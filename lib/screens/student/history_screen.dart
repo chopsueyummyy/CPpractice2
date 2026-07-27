@@ -201,6 +201,60 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           )).toList(),
                         ),
                       ],
+                      if (item['rse'] != null || item['mbi'] != null) ...[
+                        const Divider(height: 20),
+                        if (item['rse'] != null) ...[
+                          Row(
+                            children: [
+                              Icon(
+                                item['rse']['level'].toString().toLowerCase().contains('low')
+                                    ? Icons.sentiment_very_dissatisfied
+                                    : Icons.sentiment_satisfied_alt,
+                                color: item['rse']['level'].toString().toLowerCase().contains('low')
+                                    ? const Color(0xFFE53E3E)
+                                    : AppTheme.success,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Self-Esteem: Score ${item['rse']['score']}/30 (${item['rse']['level']})',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        if (item['mbi'] != null) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                item['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
+                                    ? Icons.local_fire_department
+                                    : item['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                        ? Icons.warning_amber_rounded
+                                        : Icons.battery_charging_full,
+                                color: item['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
+                                    ? const Color(0xFFE53E3E)
+                                    : item['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                        ? AppTheme.warning
+                                        : AppTheme.success,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Academic Burnout: ${item['mbi']['burnoutStatus']}\n'
+                                  '• Exhaustion: ${item['mbi']['exScore']} (${item['mbi']['exLevel']}) | '
+                                  '• Cynicism: ${item['mbi']['cyScore']} (${item['mbi']['cyLevel']}) | '
+                                  '• Professional Efficacy: ${item['mbi']['efScore']} (${item['mbi']['efLevel']})',
+                                  style: const TextStyle(fontSize: 12, height: 1.4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ],
                   ),
                 ),

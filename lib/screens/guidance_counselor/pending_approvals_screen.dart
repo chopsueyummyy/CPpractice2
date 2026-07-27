@@ -301,6 +301,61 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                           );
                                         }),
 
+                                        // Rosenberg Self-Esteem
+                                        if (a['rse'] != null) ...[
+                                          const Divider(height: 24),
+                                          Text('Self-Esteem Profile (RSE)',
+                                            style: Theme.of(context).textTheme.titleSmall
+                                                ?.copyWith(fontWeight: FontWeight.bold)),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                a['rse']['level'].toString().toLowerCase().contains('low')
+                                                    ? Icons.sentiment_very_dissatisfied
+                                                    : Icons.sentiment_satisfied_alt,
+                                                color: a['rse']['level'].toString().toLowerCase().contains('low')
+                                                    ? const Color(0xFFE53E3E)
+                                                    : AppTheme.success,
+                                                size: 20,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'Score: ${a['rse']['score']} / 30 (${a['rse']['level']})',
+                                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+
+                                        // MBI-SS Burnout
+                                        if (a['mbi'] != null) ...[
+                                          const Divider(height: 24),
+                                          Text('Academic Burnout Profile (MBI-SS)',
+                                            style: Theme.of(context).textTheme.titleSmall
+                                                ?.copyWith(fontWeight: FontWeight.bold)),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Burnout Status: ${a['mbi']['burnoutStatus']}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: a['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
+                                                  ? const Color(0xFFE53E3E)
+                                                  : a['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                                      ? AppTheme.warning
+                                                      : AppTheme.success,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            '• Emotional Exhaustion: ${a['mbi']['exScore']} (${a['mbi']['exLevel']})\n'
+                                            '• Cynicism: ${a['mbi']['cyScore']} (${a['mbi']['cyLevel']})\n'
+                                            '• Professional Efficacy: ${a['mbi']['efScore']} (${a['mbi']['efLevel']})',
+                                            style: const TextStyle(fontSize: 12, height: 1.4),
+                                          ),
+                                        ],
+
                                         // Recommendations
                                         if (recs.isNotEmpty) ...[
                                           const Divider(height: 24),

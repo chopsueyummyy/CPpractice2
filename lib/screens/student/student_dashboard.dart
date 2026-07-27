@@ -118,92 +118,153 @@ class _StudentDashboardState extends State<StudentDashboard> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Container(
-              color: AppTheme.backgroundLight,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppTheme.backgroundLight,
+                    AppTheme.primaryPurple.withOpacity(0.04),
+                  ],
+                ),
+              ),
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _assessmentStatus == 'approved'
-                            ? 'Assessment Complete!'
-                            : _assessmentStatus == 'pending_review'
-                                ? 'Assessment Under Review'
-                                    : _assessmentStatus == 'rejected'
-                                        ? 'Your assessment needs a retake'
-                                        : 'Start your Course Assessment today!',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryPurple,
-                          height: 1.2,
-                        ),
+                  padding: const EdgeInsets.all(24.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 650),
+                    child: Card(
+                      elevation: 6,
+                      shadowColor: Colors.black12,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        _assessmentStatus == 'approved'
-                            ? 'Your results have been approved. Check your results in the sidebar.'
-                            : _assessmentStatus == 'pending_review'
-                                ? 'Your guidance counselor is reviewing your assessment. Please wait.'
-                                    : _assessmentStatus == 'rejected'
-                                        ? 'Your counselor has requested you to retake the assessment.'
-                                    : 'Kickstart your journey by taking our Course Assessment to discover the best course path for you today!',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      SizedBox(
-                        width: 300,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _buttonEnabled
-                              ? () {
-                                  if (_assessmentStatus == 'in_progress') {
-                                    context.go('/student/assessment');
-                                  } else {
-                                    context.go('/student/student-details');
-                                  }
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _buttonEnabled ? _buttonColor : Colors.grey.shade300,
-                            foregroundColor: AppTheme.primaryPurple,
-                            elevation: _buttonEnabled ? 4 : 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40.0, vertical: 48.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Header Icon representation
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryPurple.withOpacity(0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _assessmentStatus == 'approved'
+                                    ? Icons.military_tech_rounded
+                                    : _assessmentStatus == 'pending_review'
+                                        ? Icons.hourglass_top_rounded
+                                        : Icons.explore_rounded,
+                                size: 56,
+                                color: _assessmentStatus == 'approved'
+                                    ? AppTheme.success
+                                    : AppTheme.primaryPurple,
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(_buttonIcon, size: 24, color: _buttonEnabled ? AppTheme.primaryPurple : Colors.grey),
-                              const SizedBox(width: 12),
-                              Flexible(
-                                child: Text(
-                                  _buttonLabel,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: _buttonEnabled ? AppTheme.primaryPurple : Colors.grey,
+                            const SizedBox(height: 28),
+                            Text(
+                              _assessmentStatus == 'approved'
+                                  ? 'Assessment Complete!'
+                                  : _assessmentStatus == 'pending_review'
+                                      ? 'Assessment Under Review'
+                                      : _assessmentStatus == 'rejected'
+                                          ? 'Your assessment needs a retake'
+                                          : 'Start your Course Assessment today!',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: AppTheme.primaryPurple,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _assessmentStatus == 'approved'
+                                  ? 'Your results have been approved. Check your results in the sidebar or click below to view your Course recommendations.'
+                                  : _assessmentStatus == 'pending_review'
+                                      ? 'Your guidance counselor is currently reviewing your assessment. Please wait for authorization.'
+                                      : _assessmentStatus == 'rejected'
+                                          ? 'Your counselor has requested you to retake the assessment. Press start to proceed.'
+                                          : 'Kickstart your journey by taking our Course Assessment to discover the best course path for you today!',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: AppTheme.textSecondary,
+                                height: 1.55,
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+                            SizedBox(
+                              width: 300,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: _buttonEnabled
+                                    ? () {
+                                        if (_assessmentStatus == 'in_progress') {
+                                          context.go('/student/assessment');
+                                        } else {
+                                          context.go('/student/student-details');
+                                        }
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _buttonEnabled ? _buttonColor : Colors.grey.shade200,
+                                  foregroundColor: _buttonEnabled 
+                                      ? (_buttonColor == AppTheme.primaryYellow ? AppTheme.primaryPurple : Colors.white)
+                                      : Colors.grey,
+                                  elevation: _buttonEnabled ? 2 : 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      _buttonIcon, 
+                                      size: 22, 
+                                      color: _buttonEnabled 
+                                          ? (_buttonColor == AppTheme.primaryYellow ? AppTheme.primaryPurple : Colors.white)
+                                          : Colors.grey
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Flexible(
+                                      child: Text(
+                                        _buttonLabel,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: _buttonEnabled 
+                                              ? (_buttonColor == AppTheme.primaryYellow ? AppTheme.primaryPurple : Colors.white)
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (_assessmentStatus == 'approved') ...[
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () => context.go('/student/results'),
+                                icon: const Icon(Icons.assessment_rounded),
+                                label: const Text('View My Results'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
                               ),
                             ],
-                          ),
+                          ],
                         ),
                       ),
-                      if (_assessmentStatus == 'approved') ...[
-                        const SizedBox(height: 16),
-                        TextButton.icon(
-                          onPressed: () => context.go('/student/results'),
-                          icon: Icon(Icons.assessment, color: AppTheme.primaryPurple),
-                          label: Text('View My Results', style: TextStyle(color: AppTheme.primaryPurple)),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
                 ),
               ),

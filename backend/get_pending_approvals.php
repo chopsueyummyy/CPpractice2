@@ -56,6 +56,18 @@ while ($row = $result->fetch_assoc()) {
         $recommendations[] = $r;
     }
 
+    // Fetch RSE results
+    $rse = $conn->prepare("SELECT Score, Level FROM rse_results WHERE AssessmentID = ?");
+    $rse->bind_param("i", $row['AssessmentID']);
+    $rse->execute();
+    $rseRow = $rse->get_result()->fetch_assoc();
+
+    // Fetch MBI results
+    $mbi = $conn->prepare("SELECT EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus FROM mbi_results WHERE AssessmentID = ?");
+    $mbi->bind_param("i", $row['AssessmentID']);
+    $mbi->execute();
+    $mbiRow = $mbi->get_result()->fetch_assoc();
+
     $pending[] = [
         "assessmentId"  => $row['AssessmentID'],
         "studentId"     => $row['StudentID'],
@@ -76,7 +88,20 @@ while ($row = $result->fetch_assoc()) {
             "E" => $row['E_Percentage'],
             "C" => $row['C_Percentage'],
         ],
-        "recommendations" => $recommendations
+        "recommendations" => $recommendations,
+        "rse" => $rseRow ? [
+            "score" => (int)$rseRow['Score'],
+            "level" => $rseRow['Level']
+        ] : null,
+        "mbi" => $mbiRow ? [
+            "exScore" => (float)$mbiRow['EX_Score'],
+            "cyScore" => (float)$mbiRow['CY_Score'],
+            "efScore" => (float)$mbiRow['EF_Score'],
+            "exLevel" => $mbiRow['EX_Level'],
+            "cyLevel" => $mbiRow['CY_Level'],
+            "efLevel" => $mbiRow['EF_Level'],
+            "burnoutStatus" => $mbiRow['BurnoutStatus']
+        ] : null
     ];
 }
 

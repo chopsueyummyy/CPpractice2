@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -152,65 +153,80 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.all(24.0),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: Card(
-                  elevation: 24,
-                  shadowColor: Colors.black45,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32.0, vertical: 36.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // College Logo
-                          Center(
-                            child: Image.asset(
-                              'assets/images/Jose_Maria_College_logo.png',
-                              height: 100, // Adjust size as needed
-                              fit: BoxFit.contain,
-                            ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.92), // Glass style background color
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.55),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
                           ),
-                          const SizedBox(height: 18),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32.0, vertical: 36.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // College Logo
+                              Center(
+                                child: Image.asset(
+                                  'assets/images/Jose_Maria_College_logo.png',
+                                  height: 100, // Adjust size as needed
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(height: 18),
 
-                          // ── Title with Montserrat (STRICTLY login screen only) ──
-                          Text(
-                            _userType == 'admin' ? 'Admin Portal' : 'RIASEC Assessment',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: _userType == 'admin' ? AppTheme.error : AppTheme.textPrimary,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
+                              // ── Title with Montserrat ──
+                              Text(
+                                _userType == 'admin' ? 'Admin Portal' : 'CourseAlign',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 28, // Slightly larger and bold
+                                  fontWeight: FontWeight.w900,
+                                  color: _userType == 'admin' ? AppTheme.error : AppTheme.primaryPurple,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
 
-                          // Subtitle keeps the default theme font
-                          Text(
-                            _userType == 'admin' ? 'Secure Administration Access' : 'Career Assessment System',
-                            textAlign: TextAlign.center,
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppTheme.textSecondary,
-                                    ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _userType == 'admin' ? 'Administrators Only!' : 'v3.0 - Stable Release',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: _userType == 'admin' ? AppTheme.error.withOpacity(0.5) : AppTheme.primaryPurple.withOpacity(0.5),
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 28),
+                              // Subtitle keeps the default theme font
+                              Text(
+                                _userType == 'admin' ? 'Secure Administration Access' : 'Course Recommendation System',
+                                textAlign: TextAlign.center,
+                                style:
+                                    Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppTheme.textSecondary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _userType == 'admin' ? 'Administrators Only!' : 'v3.0 - Stable Release',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: _userType == 'admin' ? AppTheme.error.withOpacity(0.5) : AppTheme.primaryPurple.withOpacity(0.5),
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 28),
 
                           // ── Role Toggle ───────────────────────────────────────
                           if (_userType != 'admin')
@@ -410,7 +426,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-        ],
+        ),
+      ),
+    ],
       ),
     );
   }

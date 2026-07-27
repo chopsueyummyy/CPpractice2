@@ -206,134 +206,198 @@ class _StudentDetailsFormState extends State<StudentDetailsForm> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Card(
-                color: AppTheme.primaryPurple.withOpacity(0.05),
+      body: Container(
+        color: AppTheme.backgroundLight,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
+              child: Card(
+                elevation: 6,
+                shadowColor: Colors.black12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: AppTheme.primaryPurple, size: 32),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 40),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Notification
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryPurple.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.15)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: AppTheme.primaryPurple, size: 28),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Personal Information Required',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryPurple,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      'Please fill in all fields to proceed to your assessment.',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // First Name & Last Name side-by-side
+                        Row(
                           children: [
-                            Text(
-                              'Personal Information Required',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryPurple,
-                              ),
+                            Expanded(
+                              child: _field(_firstNameController, 'First Name *', Icons.person,
+                                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Please fill in all fields to proceed with the assessment.',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _field(_lastNameController, 'Last Name *', Icons.person,
+                                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-              _field(_firstNameController, 'First Name *', Icons.person,
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
-              const SizedBox(height: 16),
-              _field(_lastNameController, 'Last Name *', Icons.person,
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
-              const SizedBox(height: 16),
-              _field(_middleNameController, 'Middle Name (Optional)', Icons.person_outline),
-              const SizedBox(height: 16),
-              _field(_suffixController, 'Suffix (Optional)', Icons.text_fields,
-                  hint: 'e.g., Jr., Sr., II'),
-              const SizedBox(height: 16),
+                        // Middle Name & Suffix side-by-side
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _field(_middleNameController, 'Middle Name (Optional)', Icons.person_outline),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _field(_suffixController, 'Suffix (Optional)', Icons.text_fields,
+                                  hint: 'e.g., Jr., Sr., II'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
 
-              // Birthdate
-              InkWell(
-                onTap: _selectBirthdate,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Birthdate *',
-                    prefixIcon: const Icon(Icons.calendar_today),
-                    suffixIcon: _birthdate != null
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () => setState(() {
-                              _birthdate = null;
-                              _ageController.clear();
-                            }),
-                          )
-                        : null,
-                  ),
-                  child: Text(
-                    _birthdate != null
-                        ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
-                        : 'Select your birthdate',
-                    style: TextStyle(
-                      color: _birthdate != null ? AppTheme.textPrimary : AppTheme.textSecondary,
+                        // Birthdate & Age side-by-side
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: InkWell(
+                                onTap: _selectBirthdate,
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: 'Birthdate *',
+                                    prefixIcon: const Icon(Icons.calendar_today),
+                                    suffixIcon: _birthdate != null
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () => setState(() {
+                                              _birthdate = null;
+                                              _ageController.clear();
+                                            }),
+                                          )
+                                        : null,
+                                  ),
+                                  child: Text(
+                                    _birthdate != null
+                                        ? '${_birthdate!.day}/${_birthdate!.month}/${_birthdate!.year}'
+                                        : 'Select birthdate',
+                                    style: TextStyle(
+                                      color: _birthdate != null ? AppTheme.textPrimary : AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 1,
+                              child: _field(_ageController, 'Age *', Icons.cake,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    final a = int.tryParse(v ?? '');
+                                    if (a == null || a < 10 || a > 100) return 'Invalid';
+                                    return null;
+                                  }),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Gender full width
+                        _dropdown('Gender *', Icons.person_outline, _gender, _genderOptions,
+                            (v) => setState(() => _gender = v)),
+                        const SizedBox(height: 16),
+
+                        // Strand full width
+                        _dropdown('Strand *', Icons.school, _strand, _strandOptions,
+                            (v) => setState(() => _strand = v)),
+                        const SizedBox(height: 16),
+
+                        // Grade Level full width
+                        _dropdown('Grade Level *', Icons.grade, _gradeLevel, _gradeLevelOptions,
+                            (v) => setState(() => _gradeLevel = v)),
+                        const SizedBox(height: 36),
+
+                        // Submission Actions
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: _isSubmitting
+                              ? const Center(child: CircularProgressIndicator())
+                              : ElevatedButton.icon(
+                                  onPressed: _submit,
+                                  icon: const Icon(Icons.arrow_forward),
+                                  label: const Text('Continue to Assessment'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryPurple,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () => context.go('/student/dashboard'),
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text('Return to Dashboard'),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              _field(_ageController, 'Age *', Icons.cake,
-                  keyboardType: TextInputType.number,
-                  validator: (v) {
-                    final a = int.tryParse(v ?? '');
-                    if (a == null || a < 10 || a > 100) return 'Enter a valid age';
-                    return null;
-                  }),
-              const SizedBox(height: 16),
-
-              _dropdown('Gender *', Icons.person_outline, _gender, _genderOptions,
-                  (v) => setState(() => _gender = v)),
-              const SizedBox(height: 16),
-
-              _dropdown('Strand *', Icons.school, _strand, _strandOptions,
-                  (v) => setState(() => _strand = v)),
-              const SizedBox(height: 16),
-
-              _dropdown('Grade Level *', Icons.grade, _gradeLevel, _gradeLevelOptions,
-                  (v) => setState(() => _gradeLevel = v)),
-              const SizedBox(height: 32),
-
-              SizedBox(
-                width: double.infinity,
-                child: _isSubmitting
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton.icon(
-                        onPressed: _submit,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Continue to Assessment'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => context.go('/student/dashboard'),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Return to Dashboard'),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

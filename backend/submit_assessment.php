@@ -19,19 +19,26 @@ include 'db_connect.php';
 
 $data         = json_decode(file_get_contents("php://input"), true);
 $assessmentId = (int)($data['assessmentId'] ?? 0);
-$answers      = $data['answers'] ?? [];
+$answers      = $data['answers'] ?? []; // RIASEC answers
+$rseAnswers   = $data['rseAnswers'] ?? [];
+$mbiAnswers   = $data['mbiAnswers'] ?? [];
+
+$rseSum = 20; // Default fallback raw sum
+$mbiSum = 30; // Default fallback raw sum
 
 if (empty($assessmentId) || empty($answers)) {
-    echo json_encode(["status" => "error", "message" => "Missing assessmentId or answers"]);
+    echo json_encode(["status" => "error", "message" => "Missing assessmentId or RIASEC answers"]);
     exit();
 }
 
-$maxScores = ['R' => 45, 'I' => 35, 'A' => 30, 'S' => 30, 'E' => 35, 'C' => 35];
+// 1. SCORING RIASEC (Agree = 1, Disagree = 0)
+// Max score is the number of questions per category
+$maxScores = ['R' => 9, 'I' => 7, 'A' => 6, 'S' => 6, 'E' => 7, 'C' => 7];
 $rawScores = ['R' => 0,  'I' => 0,  'A' => 0,  'S' => 0,  'E' => 0,  'C' => 0];
 
 foreach ($answers as $answer) {
     $questionId = (int)$answer['questionId'];
-    $score      = max(1, min(5, (int)$answer['score']));
+    $score      = max(0, min(1, (int)$answer['score'])); // Clamp score to 0 or 1 (binary)
 
     $q = $conn->prepare("SELECT RIASECCategory FROM riasec_questions WHERE QuestionID = ?");
     $q->bind_param("i", $questionId);
@@ -42,7 +49,7 @@ foreach ($answers as $answer) {
 
     $rawScores[$category] += $score;
 
-    $ins = $conn->prepare("INSERT INTO assessment_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?)");
+    $ins = $conn->prepare("INSERT INTO assessment_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE Score=VALUES(Score)");
     $ins->bind_param("iii", $assessmentId, $questionId, $score);
     $ins->execute();
 }
@@ -88,15 +95,232 @@ $res->bind_param(
 );
 
 if (!$res->execute()) {
-    echo json_encode(["status" => "error", "message" => "Failed to save results: " . $res->error]);
+    echo json_encode(["status" => "error", "message" => "Failed to save RIASEC results: " . $res->error]);
     exit();
 }
 $resultId = (int)$conn->insert_id;
 
-$rank = 1;
+
+// Legacy RIASEC recommendations loop removed. Predictions are generated below using the XGBoost & SHAP model.
+
+
+// 2. SCORING ROSENBERG SELF-ESTEEM SCALE (RSE)
+if (!empty($rseAnswers)) {
+    // Delete old answers if exist
+    $conn->query("DELETE FROM rse_answers WHERE AssessmentID = $assessmentId");
+    
+    $rseScore = 0;
+    $rseSum = 0; // Reset default fallback
+    foreach ($rseAnswers as $ans) {
+        $qId = (int)$ans['questionId'];
+        $scoreVal = (int)$ans['score']; // 1 to 4: 1=Strongly Agree, 2=Agree, 3=Disagree, 4=Strongly Disagree
+
+        // Accumulate raw sum for ML model
+        $rseSum += $scoreVal;
+
+        // Check if question is negative
+        $rseQ = $conn->prepare("SELECT IsNegative FROM rse_questions WHERE QuestionID = ?");
+        $rseQ->bind_param("i", $qId);
+        $rseQ->execute();
+        $rseQRes = $rseQ->get_result()->fetch_assoc();
+        $isNegative = (int)($rseQRes['IsNegative'] ?? 0);
+
+        // Convert options to scores (0-3 scale):
+        // Positive: 1 (Strongly Agree) -> 3, 2 (Agree) -> 2, 3 (Disagree) -> 1, 4 (Strongly Disagree) -> 0
+        // Negative: 1 (Strongly Agree) -> 0, 2 (Agree) -> 1, 3 (Disagree) -> 2, 4 (Strongly Disagree) -> 3
+        if ($isNegative === 0) {
+            $convertedScore = 4 - $scoreVal;
+        } else {
+            $convertedScore = $scoreVal - 1;
+        }
+        $rseScore += $convertedScore;
+
+        $insRse = $conn->prepare("INSERT INTO rse_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?)");
+        $insRse->bind_param("iii", $assessmentId, $qId, $scoreVal);
+        $insRse->execute();
+    }
+
+    $rseLevel = ($rseScore < 15) ? 'Low Self-Esteem' : 'Normal Self-Esteem';
+    $rseRes = $conn->prepare("
+        INSERT INTO rse_results (AssessmentID, Score, Level)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE Score=VALUES(Score), Level=VALUES(Level)
+    ");
+    $rseRes->bind_param("iis", $assessmentId, $rseScore, $rseLevel);
+    $rseRes->execute();
+}
+
+// 3. SCORING MASLACH BURNOUT INVENTORY (MBI-SS)
+if (!empty($mbiAnswers)) {
+    // Delete old answers if exist
+    $conn->query("DELETE FROM mbi_answers WHERE AssessmentID = $assessmentId");
+
+    $exSum = 0; $exCount = 0;
+    $cySum = 0; $cyCount = 0;
+    $efSum = 0; $efCount = 0;
+    $mbiSum = 0; // Reset default fallback
+
+    foreach ($mbiAnswers as $ans) {
+        $qId = (int)$ans['questionId'];
+        $scoreVal = (int)$ans['score']; // 0 to 6
+
+        // Accumulate raw sum for ML model
+        $mbiSum += $scoreVal;
+
+        // Check subscale
+        $mbiQ = $conn->prepare("SELECT Subscale FROM mbi_questions WHERE QuestionID = ?");
+        $mbiQ->bind_param("i", $qId);
+        $mbiQ->execute();
+        $mbiQRes = $mbiQ->get_result()->fetch_assoc();
+        $subscale = $mbiQRes['Subscale'] ?? '';
+
+        if ($subscale === 'EX') {
+            $exSum += $scoreVal;
+            $exCount++;
+        } elseif ($subscale === 'CY') {
+            $cySum += $scoreVal;
+            $cyCount++;
+        } elseif ($subscale === 'EF') {
+            $efSum += $scoreVal;
+            $efCount++;
+        }
+
+        $insMbi = $conn->prepare("INSERT INTO mbi_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?)");
+        $insMbi->bind_param("iii", $assessmentId, $qId, $scoreVal);
+        $insMbi->execute();
+    }
+
+    $exMean = $exCount > 0 ? round($exSum / $exCount, 2) : 0.00;
+    $cyMean = $cyCount > 0 ? round($cySum / $cyCount, 2) : 0.00;
+    $efMean = $efCount > 0 ? round($efSum / $efCount, 2) : 0.00;
+
+    // EX: Low < 2.00, Moderate 2.00-2.80, High > 2.80
+    $exLevel = 'Low';
+    if ($exMean > 2.80) {
+        $exLevel = 'High';
+    } elseif ($exMean >= 2.00) {
+        $exLevel = 'Moderate';
+    }
+
+    // CY: Low < 0.50, Moderate 0.50-1.50, High > 1.50
+    $cyLevel = 'Low';
+    if ($cyMean > 1.50) {
+        $cyLevel = 'High';
+    } elseif ($cyMean >= 0.50) {
+        $cyLevel = 'Moderate';
+    }
+
+    // EF: Low risk > 4.50, Moderate risk 3.83-4.50, High risk < 3.83
+    $efLevel = 'Low';
+    if ($efMean < 3.83) {
+        $efLevel = 'High';
+    } elseif ($efMean <= 4.50) {
+        $efLevel = 'Moderate';
+    }
+
+    // Overall Burnout Status
+    if ($exLevel === 'High' && $cyLevel === 'High' && $efLevel === 'High') {
+        $burnoutStatus = 'High Burnout Risk';
+    } elseif ($exLevel === 'Low' && $cyLevel === 'Low' && $efLevel === 'Low') {
+        $burnoutStatus = 'Low Burnout Risk';
+    } else {
+        $burnoutStatus = 'Moderate Burnout Risk';
+    }
+
+    $mbiRes = $conn->prepare("
+        INSERT INTO mbi_results (AssessmentID, EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            EX_Score=VALUES(EX_Score), CY_Score=VALUES(CY_Score), EF_Score=VALUES(EF_Score),
+            EX_Level=VALUES(EX_Level), CY_Level=VALUES(CY_Level), EF_Level=VALUES(EF_Level),
+            BurnoutStatus=VALUES(BurnoutStatus)
+    ");
+    $mbiRes->bind_param("idddssss", $assessmentId, $exMean, $cyMean, $efMean, $exLevel, $cyLevel, $efLevel, $burnoutStatus);
+    $mbiRes->execute();
+}
+
+// 4. GENERATING RECOMMENDATIONS VIA XGBOOST & SHAP MODEL
+// Fetch student's SHS strand
+$stmt = $conn->prepare("SELECT StudentID FROM assessments WHERE AssessmentID = ?");
+$stmt->bind_param("i", $assessmentId);
+$stmt->execute();
+$asm = $stmt->get_result()->fetch_assoc();
+$studentId = $asm['StudentID'] ?? 0;
+
+$pi = $conn->prepare("SELECT Strand FROM personal_information WHERE StudentID = ? ORDER BY CreatedAt DESC LIMIT 1");
+$pi->bind_param("i", $studentId);
+$pi->execute();
+$piRow = $pi->get_result()->fetch_assoc();
+$strand = $piRow['Strand'] ?? 'STEM';
+
+// Map RIASEC Agree/Disagree (0/1) raw scores to original Likert (1-5) scale sums
+$payload = [
+    "R" => $rawScores['R'] * 4 + 9,
+    "I" => $rawScores['I'] * 4 + 7,
+    "A" => $rawScores['A'] * 4 + 6,
+    "S" => $rawScores['S'] * 4 + 6,
+    "E" => $rawScores['E'] * 4 + 7,
+    "C" => $rawScores['C'] * 4 + 7,
+    "RSES" => $rseSum,
+    "MBI" => $mbiSum,
+    "Strand" => $strand
+];
+
+// Clear previous recommendations for this ResultID if any
+$conn->query("DELETE FROM riasec_recommendations WHERE ResultID = $resultId");
+
+$recommendationsSaved = false;
+
+try {
+    $url = 'http://host.docker.internal:8001/recommend';
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5 second timeout
+    $output = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200 && $output) {
+        $response = json_decode($output, true);
+        if (isset($response['status']) && $response['status'] === 'success') {
+            foreach ($response['recommendations'] as $rec) {
+                $cCode = $rec['course_code'];
+                $mScore = (float)($rec['probability'] * 100);
+                $explanation = $rec['explanation'];
+                $rank = (int)$rec['rank'];
+                
+                // Find CourseID from the CourseCode
+                $cStmt = $conn->prepare("SELECT CourseID FROM riasec_courses WHERE CourseCode = ? LIMIT 1");
+                $cStmt->bind_param("s", $cCode);
+                $cStmt->execute();
+                $cRow = $cStmt->get_result()->fetch_assoc();
+                
+                if ($cRow) {
+                    $courseId = (int)$cRow['CourseID'];
+                    $recStmt = $conn->prepare("
+                        INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`)
+                        VALUES (?, ?, ?, ?, ?)
+                    ");
+                    $recStmt->bind_param("iidsi", $resultId, $courseId, $mScore, $explanation, $rank);
+                    $recStmt->execute();
+                }
+            }
+            $recommendationsSaved = true;
+        }
+    }
+} catch (Exception $e) {
+    // Suppress and fallback
+}
+
+// Fallback: If recommendation microservice fails, generate safe default recommendations using RIASEC top categories
+if (!$recommendationsSaved) {
+    $rank = 1;
     foreach ($top3 as $type) {
         $courses = $conn->prepare("
-            SELECT CourseID, CourseName, ExplanationTip FROM riasec_courses
+            SELECT CourseID, Description FROM riasec_courses
             WHERE RIASECCategory = ? ORDER BY RAND() LIMIT 1
         ");
         $courses->bind_param("s", $type);
@@ -104,11 +328,10 @@ $rank = 1;
         $courseResult = $courses->get_result();
 
         while ($course = $courseResult->fetch_assoc()) {
-            if ($rank > 6) break;
+            if ($rank > 3) break;
             
             $matchScore = (float)$percentages[$type];
-            // Provide the unique course explanation instead of a generic one
-            $explanation = $course['ExplanationTip'] ?? "This course aligns with your {$type} interest profile.";
+            $explanation = $course['Description'] ?? "This course aligns with your {$type} interest profile.";
 
             $recStmt = $conn->prepare("
                 INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`)
@@ -119,6 +342,7 @@ $rank = 1;
             $rank++;
         }
     }
+}
 
 $upd = $conn->prepare("UPDATE assessments SET Status = 'pending_review', SubmittedAt = NOW() WHERE AssessmentID = ?");
 $upd->bind_param("i", $assessmentId);

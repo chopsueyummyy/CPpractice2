@@ -81,14 +81,20 @@ class ApiService {
     );
   }
 
-  static Future<Map<String, dynamic>> submitAssessment(
-      int assessmentId, List<Map<String, dynamic>> answers) async {
+  static Future<Map<String, dynamic>> submitAssessment({
+    required int assessmentId,
+    required List<Map<String, dynamic>> answers,
+    required List<Map<String, dynamic>> rseAnswers,
+    required List<Map<String, dynamic>> mbiAnswers,
+  }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/submit_assessment.php'),
       headers: _headers,
       body: jsonEncode({
         'assessmentId': assessmentId,
         'answers': answers,
+        'rseAnswers': rseAnswers,
+        'mbiAnswers': mbiAnswers,
       }),
     );
     return jsonDecode(response.body);

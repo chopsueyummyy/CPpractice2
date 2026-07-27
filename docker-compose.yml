@@ -41,7 +41,7 @@ services:
       MYSQL_USER: riasec_user
       MYSQL_PASSWORD: riasec_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
       - ./assets/riasec_db.sql:/docker-entrypoint-initdb.d/init.sql
@@ -59,6 +59,20 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: riasec_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=riasec_user
+      - PMA_PASSWORD=riasec_password
+    depends_on:
+      - db
 
 volumes:
   redis_data:
