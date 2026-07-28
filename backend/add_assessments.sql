@@ -1,9 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
--- 1. Alter assessment_answers constraint
--- Check constraints in MariaDB / MySQL can be dropped by dropping the constraint name
--- (Commented out as constraint was already dropped on first successful run)
--- ALTER TABLE assessment_answers DROP CHECK assessment_answers_chk_1;
+-- 1. Alter assessments and assessment_answers constraints
+ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 0;
 ALTER TABLE assessment_answers ALTER Score SET DEFAULT 0;
 
 -- 2. Create RSE tables

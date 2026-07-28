@@ -13,9 +13,15 @@ include 'db_connect.php';
 $data      = json_decode(file_get_contents("php://input"), true);
 $studentId = $data['studentId'] ?? '';
 $piId      = $data['piId']      ?? '';
+$agreed    = $data['agreed']    ?? false;
 
 if (empty($studentId) || empty($piId)) {
     echo json_encode(["status" => "error", "message" => "Missing studentId or piId"]);
+    exit();
+}
+
+if (!$agreed) {
+    echo json_encode(["status" => "error", "message" => "You must acknowledge and agree to the terms to proceed."]);
     exit();
 }
 
@@ -37,7 +43,7 @@ if ($guardianResult && $guardianResult->num_rows > 0) {
 }
 
 $stmt = $conn->prepare("
-    INSERT INTO assessments (StudentID, PI_ID, Status) VALUES (?, ?, 'in_progress')
+    INSERT INTO assessments (StudentID, PI_ID, Status, AgreedToDisclaimer) VALUES (?, ?, 'in_progress', 1)
 ");
 $stmt->bind_param("si", $studentId, $piId);
 

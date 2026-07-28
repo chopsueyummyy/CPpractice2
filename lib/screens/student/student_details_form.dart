@@ -138,26 +138,6 @@ class _StudentDetailsFormState extends State<StudentDetailsForm> {
       if (piData['status'] != 'success') throw Exception(piData['message']);
       _session.currentPiId = int.tryParse(piData['piId'].toString());
 
-      // Step 2: Start assessment
-      final asmData = await ApiService.startAssessment(
-        _session.studentId!,
-        _session.currentPiId!,
-      );
-
-      if (asmData['status'] == 'resume') {
-        _session.currentAssessmentId = int.tryParse(asmData['assessmentId'].toString());
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Resuming your previous assessment session...')),
-          );
-          context.go('/student/assessment');
-        }
-        return;
-      }
-
-      if (asmData['status'] != 'success') throw Exception(asmData['message']);
-      _session.currentAssessmentId = int.tryParse(asmData['assessmentId'].toString());
-
       if (mounted) context.go('/student/assessment-instructions');
     } catch (e) {
       _snack('Error: $e');

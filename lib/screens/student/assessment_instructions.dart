@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../models/riasec_models.dart';
+import '../../services/api_service.dart';
+import '../../services/session_manager.dart';
 import '../../widgets/student_sidebar.dart';
 
 class AssessmentInstructionsScreen extends StatelessWidget {
@@ -166,9 +168,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  context.go('/student/assessment', extra: studentDetails);
-                },
+                onPressed: () => _showDisclaimerDialog(context),
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('Start Assessment'),
                 style: ElevatedButton.styleFrom(
@@ -187,6 +187,185 @@ class AssessmentInstructionsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDisclaimerDialog(BuildContext context) {
+    final session = SessionManager();
+    bool isChecked = false;
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryPurple, size: 28),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Assessment Acknowledgment',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryPurple,
+                        ),
+                  ),
+                ],
+              ),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Before proceeding with the assessment, please read the following:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, height: 1.4),
+                      ),
+                      const SizedBox(height: 12),
+                      _disclaimerBullet(
+                        'This assessment is designed to assist you in identifying college courses that best match your interests and assessment results.',
+                      ),
+                      _disclaimerBullet(
+                        'Please answer all questions honestly to obtain more accurate recommendations.',
+                      ),
+                      _disclaimerBullet(
+                        'Your responses will be securely stored and used only within the CourseAlign system.',
+                      ),
+                      _disclaimerBullet(
+                        'The generated recommendations are intended to support your decision-making and should not replace professional guidance.',
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'By clicking "I Agree", you acknowledge that you understand the purpose of this assessment and agree to proceed.',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.4),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Checkbox list tile
+                      CheckboxListTile(
+                        value: isChecked,
+                        onChanged: isSubmitting
+                            ? null
+                            : (val) {
+                                setDialogState(() {
+                                  isChecked = val ?? false;
+                                });
+                              },
+                        title: const Text(
+                          'I have read and understood the information above.',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        activeColor: AppTheme.primaryPurple,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                        },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: (!isChecked || isSubmitting)
+                      ? null
+                      : () async {
+                          setDialogState(() {
+                            isSubmitting = true;
+                          });
+                          
+                          try {
+                            final data = await ApiService.startAssessment(
+                              session.studentId!,
+                              session.currentPiId!,
+                              agreed: true,
+                            );
+                            
+                            if (data['status'] == 'success' || data['status'] == 'resume') {
+                              session.currentAssessmentId = int.tryParse(data['assessmentId'].toString());
+                              
+                              if (context.mounted) {
+                                Navigator.pop(context); // Close dialog
+                                context.go('/student/assessment', extra: studentDetails);
+                              }
+                            } else {
+                              throw Exception(data['message'] ?? 'Failed to start assessment');
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              isSubmitting = false;
+                            });
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: $e'),
+                                  backgroundColor: AppTheme.error,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('I Agree', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _disclaimerBullet(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 5.0),
+            child: Icon(Icons.lens, size: 6, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+            ),
+          ),
+        ],
       ),
     );
   }

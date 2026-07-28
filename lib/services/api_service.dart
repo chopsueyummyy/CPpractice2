@@ -51,11 +51,11 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> startAssessment(
-      String studentId, int piId) async {
+      String studentId, int piId, {bool agreed = false}) async {
     final response = await http.post(
       Uri.parse('$baseUrl/start_assessment.php'),
       headers: _headers,
-      body: jsonEncode({'studentId': studentId, 'piId': piId}),
+      body: jsonEncode({'studentId': studentId, 'piId': piId, 'agreed': agreed}),
     );
     return jsonDecode(response.body);
   }
