@@ -410,39 +410,187 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget _courseCard(BuildContext context, int rank, Map<String, dynamic> rec) {
     final type  = rec['RIASECCategory'] as String;
     final color = AppTheme.riasecColor(type);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
-          child: Text('$rank',
-            style: const TextStyle(color: AppTheme.primaryPurple, fontWeight: FontWeight.bold)),
+    
+    // Choose ranking colors & titles
+    Color rankBgColor;
+    Color rankTxtColor;
+    String rankLabel;
+    IconData rankIcon;
+    
+    if (rank == 1) {
+      rankBgColor = const Color(0xFFFFD700).withOpacity(0.15); // Soft Gold
+      rankTxtColor = const Color(0xFFB8860B); // Dark Gold
+      rankLabel = 'Top Match';
+      rankIcon = Icons.emoji_events_rounded;
+    } else if (rank == 2) {
+      rankBgColor = AppTheme.primaryPurple.withOpacity(0.1); // Soft Purple
+      rankTxtColor = AppTheme.primaryPurple;
+      rankLabel = 'Strong Match';
+      rankIcon = Icons.verified_rounded;
+    } else {
+      rankBgColor = Colors.teal.withOpacity(0.1); // Soft Teal
+      rankTxtColor = Colors.teal.shade800;
+      rankLabel = 'Suitable Match';
+      rankIcon = Icons.thumb_up_rounded;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundWhite,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppTheme.dividerColor.withOpacity(0.4),
+          width: 1,
         ),
-        title: Text(rec['CourseName'] as String,
-          style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: IntrinsicHeight(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Left category color strip indicator
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8)
+                width: 6,
+                color: color,
+              ),
+              
+              // Card contents
+              Expanded(
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    dividerColor: Colors.transparent, // Removes line separators from ExpansionTile
+                  ),
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    leading: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: rankBgColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(rankIcon, color: rankTxtColor, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            rankLabel,
+                            style: TextStyle(
+                              color: rankTxtColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    title: Text(
+                      rec['CourseName'] as String,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: AppTheme.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Wrap(
+                        spacing: 8,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppTheme.backgroundLight,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              rec['CourseCode'] as String,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              AppTheme.riasecName(type),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.04),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: color.withOpacity(0.12),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.lightbulb_outline_rounded, color: color, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'AI Recommendation Analysis',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                rec['Explanation'] ?? '',
+                                style: const TextStyle(
+                                  color: AppTheme.textPrimary,
+                                  fontSize: 13,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Text('${rec['CourseCode']} • ${AppTheme.riasecName(type)}',
-                  style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
         ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text(rec['Explanation'] ?? '',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, height: 1.4)),
-          ),
-        ],
       ),
     );
   }
