@@ -42,7 +42,7 @@ $result = $conn->query("
 $pending = [];
 while ($row = $result->fetch_assoc()) {
     $rec = $conn->prepare("
-        SELECT rr.Rank, rr.MatchScore, rc.CourseName, rc.CourseCode, rc.RIASECCategory
+        SELECT rr.Rank, rr.MatchScore, rr.Explanation, rc.CourseName, rc.CourseCode, rc.RIASECCategory
         FROM riasec_recommendations rr
         JOIN riasec_courses rc ON rc.CourseID = rr.CourseID
         WHERE rr.ResultID = ?

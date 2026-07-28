@@ -359,21 +359,89 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                         // Recommendations
                                         if (recs.isNotEmpty) ...[
                                           const Divider(height: 24),
-                                          Text('Recommended Courses',
+                                          Text('Recommended Courses & AI Explanations',
                                             style: Theme.of(context).textTheme.titleSmall
                                                 ?.copyWith(fontWeight: FontWeight.bold)),
                                           const SizedBox(height: 8),
-                                          ...recs.map((rec) => Card(
-                                            margin: const EdgeInsets.only(bottom: 8),
-                                            child: ListTile(
-                                              leading: Icon(Icons.school,
-                                                  color: AppTheme.primaryPurple),
-                                              title: Text(rec['CourseName'] ?? ''),
-                                              subtitle: Text(
-                                                '${rec['CourseCode']} • '
-                                                '${AppTheme.riasecName(rec['RIASECCategory'] ?? '')}'),
-                                            ),
-                                          )),
+                                          ...recs.map((rec) {
+                                            final explanation = rec['Explanation'] ?? '';
+                                            return Card(
+                                              margin: const EdgeInsets.only(bottom: 12),
+                                              elevation: 0,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.5)),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  ListTile(
+                                                    leading: CircleAvatar(
+                                                      backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
+                                                      child: const Icon(Icons.school, color: AppTheme.primaryPurple, size: 20),
+                                                    ),
+                                                    title: Text(
+                                                      rec['CourseName'] ?? '',
+                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                                    ),
+                                                    subtitle: Text(
+                                                      '${rec['CourseCode']} • ${AppTheme.riasecName(rec['RIASECCategory'] ?? '')}',
+                                                      style: const TextStyle(fontSize: 12),
+                                                    ),
+                                                    trailing: Text(
+                                                      'Rank ${rec['Rank']}',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: AppTheme.primaryPurple,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (explanation.isNotEmpty)
+                                                    Container(
+                                                      width: double.infinity,
+                                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                      decoration: BoxDecoration(
+                                                        color: AppTheme.primaryPurple.withOpacity(0.04),
+                                                        borderRadius: const BorderRadius.only(
+                                                          bottomLeft: Radius.circular(12),
+                                                          bottomRight: Radius.circular(12),
+                                                        ),
+                                                      ),
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Icon(Icons.lightbulb_outline, size: 16, color: Colors.purple.shade700),
+                                                              const SizedBox(width: 8),
+                                                              Text(
+                                                                'Why Recommended (AI Analysis):',
+                                                                style: TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight: FontWeight.w800,
+                                                                  color: Colors.purple.shade900,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          const SizedBox(height: 6),
+                                                          Text(
+                                                            explanation,
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              height: 1.4,
+                                                              color: Colors.purple.shade900,
+                                                              fontWeight: FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            );
+                                          }),
                                         ],
 
                                         const SizedBox(height: 16),

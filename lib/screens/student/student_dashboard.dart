@@ -52,7 +52,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       case 'rejected':
         return 'Retake Assessment';
       default:
-        return 'Start RIASEC Test';
+        return 'Start Test';
     }
   }
 
@@ -206,7 +206,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                         if (_assessmentStatus == 'in_progress') {
                                           context.go('/student/assessment');
                                         } else {
-                                          context.go('/student/student-details');
+                                          _showDisclaimerDialog(context);
                                         }
                                       }
                                     : null,
@@ -269,6 +269,142 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 ),
               ),
             ),
+    );
+  }
+
+  void _showDisclaimerDialog(BuildContext context) {
+    bool isChecked = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryPurple, size: 28),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Assessment Acknowledgment',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryPurple,
+                        ),
+                  ),
+                ],
+              ),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Before proceeding with the assessment, please read the following:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, height: 1.4),
+                      ),
+                      const SizedBox(height: 12),
+                      _disclaimerBullet(
+                        'This assessment is designed to assist you in identifying college courses that best match your interests and assessment results.',
+                      ),
+                      _disclaimerBullet(
+                        'Please answer all questions honestly to obtain more accurate recommendations.',
+                      ),
+                      _disclaimerBullet(
+                        'Your responses will be securely stored and used only within the CourseAlign system.',
+                      ),
+                      _disclaimerBullet(
+                        'The generated recommendations are intended to support your decision-making and should not replace professional guidance.',
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'By clicking "I Agree", you acknowledge that you understand the purpose of this assessment and agree to proceed.',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, height: 1.4),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Checkbox list tile
+                      CheckboxListTile(
+                        value: isChecked,
+                        onChanged: (val) {
+                          setDialogState(() {
+                            isChecked = val ?? false;
+                          });
+                        },
+                        title: const Text(
+                          'I have read and understood the information above.',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        activeColor: AppTheme.primaryPurple,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: !isChecked
+                      ? null
+                      : () {
+                          _session.hasAgreedToDisclaimer = true;
+                          Navigator.pop(context); // Close dialog
+                          context.go('/student/student-details');
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                  child: const Text('I Agree', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _disclaimerBullet(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 5.0),
+            child: Icon(Icons.lens, size: 6, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

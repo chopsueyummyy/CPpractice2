@@ -30,6 +30,7 @@ class SessionManager {
   int? currentAssessmentId;
   int? currentResultId;
   String? assessmentStatus; // 'pending_review', 'approved', 'rejected', 'in_progress'
+  bool hasAgreedToDisclaimer = false;
 
   void _loadFromStorage() {
     final storage = html.window.localStorage;

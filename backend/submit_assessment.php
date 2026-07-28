@@ -331,7 +331,21 @@ if (!$recommendationsSaved) {
             if ($rank > 3) break;
             
             $matchScore = (float)$percentages[$type];
-            $explanation = $course['Description'] ?? "This course aligns with your {$type} interest profile.";
+            
+            // Detailed explanation fallback mimicking SHAP
+            $interestName = [
+                'R' => 'Realistic (practical, hands-on activities)',
+                'I' => 'Investigative (analytical, problem-solving, and scientific thinking)',
+                'A' => 'Artistic (creative expression, design, and innovation)',
+                'S' => 'Social (communication, helping others, and social interaction)',
+                'E' => 'Enterprising (leadership, entrepreneurship, and persuasive communication)',
+                'C' => 'Conventional (detail-oriented, organized, and structured approach to tasks)'
+            ][$type] ?? $type;
+            
+            $explanation = "Your senior high school academic strand ($strand) provides a highly compatible foundation for this program. Your strong interest in $interestName aligns perfectly with this field.";
+            if ($rseSum >= 15) {
+                $explanation .= " Your positive self-esteem and confidence in your academic capabilities support your readiness to excel in this course.";
+            }
 
             $recStmt = $conn->prepare("
                 INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`)

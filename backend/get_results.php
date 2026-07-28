@@ -15,8 +15,9 @@ $studentId    = $_GET['studentId'] ?? '';
 
 if (!empty($assessmentId)) {
     $stmt = $conn->prepare("
-        SELECT ar.*, a.Status, a.AssessmentID as AID FROM assessment_results ar
+        SELECT ar.*, a.Status, a.AssessmentID as AID, pi.Strand FROM assessment_results ar
         JOIN assessments a ON a.AssessmentID = ar.AssessmentID
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
         WHERE ar.AssessmentID = ?
     ");
     $stmt->bind_param("i", $assessmentId);
@@ -47,8 +48,9 @@ if (!empty($assessmentId)) {
     }
 
     $stmt = $conn->prepare("
-        SELECT ar.*, a.Status FROM assessment_results ar
+        SELECT ar.*, a.Status, pi.Strand FROM assessment_results ar
         JOIN assessments a ON a.AssessmentID = ar.AssessmentID
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
         WHERE ar.AssessmentID = ?
     ");
     $stmt->bind_param("i", $aRow['AssessmentID']);
@@ -104,6 +106,7 @@ echo json_encode([
     "status"           => "success",
     "assessmentStatus" => $result['Status'],
     "assessmentId"     => (int)$result['AssessmentID'],
+    "strand"           => $result['Strand'] ?? null,
     "scores" => [
         "R" => ["score" => $result['R_Score'], "percentage" => $result['R_Percentage']],
         "I" => ["score" => $result['I_Score'], "percentage" => $result['I_Percentage']],

@@ -152,6 +152,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final tertiary  = _resultsData!['tertiaryType'] as String;
     final recs      = _resultsData!['recommendations'] as List<dynamic>;
     final status    = _resultsData!['assessmentStatus'] as String;
+    final strand    = (_resultsData!['strand'] as String?) ?? 'Not Specified';
 
     final rseData   = _resultsData!['rse'] as Map<String, dynamic>?;
     final mbiData   = _resultsData!['mbi'] as Map<String, dynamic>?;
@@ -163,8 +164,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         return bVal.compareTo(aVal);
       });
 
-    return DefaultTabController(
-      length: 3,
+    return SingleChildScrollView(
       child: Column(
         children: [
           // Banner Status
@@ -193,148 +193,299 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ],
             ),
           ),
-          
-          // Tab Headers
-          const TabBar(
-            labelColor: AppTheme.primaryPurple,
-            unselectedLabelColor: AppTheme.textSecondary,
-            indicatorColor: AppTheme.primaryPurple,
-            tabs: [
-              Tab(icon: Icon(Icons.school), text: 'Career Interests'),
-              Tab(icon: Icon(Icons.person_pin), text: 'Self-Esteem (RSE)'),
-              Tab(icon: Icon(Icons.psychology), text: 'Burnout (MBI-SS)'),
-            ],
-          ),
 
-          // Tab Content
-          Expanded(
-            child: TabBarView(
-              children: [
-                // TAB 1: Career Interests (RIASEC)
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Type Chip Banner
-                      Card(
-                        elevation: 0,
-                        color: AppTheme.backgroundLight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Your Career Interest Profile',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 16),
-                              Center(
-                                child: Wrap(
-                                  spacing: 12,
-                                  runSpacing: 12,
-                                  alignment: WrapAlignment.center,
-                                  children: [
-                                    _typeChip(primary, rank: 1),
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 16.0),
-                                      child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
-                                    ),
-                                    _typeChip(secondary, rank: 2),
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 16.0),
-                                      child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
-                                    ),
-                                    _typeChip(tertiary, rank: 3),
-                                  ],
-                                ),
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- SECTION 1: CAREER INTEREST PROFILE (RIASEC) ---
+                    _buildSectionHeader('Career Interests Profile', Icons.school_rounded),
+                    const SizedBox(height: 12),
+                    
+                    // Type Chip Banner
+                    Card(
+                      elevation: 0,
+                      color: AppTheme.backgroundLight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Your Career Interest Profile',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: Wrap(
+                                spacing: 12,
+                                runSpacing: 12,
+                                alignment: WrapAlignment.center,
+                                children: [
+                                  _typeChip(primary, rank: 1),
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 16.0),
+                                    child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
+                                  ),
+                                  _typeChip(secondary, rank: 2),
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 16.0),
+                                    child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
+                                  ),
+                                  _typeChip(tertiary, rank: 3),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Text('RIASEC Percentage Scores',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 24),
+                    Text('RIASEC Percentage Scores',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    ...sortedScores.map((entry) {
+                      final type = entry.key;
+                      final percentage = double.tryParse(entry.value['percentage'].toString()) ?? 0.0;
+                      return _scoreCard(context, type, percentage);
+                    }),
+                    const SizedBox(height: 32),
+
+                    // --- SECTION 2: SELF-ESTEEM (RSE) ---
+                    _buildSectionHeader('Self-Esteem Profile (RSE)', Icons.person_pin_rounded),
+                    const SizedBox(height: 12),
+                    rseData == null 
+                      ? const Center(child: Text('No Self-Esteem results available for this record.'))
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildRseOverviewCard(rseData),
+                            const SizedBox(height: 20),
+                            Text('Scale Interpretation & Guidelines',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 12),
+                            _buildRseInterpretationPanel(),
+                          ],
+                        ),
+                    const SizedBox(height: 32),
+
+                    // --- SECTION 3: ACADEMIC BURNOUT (MBI-SS) ---
+                    _buildSectionHeader('Academic Burnout Profile (MBI-SS)', Icons.psychology_rounded),
+                    const SizedBox(height: 12),
+                    mbiData == null 
+                      ? const Center(child: Text('No Academic Burnout results available for this record.'))
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildMbiOverviewCard(mbiData),
+                            const SizedBox(height: 20),
+                            Text('Academic Burnout Subscale Scores',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 12),
+                            _buildMbiScoreCard('EX', 'Emotional Exhaustion', mbiData['exScore'], mbiData['exLevel'], 
+                                'Measures feelings of being emotionally overextended and exhausted by schoolwork.', 
+                                AppTheme.error, maxVal: 6.0),
+                            _buildMbiScoreCard('CY', 'Cynicism', mbiData['cyScore'], mbiData['cyLevel'], 
+                                'Measures detached, cynical, or indifferent attitude towards academic commitments.', 
+                                Colors.orange, maxVal: 6.0),
+                            _buildMbiScoreCard('EF', 'Professional Efficacy', mbiData['efScore'], mbiData['efLevel'], 
+                                'Measures feelings of academic competence and achievements. Lower efficacy signifies higher risk.', 
+                                AppTheme.success, maxVal: 6.0, isEfficacy: true),
+                            const SizedBox(height: 20),
+                            Text('Academic Burnout Risk Scale Details',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 12),
+                            _buildMbiInterpretationPanel(),
+                          ],
+                        ),
+                    const SizedBox(height: 32),
+
+                    // --- SECTION 4: RECOMMENDED COURSES ---
+                    if (recs.isNotEmpty) ...[
+                      _buildSectionHeader('Recommended Courses', Icons.assignment_turned_in_rounded),
+                      const SizedBox(height: 12),
+                      ...recs.asMap().entries.map((entry) =>
+                        _courseCard(context, entry.key + 1, entry.value as Map<String, dynamic>)),
                       const SizedBox(height: 16),
-                      ...sortedScores.map((entry) {
-                        final type = entry.key;
-                        final percentage = double.tryParse(entry.value['percentage'].toString()) ?? 0.0;
-                        return _scoreCard(context, type, percentage);
-                      }),
-                      const SizedBox(height: 24),
-                      if (recs.isNotEmpty) ...[
-                        Text('Recommended Courses',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
-                        ...recs.asMap().entries.map((entry) =>
-                          _courseCard(context, entry.key + 1, entry.value as Map<String, dynamic>)),
-                        const SizedBox(height: 24),
-                      ],
-                      if (status == 'rejected') ...[
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => context.go('/student/dashboard'),
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Retake Assessment'),
-                            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryPurple),
+
+                      // Why recommended? (SHAP dynamic explanations summary)
+                      _buildWhyRecommendedCard(primary, rseData, mbiData, strand),
+                      const SizedBox(height: 16),
+
+                      // Disclaimer Card
+                      _buildDisclaimerCard(),
+                      const SizedBox(height: 32),
+                    ],
+
+                    if (status == 'rejected') ...[
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: () => context.go('/student/dashboard'),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retake Assessment'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryPurple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                // TAB 2: Rosenberg Self-Esteem
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: rseData == null 
-                    ? const Center(child: Text('No Self-Esteem results available for this record.'))
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildRseOverviewCard(rseData),
-                          const SizedBox(height: 24),
-                          Text('Scale Interpretation & Guidelines',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          _buildRseInterpretationPanel(),
-                        ],
-                      ),
-                ),
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, top: 12.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryPurple.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: AppTheme.primaryPurple, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.primaryPurple,
+              letterSpacing: -0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                // TAB 3: Academic Burnout (MBI-SS)
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: mbiData == null 
-                    ? const Center(child: Text('No Academic Burnout results available for this record.'))
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildMbiOverviewCard(mbiData),
-                          const SizedBox(height: 24),
-                          Text('Academic Burnout Subscale Scores',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          _buildMbiScoreCard('EX', 'Emotional Exhaustion', mbiData['exScore'], mbiData['exLevel'], 
-                              'Measures feelings of being emotionally overextended and exhausted by schoolwork.', 
-                              AppTheme.error, maxVal: 6.0),
-                          _buildMbiScoreCard('CY', 'Cynicism', mbiData['cyScore'], mbiData['cyLevel'], 
-                              'Measures detached, cynical, or indifferent attitude towards academic commitments.', 
-                              Colors.orange, maxVal: 6.0),
-                          _buildMbiScoreCard('EF', 'Professional Efficacy', mbiData['efScore'], mbiData['efLevel'], 
-                              'Measures feelings of academic competence and achievements. Lower efficacy signifies higher risk.', 
-                              AppTheme.success, maxVal: 6.0, isEfficacy: true),
-                          const SizedBox(height: 24),
-                          Text('Academic Burnout Risk Scale Details',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          _buildMbiInterpretationPanel(),
-                        ],
-                      ),
-                ),
-              ],
+  Widget _buildWhyRecommendedCard(String primary, Map<String, dynamic>? rse, Map<String, dynamic>? mbi, String strand) {
+    final interestName = AppTheme.riasecName(primary);
+    final riasecText = 'Strong $interestName interest';
+
+    String rseText = 'Healthy Self-Esteem Profile';
+    if (rse != null) {
+      final level = rse['level'].toString().toLowerCase();
+      if (level.contains('low')) {
+        rseText = 'Low Self-Esteem Profile';
+      } else {
+        rseText = 'High Self-Esteem';
+      }
+    }
+
+    String mbiText = 'Low Academic Burnout';
+    if (mbi != null) {
+      final status = mbi['burnoutStatus'].toString().toLowerCase();
+      if (status.contains('high') || status.contains('burnout')) {
+        mbiText = 'High Academic Burnout Risk';
+      } else if (status.contains('moderate') || status.contains('mod')) {
+        mbiText = 'Moderate Academic Burnout Risk';
+      } else {
+        mbiText = 'Low Academic Burnout';
+      }
+    }
+
+    String strandShort = 'Selected program';
+    if (strand.contains('STEM')) strandShort = 'STEM';
+    else if (strand.contains('ABM')) strandShort = 'ABM';
+    else if (strand.contains('HUMSS')) strandShort = 'HUMSS';
+    else if (strand.contains('GAS')) strandShort = 'GAS';
+    else if (strand.contains('TVL')) strandShort = 'TVL';
+    else if (strand.contains('ICT')) strandShort = 'ICT';
+    else if (strand.contains('Arts')) strandShort = 'Arts & Design';
+    final strandText = 'Strong compatibility with $strandShort-related programs';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.dividerColor.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Why were these courses recommended?',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _whyBullet(riasecText),
+          _whyBullet(rseText),
+          _whyBullet(mbiText),
+          _whyBullet(strandText),
+        ],
+      ),
+    );
+  }
+
+  Widget _whyBullet(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 18),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDisclaimerCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.shade200.withOpacity(0.5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, color: Colors.amber.shade800, size: 20),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'These recommendations represent the best course matches based on your assessment results. They are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.45,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -470,18 +621,25 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     dividerColor: Colors.transparent, // Removes line separators from ExpansionTile
                   ),
                   child: ExpansionTile(
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    initiallyExpanded: true,
+                    iconColor: AppTheme.primaryPurple,
+                    collapsedIconColor: AppTheme.primaryPurple,
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     leading: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: rankBgColor,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: rankTxtColor.withOpacity(0.3),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(rankIcon, color: rankTxtColor, size: 16),
-                          const SizedBox(width: 4),
+                          Icon(rankIcon, color: rankTxtColor, size: 14),
+                          const SizedBox(width: 6),
                           Text(
                             rankLabel,
                             style: TextStyle(
@@ -497,21 +655,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       rec['CourseName'] as String,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
+                        fontSize: 18,
                         color: AppTheme.textPrimary,
-                        letterSpacing: -0.2,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Wrap(
                         spacing: 8,
+                        runSpacing: 6,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
                               color: AppTheme.backgroundLight,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(30),
                             ),
                             child: Text(
                               rec['CourseCode'] as String,
@@ -523,10 +682,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             decoration: BoxDecoration(
                               color: color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(30),
                             ),
                             child: Text(
                               AppTheme.riasecName(type),
@@ -545,12 +704,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(12),
+                            color: color.withOpacity(0.02),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: color.withOpacity(0.12),
+                              color: color.withOpacity(0.1),
                               width: 1,
                             ),
                           ),
@@ -571,13 +730,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 12),
                               Text(
                                 rec['Explanation'] ?? '',
                                 style: const TextStyle(
-                                  color: AppTheme.textPrimary,
+                                  color: Color(0xFF4A4A4A),
                                   fontSize: 13,
-                                  height: 1.5,
+                                  height: 1.6,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
