@@ -201,7 +201,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           )).toList(),
                         ),
                       ],
-                      if (item['rse'] != null || item['mbi'] != null) ...[
+                      if (item['rse'] != null || item['cdses'] != null) ...[
                         const Divider(height: 20),
                         if (item['rse'] != null) ...[
                           Row(
@@ -224,30 +224,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                           const SizedBox(height: 8),
                         ],
-                        if (item['mbi'] != null) ...[
+                        if (item['cdses'] != null) ...[
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
-                                item['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
-                                    ? Icons.local_fire_department
-                                    : item['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
-                                        ? Icons.warning_amber_rounded
-                                        : Icons.battery_charging_full,
-                                color: item['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
-                                    ? const Color(0xFFE53E3E)
-                                    : item['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                item['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('high')
+                                    ? Icons.stars_rounded
+                                    : item['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
+                                        ? Icons.trending_up_rounded
+                                        : Icons.info_outline_rounded,
+                                color: item['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('high')
+                                    ? AppTheme.success
+                                    : item['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
                                         ? AppTheme.warning
-                                        : AppTheme.success,
+                                        : const Color(0xFFE53E3E),
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Academic Burnout: ${item['mbi']['burnoutStatus']}\n'
-                                  '• Exhaustion: ${item['mbi']['exScore']} (${item['mbi']['exLevel']}) | '
-                                  '• Cynicism: ${item['mbi']['cyScore']} (${item['mbi']['cyLevel']}) | '
-                                  '• Professional Efficacy: ${item['mbi']['efScore']} (${item['mbi']['efLevel']})',
+                                  'Career Self-Efficacy: ${item['cdses']['selfEfficacyLevel']} (Score: ${item['cdses']['totalScore'].toInt()}/125)\n'
+                                  '• SA: ${item['cdses']['saScore']} | OI: ${item['cdses']['oiScore']} | '
+                                  'GS: ${item['cdses']['gsScore']} | PL: ${item['cdses']['plScore']} | '
+                                  'PS: ${item['cdses']['psScore']}',
                                   style: const TextStyle(fontSize: 12, height: 1.4),
                                 ),
                               ),

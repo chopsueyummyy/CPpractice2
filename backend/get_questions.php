@@ -32,11 +32,11 @@ while ($row = $rseResult->fetch_assoc()) {
     ];
 }
 
-// Fetch MBI questions
-$mbiResult = $conn->query("SELECT QuestionID, QuestionText, Subscale FROM mbi_questions ORDER BY QuestionID");
-$mbi = [];
-while ($row = $mbiResult->fetch_assoc()) {
-    $mbi[] = [
+// Fetch CDSES questions
+$cdsesResult = $conn->query("SELECT QuestionID, QuestionText, Subscale FROM cdses_questions ORDER BY QuestionID");
+$cdses = [];
+while ($row = $cdsesResult->fetch_assoc()) {
+    $cdses[] = [
         "id"       => (int)$row['QuestionID'],
         "question" => $row['QuestionText'],
         "subscale" => $row['Subscale']
@@ -47,7 +47,7 @@ echo json_encode([
     "status" => "success",
     "riasec" => $riasec,
     "rse"    => $rse,
-    "mbi"    => $mbi
+    "cdses"  => $cdses
 ]);
 
 $conn->close();

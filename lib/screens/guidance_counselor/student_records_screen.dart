@@ -24,7 +24,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
   String _strand       = 'all';
   String _dominantType = 'all';
   String _rseLevel     = 'all';
-  String _mbiStatus    = 'all';
+  String _cdsesLevel   = 'all';
   String _dateFrom     = '';
   String _dateTo       = '';
   String _search       = '';
@@ -72,11 +72,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
     'Low Self-Esteem': 'Low Self-Esteem',
   };
 
-  final _mbiOptions = {
-    'all': 'All Burnout Levels',
-    'High Burnout Risk': 'High Burnout Risk',
-    'Moderate Burnout Risk': 'Moderate Burnout Risk',
-    'Low Burnout Risk': 'Low Burnout Risk',
+  final _cdsesOptions = {
+    'all': 'All Self-Efficacy Levels',
+    'High Career Decision Self-Efficacy': 'High Self-Efficacy',
+    'Moderate Career Decision Self-Efficacy': 'Moderate Self-Efficacy',
+    'Low Career Decision Self-Efficacy': 'Low Self-Efficacy',
   };
 
   @override
@@ -100,7 +100,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
         strand: _strand,
         dominantType: _dominantType,
         rseLevel: _rseLevel,
-        mbiStatus: _mbiStatus,
+        cdsesLevel: _cdsesLevel,
         dateFrom: _dateFrom,
         dateTo: _dateTo,
         search: _search,
@@ -119,7 +119,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       _strand       = 'all';
       _dominantType = 'all';
       _rseLevel     = 'all';
-      _mbiStatus    = 'all';
+      _cdsesLevel   = 'all';
       _dateFrom     = '';
       _dateTo       = '';
       _search       = '';
@@ -261,8 +261,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                     Expanded(child: _filterDropdown('Self-Esteem (RSE)', _rseOptions, _rseLevel,
                         (v) => setState(() => _rseLevel = v!))),
                     const SizedBox(width: 8),
-                    Expanded(child: _filterDropdown('Burnout Level (MBI-SS)', _mbiOptions, _mbiStatus,
-                        (v) => setState(() => _mbiStatus = v!))),
+                    Expanded(child: _filterDropdown('Self-Efficacy (CDSES)', _cdsesOptions, _cdsesLevel,
+                        (v) => setState(() => _cdsesLevel = v!))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -366,7 +366,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                           final scores = r['scores'] as Map<String, dynamic>;
                           final statusColor = _statusColor(r['status']);
                           final rse = r['rse'] as Map<String, dynamic>?;
-                          final mbi = r['mbi'] as Map<String, dynamic>?;
+                          final cdses = r['cdses'] as Map<String, dynamic>?;
                           final recs = List<Map<String, dynamic>>.from(r['recommendations'] ?? []);
                           return Card(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -501,31 +501,32 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                         ),
                                       ],
 
-                                      // Academic Burnout Profile (MBI-SS)
-                                      if (mbi != null) ...[
+                                      // Career Decision Self-Efficacy (CDSES-SF)
+                                      if (cdses != null) ...[
                                         const Divider(height: 24),
                                         Text(
-                                          'Academic Burnout Profile (MBI-SS)',
+                                          'Career Decision Self-Efficacy Profile (CDSES-SF)',
                                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Burnout Status: ${mbi['burnoutStatus']}',
+                                          'Self-Efficacy Level: ${cdses['selfEfficacyLevel']}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: mbi['burnoutStatus'].toString().toLowerCase().contains('high')
-                                                ? const Color(0xFFE53E3E)
-                                                : mbi['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                            color: cdses['selfEfficacyLevel'].toString().toLowerCase().contains('high')
+                                                ? AppTheme.success
+                                                : cdses['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
                                                     ? AppTheme.warning
-                                                    : AppTheme.success,
+                                                    : const Color(0xFFE53E3E),
                                             fontSize: 13,
                                           ),
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
-                                          '• Emotional Exhaustion: ${mbi['exScore']} (${mbi['exLevel']})\n'
-                                          '• Cynicism: ${mbi['cyScore']} (${mbi['cyLevel']})\n'
-                                          '• Professional Efficacy: ${mbi['efScore']} (${mbi['efLevel']})',
+                                          '• Total Score: ${cdses['totalScore'].toInt()} / 125\n'
+                                          '• SA: ${cdses['saScore']} | OI: ${cdses['oiScore']} | '
+                                          'GS: ${cdses['gsScore']} | PL: ${cdses['plScore']} | '
+                                          'PS: ${cdses['psScore']}',
                                           style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
                                         ),
                                       ],
@@ -758,7 +759,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       'E': 'Enterprising (E)',
       'C': 'Conventional (C)',
       'RSES': 'Rosenberg Self-Esteem',
-      'MBI': 'Burnout Resilience',
+      'MBI': 'Career Self-Efficacy',
     };
 
     return Padding(

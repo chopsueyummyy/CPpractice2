@@ -85,7 +85,7 @@ class ApiService {
     required int assessmentId,
     required List<Map<String, dynamic>> answers,
     required List<Map<String, dynamic>> rseAnswers,
-    required List<Map<String, dynamic>> mbiAnswers,
+    required List<Map<String, dynamic>> cdsesAnswers,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/submit_assessment.php'),
@@ -94,7 +94,7 @@ class ApiService {
         'assessmentId': assessmentId,
         'answers': answers,
         'rseAnswers': rseAnswers,
-        'mbiAnswers': mbiAnswers,
+        'cdsesAnswers': cdsesAnswers,
       }),
     );
     return jsonDecode(response.body);
@@ -204,7 +204,7 @@ class ApiService {
     String strand = 'all',
     String dominantType = 'all',
     String rseLevel = 'all',
-    String mbiStatus = 'all',
+    String cdsesLevel = 'all',
     String dateFrom = '',
     String dateTo = '',
     String search = '',
@@ -216,7 +216,7 @@ class ApiService {
         'strand': strand,
         'dominantType': dominantType,
         'rseLevel': rseLevel,
-        'mbiStatus': mbiStatus,
+        'cdsesLevel': cdsesLevel,
         'dateFrom': dateFrom,
         'dateTo': dateTo,
         'search': search,

@@ -98,11 +98,20 @@ $rse->bind_param("i", $result['AssessmentID']);
 $rse->execute();
 $rseRow = $rse->get_result()->fetch_assoc();
 
-// Fetch MBI results for this assessment
-$mbi = $conn->prepare("SELECT EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus FROM mbi_results WHERE AssessmentID = ?");
-$mbi->bind_param("i", $result['AssessmentID']);
-$mbi->execute();
-$mbiRow = $mbi->get_result()->fetch_assoc();
+// Fetch CDSES results for this assessment
+$cdses = $conn->prepare("SELECT SA_Score, OI_Score, GS_Score, PL_Score, PS_Score, TotalScore, SelfEfficacyLevel FROM cdses_results WHERE AssessmentID = ?");
+$cdses->bind_param("i", $result['AssessmentID']);
+$cdses->execute();
+$cdsesRow = $cdses->get_result()->fetch_assoc();
+$cdses->close();
+
+// Fetch counselor feedback/notes for this assessment
+$cf = $conn->prepare("SELECT FeedbackNotes FROM counselor_feedback WHERE AssessmentID = ? ORDER BY ReviewedAt DESC LIMIT 1");
+$cf->bind_param("i", $result['AssessmentID']);
+$cf->execute();
+$cfRow = $cf->get_result()->fetch_assoc();
+$cfNotes = $cfRow['FeedbackNotes'] ?? null;
+$cf->close();
 
 echo json_encode([
     "status"           => "success",
@@ -125,15 +134,16 @@ echo json_encode([
         "score" => (int)$rseRow['Score'],
         "level" => $rseRow['Level']
     ] : null,
-    "mbi" => $mbiRow ? [
-        "exScore" => (float)$mbiRow['EX_Score'],
-        "cyScore" => (float)$mbiRow['CY_Score'],
-        "efScore" => (float)$mbiRow['EF_Score'],
-        "exLevel" => $mbiRow['EX_Level'],
-        "cyLevel" => $mbiRow['CY_Level'],
-        "efLevel" => $mbiRow['EF_Level'],
-        "burnoutStatus" => $mbiRow['BurnoutStatus']
-    ] : null
+    "cdses" => $cdsesRow ? [
+        "saScore" => (float)$cdsesRow['SA_Score'],
+        "oiScore" => (float)$cdsesRow['OI_Score'],
+        "gsScore" => (float)$cdsesRow['GS_Score'],
+        "plScore" => (float)$cdsesRow['PL_Score'],
+        "psScore" => (float)$cdsesRow['PS_Score'],
+        "totalScore" => (float)$cdsesRow['TotalScore'],
+        "selfEfficacyLevel" => $cdsesRow['SelfEfficacyLevel']
+    ] : null,
+    "counselorNotes" => $cfNotes
 ]);
 
 $conn->close();

@@ -1,0 +1,1101 @@
+R,I,A,S,E,C,RSES,CDSES,Strand,Label
+2,7,3,5,2,2,21,114,GAS,BS Nursing
+4,5,2,2,4,6,18,116,STEM,BS Computer Science
+6,4,3,4,3,2,23,99,GAS,BS Agriculture
+2,3,3,5,4,2,29,89,HUMSS,BS Psychology
+6,6,4,2,3,4,35,82,STEM,BS Computer Science
+5,7,2,4,2,4,39,74,STEM,BS Architecture
+4,5,3,3,3,6,29,65,STEM,BS Information Systems
+4,3,4,5,7,5,37,66,ABM,BS Business Administration
+4,6,3,3,4,6,35,73,STEM,BS Civil Engineering
+4,5,3,3,3,4,24,117,STEM,BS Computer Science
+2,4,4,6,5,3,22,78,Arts & Design,BA Communication
+7,5,4,4,3,4,30,91,GAS,BS Agriculture
+4,3,3,5,3,2,38,65,HUMSS,BS Psychology
+7,2,3,3,6,3,34,77,GAS,BS Criminology
+6,7,2,4,4,5,38,88,GAS,BS Information Technology
+3,2,4,5,6,7,23,109,ABM,BS Accountancy
+4,4,5,5,3,3,23,114,HUMSS,BS Education
+2,7,3,6,2,2,29,84,STEM,BS Biology
+6,5,2,4,3,4,35,61,GAS,BS Civil Engineering
+5,5,4,4,3,2,35,70,GAS,BS Agriculture
+4,4,4,6,5,3,21,76,HUMSS,BS Tourism Management
+2,4,5,5,5,2,18,54,HUMSS,BA Communication
+4,5,2,3,2,6,25,80,STEM,BS Computer Science
+4,2,4,5,7,6,25,105,ABM,BS Business Administration
+2,2,4,4,6,6,31,104,ABM,BS Business Administration
+6,7,4,2,2,5,28,58,STEM,BS Computer Science
+4,3,2,4,5,6,32,76,ABM,BS Business Administration
+5,7,2,2,4,6,18,56,STEM,BS Information Systems
+4,6,3,3,2,5,19,66,STEM,BS Civil Engineering
+3,3,4,6,5,4,35,107,HUMSS,BS Tourism Management
+2,2,5,7,5,2,28,52,GAS,BS Education
+4,5,2,7,2,2,20,121,Sports,BS Biology
+5,5,4,2,4,6,19,124,Arts & Design,BS Civil Engineering
+4,4,3,4,5,7,40,85,ABM,BS Marketing Management
+2,4,5,6,4,3,20,46,HUMSS,BS Tourism Management
+2,2,4,3,7,6,22,89,ABM,BS Marketing Management
+5,6,2,3,4,6,27,123,STEM,BS Civil Engineering
+2,7,4,6,4,2,22,78,STEM,BS Biology
+5,5,3,4,2,4,28,71,GAS,BS Agriculture
+6,6,3,2,2,6,31,80,HUMSS,BS Mechanical Engineering
+4,3,3,7,4,4,40,99,HUMSS,BS Psychology
+2,7,2,7,2,3,36,115,ABM,BS Nursing
+5,6,2,3,2,6,25,58,STEM,BS Computer Science
+6,6,4,2,2,2,23,97,Arts & Design,BS Agriculture
+3,4,5,5,4,2,40,58,HUMSS,BA Communication
+5,5,2,3,3,5,25,73,ABM,BS Computer Science
+3,3,3,6,4,4,34,96,HUMSS,BS Tourism Management
+6,4,2,3,2,4,26,49,GAS,BS Agriculture
+4,3,4,7,5,2,30,118,TVL,BS Hospitality Management
+6,6,2,4,4,6,39,70,STEM,BS Computer Science
+6,6,4,3,4,4,27,109,STEM,BS Information Systems
+6,3,4,3,6,2,24,98,GAS,BS Criminology
+4,4,3,7,5,3,30,115,HUMSS,BS Tourism Management
+3,2,4,7,5,4,28,104,HUMSS,BS Education
+4,3,4,3,7,5,27,110,ABM,BS Business Administration
+5,5,2,4,3,4,24,63,ABM,BS Architecture
+4,2,7,4,4,4,24,94,Arts & Design,Bachelor of Fine Arts
+4,7,4,2,2,5,25,67,STEM,BS Civil Engineering
+3,5,4,5,2,3,22,104,STEM,BS Biology
+7,5,3,4,4,4,31,115,GAS,BS Agriculture
+4,3,3,4,5,7,26,111,ABM,BS Accountancy
+5,6,2,4,3,4,26,87,STEM,BS Civil Engineering
+5,4,2,2,3,4,22,72,GAS,BS Agriculture
+4,3,4,5,3,3,30,119,HUMSS,BA Communication
+6,6,3,2,3,5,30,98,STEM,BS Information Technology
+7,4,3,2,3,3,33,48,GAS,BS Agriculture
+4,2,4,5,5,4,18,95,HUMSS,BS Tourism Management
+4,7,3,2,3,4,19,78,STEM,BS Information Technology
+3,3,3,4,6,6,26,55,ABM,BS Business Administration
+5,5,2,4,2,4,19,48,GAS,BS Agriculture
+2,4,2,3,5,6,39,59,ABM,BS Business Administration
+3,4,3,4,5,7,37,59,ABM,BS Business Administration
+3,2,4,3,6,7,39,93,ABM,BS Accountancy
+2,4,4,5,5,5,40,83,ABM,BS Business Administration
+4,7,2,3,4,5,39,92,Arts & Design,BS Architecture
+2,3,4,5,4,3,38,103,HUMSS,BA Communication
+5,4,4,4,5,4,35,106,GAS,BS Criminology
+3,3,2,3,6,6,25,104,ABM,BS Marketing Management
+3,2,4,6,3,3,24,90,HUMSS,BS Tourism Management
+3,4,5,6,5,2,34,69,Arts & Design,BA Communication
+6,4,2,4,5,4,40,107,GAS,BS Criminology
+4,6,2,3,4,4,27,119,STEM,BS Information Technology
+7,5,3,4,4,3,29,103,GAS,BS Agriculture
+4,5,4,2,3,4,35,68,STEM,BS Mechanical Engineering
+3,4,7,5,4,3,21,69,Arts & Design,Bachelor of Fine Arts
+2,3,3,7,5,2,26,50,TVL,BS Hospitality Management
+6,6,2,4,3,2,18,118,GAS,BS Agriculture
+3,3,6,3,3,3,21,53,Arts & Design,Bachelor of Fine Arts
+6,7,4,2,2,4,36,83,ABM,BS Information Systems
+4,6,4,7,4,2,34,93,STEM,BS Nursing
+5,7,3,3,4,6,19,123,TVL,BS Industrial Technology
+2,7,2,6,4,2,23,75,STEM,BS Nursing
+4,5,3,3,4,6,33,82,HUMSS,BS Information Systems
+4,3,3,7,3,3,38,120,HUMSS,BS Education
+3,2,4,3,7,5,26,63,ABM,BS Business Administration
+4,4,5,6,4,2,32,83,HUMSS,BS Education
+6,7,3,3,2,6,19,100,STEM,BS Mechanical Engineering
+5,5,2,2,4,6,36,47,STEM,BS Architecture
+6,5,2,3,4,6,32,80,STEM,BS Mechanical Engineering
+3,4,3,3,6,6,31,87,ABM,BS Marketing Management
+2,6,3,7,3,3,39,96,STEM,BS Nursing
+5,5,2,3,3,3,21,96,GAS,BS Agriculture
+6,7,3,3,2,4,34,91,STEM,BS Information Technology
+4,3,6,3,3,4,22,81,Arts & Design,Bachelor of Fine Arts
+2,2,7,5,2,4,23,84,Arts & Design,Bachelor of Fine Arts
+6,4,2,2,3,2,38,64,GAS,BS Agriculture
+4,4,4,6,4,3,25,103,HUMSS,BS Education
+2,4,5,7,3,2,26,98,HUMSS,BS Tourism Management
+3,5,3,7,3,4,36,107,STEM,BS Biology
+6,6,3,3,4,6,30,103,TVL,BS Industrial Technology
+4,2,4,4,5,6,19,85,ABM,BS Business Administration
+3,4,5,5,4,2,22,109,HUMSS,BS Tourism Management
+2,3,3,7,4,2,22,97,HUMSS,BA Communication
+2,3,4,6,5,4,30,55,HUMSS,BS Psychology
+6,5,4,4,3,4,19,124,Arts & Design,BS Agriculture
+2,4,3,6,3,4,40,57,HUMSS,BS Education
+2,2,4,5,4,3,29,100,TVL,BS Education
+7,4,2,2,4,2,37,93,GAS,BS Criminology
+5,7,2,2,3,6,26,103,STEM,BS Civil Engineering
+5,6,4,4,2,4,32,89,STEM,BS Information Technology
+4,3,5,6,4,3,24,94,HUMSS,BS Education
+2,6,4,6,4,3,40,82,Sports,BS Nursing
+3,2,5,7,5,2,37,108,HUMSS,BS Tourism Management
+2,4,4,5,5,2,37,77,HUMSS,BS Education
+4,2,5,7,3,3,32,49,HUMSS,BS Psychology
+2,3,4,7,4,2,24,61,HUMSS,BS Psychology
+4,4,4,5,4,3,27,88,TVL,BS Hospitality Management
+4,5,2,4,4,6,30,116,TVL,BS Industrial Technology
+2,3,5,5,4,3,39,78,HUMSS,BS Tourism Management
+2,4,3,6,3,4,35,86,TVL,BS Hospitality Management
+6,5,4,3,4,5,38,97,STEM,BS Civil Engineering
+5,6,2,2,2,6,22,94,STEM,BS Computer Science
+6,6,4,4,2,3,38,57,GAS,BS Agriculture
+5,6,2,4,3,4,32,101,STEM,BS Architecture
+2,4,4,7,5,3,19,95,TVL,BS Hospitality Management
+3,5,4,5,4,4,37,47,HUMSS,BS Nursing
+4,7,2,2,4,4,36,72,STEM,BS Civil Engineering
+5,5,4,2,3,4,22,114,STEM,BS Civil Engineering
+2,4,2,3,5,6,25,120,ABM,BS Accountancy
+3,2,2,5,6,7,21,53,ABM,BS Accountancy
+4,4,3,6,5,2,37,50,TVL,BS Hospitality Management
+3,6,4,5,2,3,30,99,STEM,BS Biology
+4,3,6,3,3,4,22,53,TVL,Bachelor of Fine Arts
+4,4,3,4,7,7,27,103,ABM,BS Marketing Management
+5,4,2,4,6,4,24,100,GAS,BS Criminology
+5,6,3,3,3,6,21,85,STEM,BS Civil Engineering
+5,5,4,3,2,4,20,56,STEM,BS Mechanical Engineering
+2,4,3,7,5,4,28,60,TVL,BS Hospitality Management
+7,2,3,4,5,3,21,118,GAS,BS Criminology
+4,3,3,5,4,4,29,59,HUMSS,BS Psychology
+2,3,4,5,7,7,38,116,Arts & Design,BS Marketing Management
+4,5,3,4,3,5,29,45,STEM,BS Mechanical Engineering
+4,4,4,5,3,4,38,48,TVL,BS Psychology
+3,3,3,4,5,6,27,86,ABM,BS Business Administration
+4,2,2,3,5,7,19,55,ABM,BS Marketing Management
+6,4,3,3,5,2,34,59,GAS,BS Criminology
+3,7,4,7,3,4,39,84,GAS,BS Nursing
+4,5,2,3,2,4,26,82,STEM,BS Architecture
+5,7,3,2,2,5,35,74,STEM,BS Information Technology
+2,3,5,5,4,2,32,54,TVL,BS Hospitality Management
+3,4,3,5,7,6,27,59,ABM,BS Marketing Management
+2,4,4,7,4,2,31,58,HUMSS,BA Communication
+3,4,2,4,6,7,28,73,ABM,BS Marketing Management
+2,4,4,3,7,7,24,89,ABM,BS Accountancy
+2,2,3,6,3,2,37,64,HUMSS,BS Psychology
+4,7,3,3,4,6,32,117,STEM,BS Information Systems
+5,7,3,2,3,4,33,101,STEM,BS Architecture
+6,5,3,4,2,5,32,102,HUMSS,BS Mechanical Engineering
+2,4,3,7,5,4,30,104,HUMSS,BS Education
+5,7,4,2,3,6,33,109,STEM,BS Computer Science
+5,5,3,4,2,6,38,67,Arts & Design,BS Computer Science
+5,7,4,4,2,5,29,81,TVL,BS Industrial Technology
+4,4,3,7,5,3,20,87,Arts & Design,BA Communication
+3,3,5,7,5,2,28,55,HUMSS,BS Tourism Management
+3,3,5,7,5,3,22,121,HUMSS,BS Psychology
+5,7,3,4,3,4,39,112,Arts & Design,BS Information Systems
+7,3,2,3,5,2,24,88,GAS,BS Criminology
+2,2,6,3,2,3,21,109,Arts & Design,Bachelor of Fine Arts
+2,7,3,7,2,4,30,64,STEM,BS Biology
+4,7,3,2,3,5,39,75,STEM,BS Architecture
+5,7,3,2,4,4,27,105,STEM,BS Architecture
+3,4,4,4,6,6,30,109,ABM,BS Business Administration
+2,4,2,4,5,7,33,92,ABM,BS Accountancy
+4,7,2,6,2,2,26,102,STEM,BS Nursing
+3,2,3,6,4,2,31,51,HUMSS,BS Psychology
+2,3,3,6,3,2,28,57,TVL,BS Hospitality Management
+2,2,3,6,4,4,22,105,HUMSS,BA Communication
+4,5,3,2,2,6,37,112,STEM,BS Information Technology
+2,3,3,5,3,3,38,124,HUMSS,BS Education
+3,7,4,5,4,4,36,75,STEM,BS Nursing
+3,2,5,6,3,4,31,68,HUMSS,BS Education
+6,6,2,4,4,6,34,115,Sports,BS Information Systems
+2,4,7,4,3,4,18,90,Arts & Design,Bachelor of Fine Arts
+2,4,5,7,3,4,28,62,TVL,BS Hospitality Management
+4,2,5,6,5,3,38,68,HUMSS,BA Communication
+6,6,2,3,2,4,24,50,STEM,BS Information Systems
+4,3,5,6,4,2,38,69,HUMSS,BS Education
+6,6,3,2,3,5,30,101,STEM,BS Computer Science
+3,2,4,7,4,3,34,79,HUMSS,BS Tourism Management
+5,3,4,2,6,3,28,58,Arts & Design,BS Criminology
+3,3,5,7,4,2,40,101,HUMSS,BS Education
+6,6,4,3,3,6,19,54,STEM,BS Computer Science
+3,4,5,7,3,2,22,122,HUMSS,BS Tourism Management
+4,5,2,2,4,5,29,94,TVL,BS Industrial Technology
+6,5,4,3,3,5,32,54,STEM,BS Computer Science
+3,6,3,7,3,2,21,48,STEM,BS Biology
+4,3,7,3,3,3,40,102,Arts & Design,Bachelor of Fine Arts
+5,7,3,2,2,4,20,102,STEM,BS Architecture
+4,7,3,4,3,6,20,115,TVL,BS Industrial Technology
+2,4,5,7,5,2,29,110,HUMSS,BS Education
+2,2,3,3,6,7,36,92,ABM,BS Business Administration
+5,6,2,2,3,3,40,106,GAS,BS Agriculture
+7,2,2,3,6,2,32,104,GAS,BS Criminology
+2,4,5,7,3,2,31,109,TVL,BS Hospitality Management
+4,7,2,3,2,4,28,73,STEM,BS Computer Science
+3,5,3,5,4,4,26,61,STEM,BS Biology
+6,5,4,4,2,6,36,64,STEM,BS Architecture
+6,7,3,4,2,4,20,50,STEM,BS Architecture
+3,4,2,5,6,7,38,48,ABM,BS Marketing Management
+6,6,3,3,2,4,30,83,GAS,BS Agriculture
+4,6,3,3,3,4,28,122,Sports,BS Computer Science
+4,3,4,5,4,4,35,58,HUMSS,BA Communication
+4,6,3,2,2,4,19,82,TVL,BS Industrial Technology
+5,5,2,3,4,6,28,69,STEM,BS Architecture
+4,3,7,4,3,2,20,95,Arts & Design,Bachelor of Fine Arts
+4,7,3,2,2,5,33,121,STEM,BS Civil Engineering
+3,4,6,3,3,2,26,91,Arts & Design,Bachelor of Fine Arts
+2,3,3,7,5,2,29,115,TVL,BS Hospitality Management
+4,3,5,6,5,4,37,60,STEM,BS Tourism Management
+3,3,5,6,3,2,37,110,HUMSS,BS Tourism Management
+4,5,2,4,3,5,34,103,TVL,BS Computer Science
+3,4,4,5,4,4,27,120,HUMSS,BS Psychology
+4,6,4,7,3,3,18,92,STEM,BS Biology
+3,7,3,7,4,4,18,121,STEM,BS Nursing
+4,2,4,3,7,6,23,112,ABM,BS Marketing Management
+5,5,4,2,2,6,40,59,STEM,BS Architecture
+5,6,2,3,4,4,31,109,TVL,BS Industrial Technology
+4,4,6,5,2,4,24,116,Arts & Design,Bachelor of Fine Arts
+4,3,7,3,3,4,28,114,Arts & Design,Bachelor of Fine Arts
+6,6,2,2,3,6,27,73,STEM,BS Mechanical Engineering
+3,4,3,7,5,3,28,106,HUMSS,BS Education
+5,5,4,4,4,5,30,89,STEM,BS Mechanical Engineering
+3,2,4,7,3,3,32,77,HUMSS,BS Psychology
+2,4,3,5,7,6,22,58,ABM,BS Business Administration
+2,2,2,5,7,5,38,74,GAS,BS Marketing Management
+4,3,3,7,3,2,35,65,HUMSS,BA Communication
+3,4,6,4,3,3,38,52,Arts & Design,Bachelor of Fine Arts
+6,7,2,4,4,6,19,67,STEM,BS Information Systems
+2,3,3,3,7,6,19,46,ABM,BS Accountancy
+4,6,3,3,4,6,34,108,STEM,BS Architecture
+4,3,4,5,3,3,23,103,HUMSS,BS Psychology
+2,4,3,4,7,7,24,67,ABM,BS Accountancy
+3,4,4,5,4,4,21,68,HUMSS,BS Tourism Management
+3,2,6,4,3,2,32,79,Arts & Design,Bachelor of Fine Arts
+4,4,5,5,4,4,29,75,STEM,BS Education
+5,5,3,4,4,6,27,60,TVL,BS Industrial Technology
+3,4,3,5,3,3,22,103,HUMSS,BS Education
+5,6,4,4,3,6,39,72,STEM,BS Architecture
+4,7,3,4,4,5,20,117,Sports,BS Architecture
+7,4,4,4,2,2,28,111,GAS,BS Agriculture
+4,4,3,3,7,6,19,103,GAS,BS Business Administration
+6,5,4,3,4,5,18,95,TVL,BS Industrial Technology
+6,5,4,2,2,5,29,53,STEM,BS Information Technology
+4,6,2,3,3,4,22,98,STEM,BS Computer Science
+3,3,4,5,5,4,35,62,HUMSS,BS Tourism Management
+2,2,5,6,5,2,25,45,TVL,BS Hospitality Management
+3,4,5,7,4,4,30,74,HUMSS,BS Education
+2,3,3,7,3,2,39,98,TVL,BS Hospitality Management
+4,5,2,2,4,4,32,121,STEM,BS Information Technology
+4,7,2,3,3,4,35,72,STEM,BS Computer Science
+4,7,3,2,4,6,28,118,STEM,BS Computer Science
+2,3,3,7,5,2,31,83,HUMSS,BA Communication
+7,6,2,4,4,3,35,108,HUMSS,BS Agriculture
+4,3,5,6,4,2,27,93,HUMSS,BS Tourism Management
+6,4,2,3,4,2,32,52,GAS,BS Agriculture
+7,4,2,3,4,3,24,87,GAS,BS Criminology
+5,5,4,4,2,4,26,93,TVL,BS Industrial Technology
+4,5,2,4,4,6,35,72,STEM,BS Architecture
+3,2,3,5,5,2,33,76,HUMSS,BA Communication
+3,2,4,4,6,6,32,113,ABM,BS Business Administration
+3,3,5,6,4,2,33,85,HUMSS,BS Education
+3,3,3,7,3,4,22,47,TVL,BS Hospitality Management
+4,4,3,4,5,5,28,74,ABM,BS Marketing Management
+5,7,4,4,3,5,33,107,STEM,BS Civil Engineering
+2,2,5,7,4,2,35,52,TVL,BS Hospitality Management
+6,5,2,3,2,6,25,53,STEM,BS Information Systems
+4,7,3,3,2,6,38,123,STEM,BS Information Technology
+2,2,7,5,3,2,18,112,Arts & Design,Bachelor of Fine Arts
+6,4,4,4,4,3,23,58,GAS,BS Agriculture
+2,5,2,7,4,3,29,79,STEM,BS Biology
+5,6,3,4,2,6,25,83,STEM,BS Information Systems
+6,7,2,2,3,5,30,115,STEM,BS Information Systems
+6,5,2,3,3,6,28,117,STEM,BS Information Technology
+4,5,2,5,4,4,33,79,STEM,BS Nursing
+6,7,4,2,2,5,18,71,STEM,BS Mechanical Engineering
+2,3,3,7,3,4,30,114,HUMSS,BS Tourism Management
+4,4,3,7,5,3,19,57,HUMSS,BS Psychology
+5,7,4,4,3,5,18,79,STEM,BS Information Systems
+5,5,3,4,3,5,23,119,TVL,BS Industrial Technology
+6,6,2,4,2,4,26,64,STEM,BS Information Systems
+4,3,4,6,3,2,18,84,HUMSS,BS Psychology
+4,5,2,2,3,5,35,116,STEM,BS Mechanical Engineering
+2,5,3,7,2,4,37,86,STEM,BS Nursing
+5,6,3,2,4,6,25,118,STEM,BS Information Technology
+2,2,4,6,4,3,22,53,HUMSS,BS Tourism Management
+5,6,3,2,3,5,25,125,STEM,BS Mechanical Engineering
+4,6,2,2,3,4,30,87,STEM,BS Architecture
+3,3,4,6,5,4,22,83,HUMSS,BS Tourism Management
+3,3,2,4,6,6,40,107,ABM,BS Business Administration
+5,6,3,3,3,4,36,70,STEM,BS Civil Engineering
+5,6,4,2,4,3,40,71,GAS,BS Agriculture
+4,2,4,7,4,2,38,83,HUMSS,BS Education
+4,3,4,5,4,4,33,119,HUMSS,BS Psychology
+4,6,4,5,3,4,35,121,STEM,BS Biology
+4,5,4,4,3,4,38,123,Arts & Design,BS Information Systems
+3,3,3,5,3,3,25,110,HUMSS,BS Tourism Management
+7,6,4,2,3,3,30,104,GAS,BS Agriculture
+4,4,2,4,5,6,21,82,ABM,BS Marketing Management
+4,7,2,3,3,5,32,71,STEM,BS Information Systems
+3,2,4,7,5,3,28,53,TVL,BS Hospitality Management
+2,6,4,5,4,2,25,111,STEM,BS Nursing
+3,4,3,4,5,6,38,68,ABM,BS Accountancy
+6,2,4,4,4,3,36,99,GAS,BS Criminology
+2,3,4,3,7,5,35,68,ABM,BS Business Administration
+3,2,3,5,6,7,38,85,ABM,BS Business Administration
+5,7,2,3,3,5,37,67,STEM,BS Architecture
+4,4,3,7,3,3,21,75,HUMSS,BS Education
+3,4,2,5,6,6,37,62,ABM,BS Accountancy
+5,3,4,4,6,4,23,116,GAS,BS Criminology
+2,2,4,6,5,2,29,46,HUMSS,BS Education
+3,4,4,5,6,6,39,107,ABM,BS Business Administration
+5,5,2,4,2,4,27,49,TVL,BS Industrial Technology
+6,4,3,4,4,3,35,110,STEM,BS Agriculture
+6,6,4,2,4,5,35,72,STEM,BS Mechanical Engineering
+4,7,2,6,2,3,26,89,STEM,BS Nursing
+5,5,2,2,4,6,40,89,STEM,BS Information Systems
+6,6,2,4,2,4,24,52,STEM,BS Architecture
+6,6,4,2,3,4,27,82,GAS,BS Agriculture
+4,5,2,6,2,3,38,61,STEM,BS Biology
+2,2,5,6,3,4,30,107,Arts & Design,BS Psychology
+6,6,3,3,2,6,20,96,STEM,BS Mechanical Engineering
+6,6,3,3,3,6,18,56,STEM,BS Mechanical Engineering
+6,7,4,3,2,6,30,72,TVL,BS Industrial Technology
+3,3,3,4,6,7,36,61,ABM,BS Business Administration
+3,4,6,3,2,4,32,47,Sports,Bachelor of Fine Arts
+3,3,2,4,5,7,22,83,ABM,BS Accountancy
+4,7,3,3,2,5,39,66,Arts & Design,BS Mechanical Engineering
+4,4,3,6,5,2,40,57,GAS,BS Education
+4,7,2,4,4,5,18,46,STEM,BS Information Systems
+3,7,2,6,2,2,30,56,STEM,BS Nursing
+2,6,3,6,2,3,22,63,TVL,BS Nursing
+6,7,2,3,3,6,24,125,STEM,BS Information Technology
+7,4,3,2,4,2,22,60,GAS,BS Criminology
+3,3,4,5,3,3,38,55,HUMSS,BS Tourism Management
+6,7,4,3,4,4,39,83,STEM,BS Architecture
+6,5,4,3,3,6,19,75,STEM,BS Architecture
+2,6,4,7,2,4,18,91,STEM,BS Nursing
+3,4,4,6,5,4,23,105,HUMSS,BS Psychology
+4,7,2,2,3,4,19,52,STEM,BS Information Systems
+4,3,5,7,5,3,31,96,TVL,BS Tourism Management
+7,4,3,2,3,2,34,71,GAS,BS Agriculture
+4,3,4,7,5,4,39,53,HUMSS,BS Psychology
+7,2,2,2,4,3,21,103,GAS,BS Criminology
+5,7,4,4,4,4,21,46,STEM,BS Computer Science
+4,6,3,4,4,6,26,66,STEM,BS Information Technology
+6,5,2,3,3,5,34,53,STEM,BS Mechanical Engineering
+4,2,3,4,7,6,19,108,ABM,BS Marketing Management
+3,2,3,3,7,7,21,74,ABM,BS Accountancy
+4,5,2,2,3,5,30,64,STEM,BS Information Technology
+6,7,4,4,3,4,28,76,STEM,BS Computer Science
+3,2,5,6,3,4,39,51,HUMSS,BA Communication
+2,6,2,6,3,3,28,56,STEM,BS Biology
+5,5,3,4,3,6,37,76,STEM,BS Information Technology
+3,2,4,5,5,5,18,97,TVL,BS Marketing Management
+4,4,3,6,3,4,30,84,TVL,BS Hospitality Management
+5,6,2,2,4,5,20,50,STEM,BS Civil Engineering
+3,7,3,6,4,2,36,57,STEM,BS Biology
+2,4,5,5,4,4,22,75,HUMSS,BS Tourism Management
+3,4,5,6,4,3,26,74,ABM,BA Communication
+4,2,3,5,3,3,32,85,HUMSS,BS Psychology
+6,4,3,3,3,3,21,56,GAS,BS Agriculture
+4,4,5,5,3,3,22,56,HUMSS,BS Education
+3,4,3,7,4,3,23,48,TVL,BS Hospitality Management
+6,7,4,2,2,5,21,62,STEM,BS Industrial Technology
+4,5,3,3,4,6,38,55,STEM,BS Civil Engineering
+4,5,2,2,4,5,22,56,STEM,BS Mechanical Engineering
+2,2,4,5,3,4,31,95,HUMSS,BA Communication
+4,3,3,6,3,2,26,80,HUMSS,BS Tourism Management
+2,4,5,7,3,4,27,108,HUMSS,BS Psychology
+6,4,2,3,3,2,31,70,GAS,BS Agriculture
+2,7,4,5,3,4,29,106,STEM,BS Biology
+3,4,7,4,3,3,23,48,Arts & Design,Bachelor of Fine Arts
+4,6,2,3,4,5,36,74,STEM,BS Civil Engineering
+2,7,2,6,4,4,19,73,STEM,BS Nursing
+3,2,3,5,5,3,40,90,HUMSS,BS Tourism Management
+6,7,3,4,4,4,36,69,STEM,BS Information Technology
+4,3,6,4,2,2,19,74,Arts & Design,Bachelor of Fine Arts
+6,6,2,3,4,4,22,88,STEM,BS Information Technology
+2,2,3,7,5,2,21,112,HUMSS,BA Communication
+5,7,4,3,4,4,28,83,STEM,BS Information Systems
+4,3,4,4,7,6,23,116,ABM,BS Accountancy
+5,5,4,4,2,5,27,82,Arts & Design,BS Architecture
+6,7,3,4,2,4,37,85,STEM,BS Information Technology
+4,7,4,2,3,4,28,54,STEM,BS Architecture
+2,4,3,7,5,4,28,102,ABM,BA Communication
+6,5,3,3,2,6,18,51,STEM,BS Civil Engineering
+5,3,3,3,5,4,30,57,GAS,BS Criminology
+4,4,2,3,6,5,19,82,HUMSS,BS Marketing Management
+2,6,2,6,2,4,20,115,STEM,BS Nursing
+5,7,4,3,4,4,31,66,STEM,BS Information Systems
+5,2,2,3,4,2,31,115,GAS,BS Criminology
+6,6,3,3,2,2,19,95,GAS,BS Agriculture
+2,2,7,3,3,2,27,125,Arts & Design,Bachelor of Fine Arts
+2,2,2,3,7,6,20,105,ABM,BS Business Administration
+3,3,4,7,4,2,38,114,HUMSS,BS Education
+3,3,3,6,3,3,32,104,TVL,BS Hospitality Management
+6,5,2,4,4,4,20,89,STEM,BS Mechanical Engineering
+7,2,4,2,5,4,31,113,GAS,BS Criminology
+4,2,7,4,2,3,40,49,Arts & Design,Bachelor of Fine Arts
+4,7,4,5,2,3,23,66,STEM,BS Biology
+2,2,3,3,7,6,24,125,TVL,BS Business Administration
+5,7,2,2,3,6,30,115,STEM,BS Mechanical Engineering
+6,6,2,4,4,6,34,98,ABM,BS Mechanical Engineering
+4,4,5,5,3,4,21,81,HUMSS,BS Psychology
+3,3,4,7,4,4,37,105,HUMSS,BS Hospitality Management
+2,4,5,7,5,3,19,95,HUMSS,BS Tourism Management
+4,2,3,7,4,3,29,47,HUMSS,BA Communication
+3,3,4,7,5,2,25,62,HUMSS,BS Education
+5,6,4,3,4,6,20,69,TVL,BS Industrial Technology
+7,3,4,3,4,4,23,53,GAS,BS Criminology
+3,5,4,7,2,2,24,70,STEM,BS Biology
+4,6,2,3,4,4,26,92,STEM,BS Civil Engineering
+3,7,2,7,2,2,29,107,STEM,BS Biology
+3,4,4,4,6,5,26,56,ABM,BS Accountancy
+2,2,5,5,3,4,25,71,HUMSS,BS Tourism Management
+7,2,4,2,5,2,38,67,GAS,BS Criminology
+4,6,4,3,4,6,38,80,STEM,BS Information Technology
+3,3,4,5,4,3,39,111,HUMSS,BS Tourism Management
+4,2,3,7,5,3,35,121,HUMSS,BS Tourism Management
+4,2,4,5,4,3,38,86,HUMSS,BS Education
+6,7,4,3,2,4,34,75,STEM,BS Mechanical Engineering
+5,7,3,4,2,6,18,108,STEM,BS Architecture
+5,6,3,4,2,6,40,118,STEM,BS Mechanical Engineering
+4,4,3,7,5,4,33,90,HUMSS,BA Communication
+4,4,2,4,5,6,22,78,ABM,BS Accountancy
+5,6,3,4,2,2,29,73,GAS,BS Agriculture
+3,3,4,6,5,3,32,60,HUMSS,BS Education
+4,4,2,4,5,7,21,93,ABM,BS Marketing Management
+5,2,2,2,5,3,36,103,Sports,BS Criminology
+2,3,3,5,5,6,38,52,HUMSS,BS Accountancy
+2,4,2,4,5,5,37,100,ABM,BS Business Administration
+3,3,4,5,3,4,24,92,HUMSS,BS Tourism Management
+4,2,3,7,3,4,25,73,HUMSS,BA Communication
+3,2,3,6,5,4,27,66,STEM,BS Hospitality Management
+3,3,5,7,5,4,28,100,HUMSS,BS Education
+3,3,4,5,3,3,18,74,HUMSS,BS Psychology
+2,4,3,7,5,2,21,91,HUMSS,BS Psychology
+5,7,3,4,4,4,37,51,STEM,BS Computer Science
+4,7,2,3,3,5,21,115,STEM,BS Information Technology
+2,4,5,7,3,3,31,57,HUMSS,BS Psychology
+6,7,4,2,3,4,34,124,STEM,BS Mechanical Engineering
+3,5,4,5,3,4,24,90,STEM,BS Nursing
+2,2,5,6,3,4,33,87,HUMSS,BS Education
+6,5,2,4,4,5,22,56,STEM,BS Information Technology
+6,7,2,3,4,4,32,82,STEM,BS Information Systems
+4,5,2,3,3,6,28,99,STEM,BS Computer Science
+2,5,2,7,4,2,28,90,STEM,BS Nursing
+5,7,2,3,3,4,21,96,STEM,BS Architecture
+5,6,4,3,3,6,23,59,Arts & Design,BS Industrial Technology
+4,5,3,4,3,6,39,101,STEM,BS Computer Science
+3,4,3,7,5,2,33,107,GAS,BS Tourism Management
+4,5,3,4,3,4,40,112,TVL,BS Industrial Technology
+4,4,2,5,6,7,34,124,Arts & Design,BS Marketing Management
+5,6,4,4,4,5,22,116,STEM,BS Civil Engineering
+4,5,4,2,4,5,33,66,GAS,BS Architecture
+2,3,4,5,5,2,35,93,HUMSS,BA Communication
+4,6,3,4,3,4,33,102,STEM,BS Civil Engineering
+4,4,6,3,3,3,19,116,Arts & Design,Bachelor of Fine Arts
+6,7,4,3,4,6,24,103,STEM,BS Information Systems
+2,2,4,6,5,4,37,105,TVL,BS Hospitality Management
+4,3,3,5,5,2,18,88,TVL,BS Hospitality Management
+4,4,4,7,3,2,23,108,Arts & Design,BS Education
+5,3,4,2,4,2,30,72,GAS,BS Criminology
+4,3,2,4,5,7,39,120,GAS,BS Business Administration
+6,7,4,2,3,4,34,51,TVL,BS Industrial Technology
+7,3,4,2,6,4,23,61,Arts & Design,BS Criminology
+6,6,4,3,3,6,40,76,STEM,BS Architecture
+3,3,3,5,4,4,40,110,HUMSS,BA Communication
+6,6,4,4,4,2,24,71,GAS,BS Agriculture
+4,3,5,5,5,4,23,109,HUMSS,BS Education
+4,2,4,7,4,4,36,98,HUMSS,BA Communication
+6,5,2,4,2,2,30,63,STEM,BS Agriculture
+3,2,3,5,6,5,19,82,ABM,BS Business Administration
+5,5,3,2,4,4,35,73,GAS,BS Agriculture
+6,4,4,4,3,4,39,51,GAS,BS Agriculture
+3,4,4,7,3,2,26,70,HUMSS,BS Tourism Management
+4,7,4,4,4,5,36,114,TVL,BS Industrial Technology
+4,2,3,4,5,7,20,68,ABM,BS Business Administration
+2,6,2,6,3,4,26,61,STEM,BS Biology
+4,6,3,4,2,4,22,86,STEM,BS Mechanical Engineering
+6,6,3,4,4,5,20,85,STEM,BS Architecture
+4,2,4,3,6,7,35,96,ABM,BS Accountancy
+4,3,3,4,6,5,37,112,ABM,BS Business Administration
+7,4,2,4,3,3,25,123,GAS,BS Agriculture
+4,7,3,3,2,5,26,114,STEM,BS Civil Engineering
+6,6,4,4,3,5,19,82,STEM,BS Information Technology
+3,4,2,3,5,7,35,45,ABM,BS Business Administration
+4,4,2,5,6,5,24,113,ABM,BS Business Administration
+7,2,4,4,4,2,32,87,STEM,BS Criminology
+4,6,4,2,4,4,26,97,STEM,BS Computer Science
+3,3,3,6,5,2,35,45,HUMSS,BS Tourism Management
+4,7,4,2,4,4,29,109,Sports,BS Architecture
+4,2,4,6,4,3,39,48,HUMSS,BS Education
+5,4,4,3,4,3,38,63,GAS,BS Agriculture
+2,4,5,5,3,2,18,118,TVL,BS Hospitality Management
+7,4,3,2,4,4,29,72,GAS,BS Agriculture
+2,5,2,5,4,3,24,59,STEM,BS Biology
+2,4,3,5,7,5,27,53,ABM,BS Marketing Management
+4,4,3,4,6,5,39,75,TVL,BS Business Administration
+4,6,3,3,3,6,39,84,STEM,BS Information Systems
+4,4,4,6,4,2,18,85,HUMSS,BS Psychology
+6,7,4,3,3,5,22,87,STEM,BS Civil Engineering
+5,6,3,3,4,4,23,122,HUMSS,BS Industrial Technology
+4,2,4,7,5,2,20,47,HUMSS,BS Psychology
+6,7,3,4,2,4,35,78,STEM,BS Information Technology
+6,6,2,3,3,2,36,82,TVL,BS Agriculture
+2,6,3,7,2,4,25,123,STEM,BS Biology
+2,6,2,5,4,4,39,63,STEM,BS Biology
+3,2,6,4,2,2,26,92,Arts & Design,Bachelor of Fine Arts
+4,3,3,4,6,5,19,86,TVL,BS Business Administration
+6,6,4,4,4,4,30,93,STEM,BS Mechanical Engineering
+6,6,3,2,4,5,29,89,STEM,BS Information Systems
+4,2,7,3,3,2,25,54,Arts & Design,Bachelor of Fine Arts
+4,5,2,2,3,6,40,60,STEM,BS Mechanical Engineering
+6,4,2,3,6,3,33,71,GAS,BS Criminology
+5,2,2,2,6,4,23,62,GAS,BS Criminology
+6,5,2,2,3,4,34,96,STEM,BS Computer Science
+4,2,4,5,7,6,20,72,ABM,BS Marketing Management
+3,2,6,4,4,2,36,68,Arts & Design,Bachelor of Fine Arts
+3,5,4,7,3,3,37,120,GAS,BS Biology
+2,2,3,5,5,4,39,98,HUMSS,BS Tourism Management
+4,5,3,4,4,4,35,109,STEM,BS Architecture
+5,7,2,4,4,4,39,100,STEM,BS Information Systems
+2,4,5,6,3,3,30,89,TVL,BS Hospitality Management
+2,3,2,4,6,5,20,81,ABM,BS Marketing Management
+6,5,2,2,4,4,18,118,GAS,BS Agriculture
+2,6,4,5,4,3,31,91,GAS,BS Biology
+3,3,4,4,7,6,37,80,ABM,BS Marketing Management
+2,3,5,7,4,2,29,116,HUMSS,BS Tourism Management
+5,7,3,4,3,6,22,60,STEM,BS Mechanical Engineering
+6,5,2,2,4,5,28,115,TVL,BS Industrial Technology
+4,6,4,2,2,4,33,121,STEM,BS Computer Science
+5,5,3,2,4,4,30,96,STEM,BS Information Systems
+3,7,4,5,2,4,33,101,Sports,BS Biology
+3,5,2,7,4,4,40,74,STEM,BS Biology
+5,5,4,2,2,4,26,96,STEM,BS Computer Science
+3,4,3,7,3,4,40,53,HUMSS,BS Tourism Management
+6,6,4,4,3,3,26,73,GAS,BS Agriculture
+3,3,4,3,6,5,31,109,STEM,BS Business Administration
+3,6,2,7,3,4,36,77,STEM,BS Biology
+4,3,3,6,4,4,32,120,HUMSS,BS Tourism Management
+2,3,6,4,4,2,39,74,Arts & Design,Bachelor of Fine Arts
+6,4,4,2,6,3,25,81,Arts & Design,BS Criminology
+2,4,3,6,4,3,24,118,HUMSS,BA Communication
+3,4,2,3,7,5,26,71,ABM,BS Business Administration
+6,6,2,2,2,4,39,108,STEM,BS Civil Engineering
+5,5,3,4,3,3,36,80,GAS,BS Agriculture
+3,6,2,7,2,2,34,99,STEM,BS Biology
+5,6,3,3,4,2,32,60,GAS,BS Agriculture
+5,7,2,2,4,4,30,119,HUMSS,BS Industrial Technology
+5,5,4,3,2,5,33,123,STEM,BS Architecture
+3,3,2,4,7,6,29,96,ABM,BS Accountancy
+4,2,4,5,5,5,26,75,ABM,BS Accountancy
+2,2,5,5,4,2,23,98,HUMSS,BS Tourism Management
+4,7,3,6,3,3,35,117,STEM,BS Biology
+2,2,3,4,7,5,32,87,ABM,BS Accountancy
+4,4,4,6,3,3,21,89,TVL,BS Hospitality Management
+4,7,4,4,4,6,23,81,STEM,BS Architecture
+3,7,3,5,3,4,27,104,STEM,BS Biology
+2,4,4,6,5,4,36,96,HUMSS,BS Psychology
+4,5,3,2,3,5,38,82,STEM,BS Information Systems
+6,6,3,3,3,6,36,111,STEM,BS Architecture
+5,2,2,2,6,2,39,77,GAS,BS Criminology
+4,5,3,2,2,4,33,115,Sports,BS Information Systems
+4,2,3,6,5,2,20,94,HUMSS,BS Tourism Management
+6,6,3,4,2,4,34,66,Arts & Design,BS Civil Engineering
+3,3,4,7,4,4,32,62,TVL,BS Hospitality Management
+5,6,4,3,4,4,38,117,GAS,BS Agriculture
+6,5,3,4,2,2,32,84,GAS,BS Agriculture
+4,6,2,2,4,4,29,81,STEM,BS Mechanical Engineering
+6,6,3,3,2,5,27,121,STEM,BS Information Technology
+6,6,2,3,4,5,30,76,STEM,BS Information Technology
+3,2,4,5,4,4,25,111,HUMSS,BS Tourism Management
+6,7,3,3,4,6,35,79,STEM,BS Architecture
+4,5,3,2,4,5,37,102,STEM,BS Information Systems
+5,5,3,2,2,4,35,47,STEM,BS Architecture
+3,6,2,7,3,4,18,74,STEM,BS Nursing
+2,3,7,4,3,3,32,49,Arts & Design,Bachelor of Fine Arts
+2,3,4,5,5,3,23,69,HUMSS,BS Psychology
+5,5,2,4,2,5,32,76,STEM,BS Mechanical Engineering
+4,6,4,2,4,6,24,105,STEM,BS Computer Science
+3,2,5,7,3,4,35,111,GAS,BS Education
+2,3,3,7,3,2,25,100,HUMSS,BS Education
+3,4,2,4,5,5,19,119,ABM,BS Accountancy
+4,4,6,4,2,2,23,108,TVL,Bachelor of Fine Arts
+4,2,3,6,5,2,40,113,HUMSS,BA Communication
+3,2,4,7,5,3,32,69,GAS,BS Psychology
+4,2,4,5,4,4,32,116,TVL,BS Hospitality Management
+2,4,6,5,3,3,32,80,Arts & Design,Bachelor of Fine Arts
+6,5,2,4,2,5,27,78,STEM,BS Architecture
+4,7,4,3,4,4,18,124,TVL,BS Industrial Technology
+4,6,4,2,4,6,30,69,STEM,BS Architecture
+4,2,7,4,3,3,38,86,TVL,Bachelor of Fine Arts
+4,5,2,2,2,4,33,69,TVL,BS Information Systems
+4,3,5,7,5,4,26,51,HUMSS,BS Tourism Management
+6,5,2,2,4,5,20,104,STEM,BS Architecture
+5,7,4,3,3,6,19,123,STEM,BS Computer Science
+6,5,3,2,2,6,21,57,STEM,BS Computer Science
+6,4,2,4,4,2,36,125,GAS,BS Agriculture
+7,6,3,4,2,4,36,90,GAS,BS Agriculture
+5,2,2,4,5,4,28,65,GAS,BS Criminology
+5,6,3,4,3,5,31,100,STEM,BS Architecture
+4,2,5,7,3,3,35,77,HUMSS,BA Communication
+5,6,2,4,2,5,37,47,TVL,BS Industrial Technology
+2,3,3,5,4,2,40,80,HUMSS,BS Education
+4,7,4,5,2,2,32,90,STEM,BS Biology
+5,7,2,2,3,5,20,118,STEM,BS Mechanical Engineering
+4,2,4,4,6,5,33,118,ABM,BS Business Administration
+4,7,3,5,4,4,30,55,STEM,BS Nursing
+3,3,4,5,3,4,38,122,HUMSS,BA Communication
+2,3,5,5,4,4,36,64,HUMSS,BS Tourism Management
+4,5,4,4,3,5,37,118,STEM,BS Civil Engineering
+5,6,3,2,2,5,20,105,STEM,BS Civil Engineering
+6,6,3,2,3,6,31,61,STEM,BS Computer Science
+4,2,7,4,4,4,24,116,Arts & Design,Bachelor of Fine Arts
+2,5,2,6,3,3,39,118,Arts & Design,BS Biology
+6,3,3,2,5,3,37,48,GAS,BS Criminology
+3,4,3,5,5,6,19,74,ABM,BS Accountancy
+2,4,3,5,5,2,25,124,TVL,BS Hospitality Management
+2,3,5,5,4,3,33,47,HUMSS,BS Education
+5,4,4,4,3,4,33,124,GAS,BS Agriculture
+4,4,5,5,4,4,39,112,ABM,BS Psychology
+5,5,4,4,3,4,32,46,Arts & Design,BS Computer Science
+6,7,3,2,2,5,38,94,STEM,BS Mechanical Engineering
+4,4,3,6,4,4,35,56,HUMSS,BS Tourism Management
+3,7,4,5,2,2,34,84,STEM,BS Biology
+4,2,3,6,5,3,29,125,HUMSS,BS Tourism Management
+3,5,4,6,3,2,35,80,STEM,BS Biology
+3,4,3,5,5,3,34,123,HUMSS,BA Communication
+5,5,4,2,3,5,37,87,STEM,BS Civil Engineering
+2,4,3,7,5,4,24,62,HUMSS,BS Psychology
+2,6,2,7,4,2,28,53,STEM,BS Biology
+2,6,2,7,2,3,31,97,STEM,BS Nursing
+4,5,2,2,2,4,37,123,STEM,BS Mechanical Engineering
+4,2,4,3,5,7,18,90,Sports,BS Marketing Management
+2,4,7,4,4,4,29,68,Arts & Design,Bachelor of Fine Arts
+3,2,6,3,2,2,31,46,Arts & Design,Bachelor of Fine Arts
+5,4,4,2,4,2,23,101,GAS,BS Criminology
+4,3,7,3,3,3,19,122,Arts & Design,Bachelor of Fine Arts
+4,3,4,7,5,4,37,113,HUMSS,BS Tourism Management
+6,5,3,3,2,4,34,113,STEM,BS Computer Science
+6,6,4,4,2,4,27,101,STEM,BS Computer Science
+3,3,3,6,4,4,19,111,HUMSS,BS Education
+6,6,2,4,4,4,23,119,TVL,BS Industrial Technology
+5,5,3,3,3,2,23,103,GAS,BS Agriculture
+3,2,3,4,7,7,40,65,ABM,BS Business Administration
+2,5,4,6,4,3,20,112,STEM,BS Nursing
+4,5,3,7,3,2,23,87,STEM,BS Biology
+2,2,3,7,3,3,27,84,HUMSS,BS Psychology
+5,7,2,2,2,4,18,124,TVL,BS Industrial Technology
+5,6,3,4,2,6,33,75,STEM,BS Information Technology
+3,3,7,3,4,4,18,76,Arts & Design,Bachelor of Fine Arts
+6,7,4,2,2,4,22,52,STEM,BS Mechanical Engineering
+4,5,4,4,4,5,28,56,GAS,BS Computer Science
+2,4,3,5,7,7,40,121,ABM,BS Accountancy
+5,5,4,4,3,2,20,83,GAS,BS Agriculture
+2,3,5,5,4,3,22,60,HUMSS,BS Tourism Management
+5,7,3,4,2,6,24,123,TVL,BS Mechanical Engineering
+2,6,4,7,4,4,27,99,STEM,BS Biology
+3,4,5,7,4,2,37,117,HUMSS,BA Communication
+3,2,7,3,4,3,24,45,GAS,Bachelor of Fine Arts
+4,5,4,6,3,2,28,89,STEM,BS Nursing
+2,4,2,5,6,6,20,84,ABM,BS Business Administration
+6,4,2,4,3,3,30,117,GAS,BS Agriculture
+4,5,3,3,4,5,33,49,STEM,BS Information Technology
+2,4,7,5,3,3,31,52,Arts & Design,Bachelor of Fine Arts
+4,4,5,6,5,4,18,71,HUMSS,BS Education
+3,2,3,6,3,3,30,125,HUMSS,BA Communication
+4,4,3,3,7,5,27,85,ABM,BS Accountancy
+5,5,3,2,3,5,27,72,STEM,BS Mechanical Engineering
+2,3,2,3,5,6,34,48,ABM,BS Accountancy
+2,5,3,6,4,4,27,86,Sports,BS Biology
+4,7,2,5,4,2,32,94,STEM,BS Nursing
+2,5,3,5,4,4,20,87,STEM,BS Biology
+4,7,4,4,3,4,36,84,STEM,BS Computer Science
+3,2,2,4,6,7,28,101,ABM,BS Business Administration
+4,5,3,2,2,6,35,110,TVL,BS Mechanical Engineering
+4,3,4,5,5,3,36,76,TVL,BS Hospitality Management
+4,3,5,6,3,2,18,105,HUMSS,BS Education
+4,6,2,2,3,5,23,121,STEM,BS Computer Science
+6,6,3,3,2,6,39,113,Sports,BS Industrial Technology
+6,5,2,4,3,4,32,84,TVL,BS Industrial Technology
+5,5,2,2,4,5,29,95,TVL,BS Industrial Technology
+3,3,4,5,3,3,21,89,HUMSS,BA Communication
+3,3,4,5,5,7,21,96,ABM,BS Accountancy
+3,7,4,5,3,4,32,96,STEM,BS Nursing
+6,5,4,2,3,5,20,88,STEM,BS Civil Engineering
+3,3,4,4,7,7,25,67,ABM,BS Marketing Management
+6,7,4,3,2,6,37,104,STEM,BS Information Systems
+3,5,3,6,2,4,21,121,STEM,BS Nursing
+3,3,5,7,3,2,24,62,HUMSS,BS Tourism Management
+4,7,2,3,4,5,30,123,STEM,BS Information Technology
+2,4,3,4,7,7,27,100,ABM,BS Business Administration
+2,4,3,7,5,3,22,82,TVL,BS Hospitality Management
+4,7,4,3,2,5,18,75,STEM,BS Computer Science
+3,4,3,5,6,6,30,100,ABM,BS Marketing Management
+3,2,2,5,6,6,31,64,ABM,BS Accountancy
+2,2,3,7,3,2,33,100,HUMSS,BS Psychology
+2,2,5,6,4,4,37,99,HUMSS,BS Psychology
+6,6,4,3,3,5,25,68,TVL,BS Industrial Technology
+6,6,4,2,4,6,26,97,STEM,BS Information Technology
+3,2,2,5,6,7,29,59,ABM,BS Marketing Management
+4,7,4,4,3,5,34,55,STEM,BS Information Systems
+4,5,3,4,4,6,39,54,STEM,BS Architecture
+7,5,4,2,3,4,18,105,GAS,BS Agriculture
+4,4,7,4,3,3,27,66,TVL,Bachelor of Fine Arts
+4,4,4,5,5,3,36,66,HUMSS,BS Education
+4,4,3,6,4,2,22,109,Sports,BS Education
+5,5,4,3,3,5,18,59,STEM,BS Mechanical Engineering
+4,2,4,4,6,5,26,75,ABM,BS Marketing Management
+2,6,2,5,4,2,33,97,STEM,BS Biology
+6,6,4,4,2,4,36,89,HUMSS,BS Civil Engineering
+2,5,3,6,3,3,33,113,STEM,BS Nursing
+3,3,3,7,4,2,27,102,HUMSS,BS Tourism Management
+4,4,3,5,5,4,29,100,HUMSS,BA Communication
+5,6,3,2,3,6,36,95,STEM,BS Mechanical Engineering
+6,7,4,2,4,5,39,68,STEM,BS Civil Engineering
+6,5,2,2,3,4,34,58,STEM,BS Information Technology
+2,4,4,6,3,2,18,124,TVL,BS Hospitality Management
+4,4,2,5,5,5,37,61,ABM,BS Business Administration
+2,2,4,3,6,6,32,54,ABM,BS Marketing Management
+5,7,4,3,3,4,20,80,STEM,BS Mechanical Engineering
+3,3,3,6,4,2,32,53,HUMSS,BS Tourism Management
+4,3,2,5,6,5,22,114,ABM,BS Business Administration
+4,4,2,4,7,6,21,49,TVL,BS Business Administration
+5,5,3,2,4,6,18,49,STEM,BS Mechanical Engineering
+4,7,3,3,4,4,34,107,STEM,BS Mechanical Engineering
+4,2,5,5,3,3,40,106,TVL,BS Tourism Management
+3,4,4,6,3,4,38,56,TVL,BS Hospitality Management
+2,3,4,7,3,2,35,50,HUMSS,BA Communication
+3,4,3,3,7,7,29,107,Arts & Design,BS Business Administration
+6,5,2,2,2,4,36,75,TVL,BS Industrial Technology
+6,7,3,3,4,5,18,49,STEM,BS Information Systems
+4,2,4,5,3,4,39,111,HUMSS,BA Communication
+5,6,4,2,2,2,22,107,GAS,BS Agriculture
+4,2,6,5,4,2,18,67,Arts & Design,Bachelor of Fine Arts
+2,3,5,5,5,2,21,59,HUMSS,BS Education
+4,5,2,3,3,6,39,96,STEM,BS Architecture
+4,2,3,3,5,7,23,87,HUMSS,BS Marketing Management
+3,2,5,6,5,2,32,76,HUMSS,BS Psychology
+4,5,4,4,3,4,18,107,STEM,BS Computer Science
+2,4,4,5,6,6,40,105,ABM,BS Accountancy
+2,4,3,5,6,6,25,67,ABM,BS Business Administration
+6,5,4,3,4,4,38,83,STEM,BS Computer Science
+6,5,2,2,4,4,37,91,STEM,BS Information Technology
+7,4,3,4,4,2,26,51,GAS,BS Agriculture
+4,3,4,5,3,4,19,51,HUMSS,BS Psychology
+2,3,4,6,5,3,19,58,HUMSS,BS Education
+5,4,2,3,4,2,20,75,GAS,BS Agriculture
+4,3,3,3,7,7,28,74,ABM,BS Marketing Management
+2,2,3,7,4,2,30,73,TVL,BA Communication
+2,3,6,3,4,3,23,94,Arts & Design,Bachelor of Fine Arts
+6,5,4,3,3,4,28,61,TVL,BS Industrial Technology
+5,5,2,3,3,5,23,88,STEM,BS Computer Science
+4,2,5,7,3,4,35,74,Sports,BS Education
+3,5,4,6,3,3,18,99,STEM,BS Biology
+4,6,3,4,2,6,22,118,STEM,BS Civil Engineering
+5,2,3,4,6,2,31,112,GAS,BS Criminology
+3,6,2,5,4,2,40,97,STEM,BS Nursing
+3,3,3,7,3,2,33,84,HUMSS,BS Psychology
+6,7,4,2,3,5,22,96,TVL,BS Industrial Technology
+4,3,5,7,3,4,20,94,TVL,BS Hospitality Management
+4,2,4,6,4,4,37,114,HUMSS,BA Communication
+4,2,4,4,7,5,34,91,ABM,BS Business Administration
+3,6,3,7,2,3,29,67,STEM,BS Nursing
+6,7,2,2,3,4,35,59,STEM,BS Information Systems
+4,2,4,3,6,6,26,109,ABM,BS Marketing Management
+4,5,3,3,3,5,34,112,STEM,BS Mechanical Engineering
+4,4,7,5,3,3,37,92,Arts & Design,Bachelor of Fine Arts
+4,6,2,2,3,4,27,54,HUMSS,BS Information Systems
+4,5,3,5,2,4,38,47,STEM,BS Nursing
+5,5,3,3,3,4,38,47,GAS,BS Agriculture
+4,5,4,4,3,5,36,88,STEM,BS Information Systems
+3,4,5,7,5,4,32,103,HUMSS,BA Communication
+3,2,4,5,4,3,27,51,HUMSS,BS Psychology
+4,7,2,4,4,5,23,67,TVL,BS Industrial Technology
+2,2,3,5,4,4,22,101,HUMSS,BS Psychology
+2,4,4,3,7,6,29,63,ABM,BS Accountancy
+5,6,3,2,2,3,33,63,GAS,BS Agriculture
+2,2,5,7,5,3,38,82,HUMSS,BA Communication
+4,4,3,7,5,3,28,59,HUMSS,BS Education
+4,7,4,2,3,4,30,124,STEM,BS Computer Science
+5,5,3,2,4,6,24,119,TVL,BS Industrial Technology
+4,5,2,4,3,6,39,56,STEM,BS Mechanical Engineering
+2,3,4,7,5,4,19,91,HUMSS,BS Tourism Management
+6,3,3,2,5,3,29,84,GAS,BS Criminology
+5,4,4,3,4,3,32,81,GAS,BS Agriculture
+7,3,2,4,6,2,22,71,GAS,BS Criminology
+3,5,4,6,2,2,31,79,STEM,BS Biology
+6,6,4,2,2,2,30,82,GAS,BS Agriculture
+5,7,3,3,4,6,32,73,STEM,BS Computer Science
+3,3,5,7,4,2,38,81,HUMSS,BS Psychology
+4,4,6,3,2,3,33,53,Arts & Design,Bachelor of Fine Arts
+4,3,5,6,4,4,39,105,TVL,BS Hospitality Management
+3,7,4,7,2,3,23,119,HUMSS,BS Nursing
+6,5,3,2,2,5,29,98,TVL,BS Industrial Technology
+2,3,4,7,5,2,34,69,TVL,BS Hospitality Management
+2,4,2,5,6,6,39,83,ABM,BS Accountancy
+2,4,5,6,3,2,22,111,TVL,BS Hospitality Management
+3,3,6,3,2,2,34,73,Arts & Design,Bachelor of Fine Arts
+7,6,4,4,4,4,40,59,GAS,BS Agriculture
+4,5,2,3,3,5,40,91,GAS,BS Information Systems
+6,6,2,4,3,4,21,73,Arts & Design,BS Architecture
+4,2,4,5,3,2,20,99,HUMSS,BS Psychology
+2,5,3,6,2,2,21,49,STEM,BS Nursing
+4,5,3,5,3,2,20,83,STEM,BS Biology
+2,7,2,7,2,2,39,89,ABM,BS Nursing
+6,6,3,2,4,6,37,75,STEM,BS Mechanical Engineering
+4,7,2,4,2,6,24,81,STEM,BS Information Systems
+5,6,2,2,4,4,33,91,GAS,BS Agriculture
+3,4,2,3,6,6,31,72,ABM,BS Accountancy
+5,3,2,3,4,4,22,108,GAS,BS Criminology
+4,4,3,5,4,3,21,94,HUMSS,BS Education
+6,6,4,3,2,6,31,82,STEM,BS Architecture
+5,2,3,4,5,2,18,107,GAS,BS Criminology
+3,4,5,7,3,2,22,95,HUMSS,BS Tourism Management
+2,4,2,3,6,5,28,70,ABM,BS Marketing Management
+2,2,4,7,4,3,40,119,HUMSS,BS Tourism Management
+3,3,5,7,4,3,34,80,GAS,BS Tourism Management
+2,6,3,6,2,4,22,48,STEM,BS Nursing
+5,7,2,2,3,6,39,86,STEM,BS Information Systems
+6,5,2,4,4,5,32,70,STEM,BS Architecture
+3,4,7,5,3,4,35,47,Arts & Design,Bachelor of Fine Arts
+5,5,3,3,3,5,32,103,ABM,BS Computer Science
+7,5,4,2,3,3,22,84,GAS,BS Agriculture
+2,4,7,4,4,4,39,114,Arts & Design,Bachelor of Fine Arts
+4,2,7,3,3,3,33,120,Arts & Design,Bachelor of Fine Arts
+6,6,3,3,2,4,36,50,HUMSS,BS Architecture
+4,4,3,7,4,3,21,99,TVL,BS Hospitality Management
+3,3,3,7,3,2,25,84,TVL,BS Hospitality Management
+5,5,3,2,2,6,28,49,STEM,BS Information Systems
+7,4,3,3,4,4,33,120,HUMSS,BS Criminology
+4,3,4,7,3,3,21,71,HUMSS,BS Tourism Management
+4,6,2,7,3,3,31,70,STEM,BS Biology
+6,5,3,3,2,5,36,96,STEM,BS Information Systems
+6,5,4,4,2,6,28,79,Sports,BS Architecture
+3,6,2,6,2,4,27,109,STEM,BS Biology
+7,4,3,2,5,3,26,124,GAS,BS Criminology
+5,4,4,4,4,2,36,108,GAS,BS Agriculture
+5,7,4,4,3,6,38,52,TVL,BS Industrial Technology
+3,2,3,5,5,4,27,100,TVL,BS Hospitality Management
+6,5,3,3,3,6,23,77,STEM,BS Information Systems
+5,5,2,2,2,4,25,84,STEM,BS Civil Engineering
+6,5,4,2,2,2,26,62,Sports,BS Agriculture
+6,7,2,4,2,6,33,47,STEM,BS Mechanical Engineering
+4,3,3,6,4,4,39,56,HUMSS,BA Communication
+2,2,5,7,5,2,34,119,HUMSS,BS Psychology
+3,6,2,5,4,2,28,87,STEM,BS Biology
+4,4,3,6,3,2,21,67,HUMSS,BS Tourism Management
+5,6,3,4,2,5,35,92,STEM,BS Mechanical Engineering
+3,7,3,6,4,2,26,63,STEM,BS Nursing
+3,2,5,7,3,4,39,51,TVL,BS Hospitality Management
+5,7,3,3,4,6,29,60,STEM,BS Civil Engineering
+5,6,2,3,3,5,20,75,STEM,BS Civil Engineering
+3,4,3,5,6,5,26,55,ABM,BS Accountancy
+3,4,7,4,4,3,21,65,Arts & Design,Bachelor of Fine Arts
+2,6,3,7,4,4,28,103,STEM,BS Biology
+6,7,2,4,3,6,22,45,STEM,BS Computer Science
+3,4,3,5,3,2,34,61,HUMSS,BS Education
+6,3,3,4,4,3,23,120,GAS,BS Criminology
+2,2,4,6,3,3,30,118,HUMSS,BS Education
+6,7,4,4,2,4,32,70,STEM,BS Information Technology
+2,3,4,4,7,6,22,56,ABM,BS Accountancy
+4,2,2,5,7,6,32,108,Arts & Design,BS Accountancy
+2,3,3,5,6,6,22,100,ABM,BS Business Administration
+4,6,4,4,2,5,23,97,STEM,BS Architecture
+5,6,2,4,3,4,29,119,STEM,BS Information Technology
+4,5,3,2,3,6,30,72,TVL,BS Industrial Technology
+7,4,3,2,4,4,19,51,GAS,BS Criminology
+5,6,4,4,4,6,19,45,STEM,BS Civil Engineering
+5,6,3,4,3,4,35,50,STEM,BS Architecture
+4,7,3,3,3,4,20,85,STEM,BS Mechanical Engineering
+5,3,2,3,4,2,33,80,GAS,BS Criminology
+6,3,4,3,6,3,31,66,GAS,BS Criminology
+2,4,7,5,3,2,24,64,ABM,Bachelor of Fine Arts
+5,6,2,4,3,5,21,108,HUMSS,BS Computer Science
+6,5,3,2,4,2,21,89,Sports,BS Agriculture
+2,2,5,7,4,4,39,119,HUMSS,BS Education
+6,7,2,3,2,4,33,57,STEM,BS Information Technology
+5,7,4,2,3,5,36,58,STEM,BS Information Technology
+2,2,4,7,5,3,32,125,HUMSS,BS Psychology
+6,5,3,2,4,6,32,86,STEM,BS Architecture
+2,2,2,5,6,6,19,54,ABM,BS Marketing Management
+5,5,3,3,2,4,30,56,ABM,BS Architecture
+3,3,3,5,7,5,21,83,ABM,BS Accountancy
+7,3,4,4,4,3,39,57,GAS,BS Criminology
+2,6,3,6,3,3,36,121,STEM,BS Biology
+6,4,2,3,6,3,20,50,GAS,BS Criminology
+6,5,4,4,4,4,33,112,TVL,BS Industrial Technology
+2,6,3,6,2,3,27,64,STEM,BS Biology
+2,4,4,6,5,2,35,54,HUMSS,BS Education
+2,7,3,6,2,3,39,117,STEM,BS Biology
+3,4,3,7,3,2,39,104,TVL,BS Hospitality Management
+3,2,2,4,7,6,28,120,ABM,BS Accountancy
+6,6,3,2,2,4,20,122,TVL,BS Industrial Technology
+3,7,2,5,3,2,18,66,STEM,BS Nursing
+6,6,4,4,4,6,33,83,TVL,BS Industrial Technology
+5,7,4,4,4,5,27,56,STEM,BS Architecture
+2,2,4,3,5,5,33,63,ABM,BS Business Administration
+7,4,2,2,5,3,22,105,GAS,BS Criminology
+2,5,4,7,3,3,33,47,STEM,BS Nursing
+2,2,3,5,6,5,28,46,Sports,BS Marketing Management
+6,3,4,4,6,4,35,82,GAS,BS Criminology
+4,4,7,5,4,3,25,52,Arts & Design,Bachelor of Fine Arts
+7,3,4,2,5,4,31,105,TVL,BS Criminology
+3,4,4,5,3,3,24,105,TVL,BS Hospitality Management
+6,5,4,4,3,6,40,104,HUMSS,BS Civil Engineering
+3,4,5,7,4,3,23,124,HUMSS,BS Tourism Management
+6,6,2,2,2,4,37,107,GAS,BS Information Systems
+3,2,6,5,2,2,29,78,Arts & Design,Bachelor of Fine Arts
+2,4,2,3,6,6,21,124,ABM,BS Accountancy
+5,5,3,3,3,2,35,79,GAS,BS Agriculture
+4,7,2,7,2,3,32,59,STEM,BS Biology
+6,5,4,2,4,4,23,125,ABM,BS Architecture
+2,4,4,7,4,4,33,57,TVL,BS Hospitality Management
+3,2,3,5,4,3,18,76,TVL,BS Hospitality Management
+3,3,7,3,2,3,29,98,Arts & Design,Bachelor of Fine Arts
+4,7,3,2,2,5,31,97,STEM,BS Civil Engineering
+4,6,2,6,2,2,40,111,STEM,BS Biology
+5,6,3,2,3,4,30,49,STEM,BS Information Systems
+4,2,5,7,5,4,27,98,HUMSS,BS Psychology
+6,6,4,3,3,2,26,112,GAS,BS Agriculture
+4,3,4,7,3,4,37,124,HUMSS,BS Psychology
+4,3,3,6,3,2,35,87,TVL,BS Hospitality Management
+4,4,4,5,3,4,35,84,HUMSS,BS Psychology
+2,2,4,5,6,5,27,99,ABM,BS Accountancy
+4,5,3,6,4,4,29,60,Arts & Design,BS Nursing
+3,6,4,7,2,3,28,75,STEM,BS Nursing
+4,4,4,5,7,7,25,89,ABM,BS Marketing Management
+4,2,4,4,7,7,25,58,ABM,BS Marketing Management
+2,3,3,3,5,7,31,97,STEM,BS Marketing Management
+5,3,2,3,4,3,39,112,GAS,BS Criminology
+7,5,3,4,3,4,31,101,GAS,BS Agriculture
+4,3,6,3,4,2,33,103,Arts & Design,Bachelor of Fine Arts
+4,5,4,5,3,3,19,65,STEM,BS Biology
+2,4,4,5,3,3,36,82,ABM,BS Hospitality Management
+3,6,3,6,3,3,18,63,TVL,BS Nursing
+5,3,3,2,4,4,33,45,HUMSS,BS Criminology
+4,6,3,4,3,6,32,88,STEM,BS Information Systems
+4,4,6,3,4,4,32,102,Arts & Design,Bachelor of Fine Arts
+4,3,3,7,5,4,31,94,HUMSS,BS Psychology
+3,4,3,7,4,4,26,56,HUMSS,BS Tourism Management
+6,7,4,3,4,6,21,116,TVL,BS Information Technology
+7,4,4,4,2,3,34,47,TVL,BS Agriculture
+2,3,2,3,7,7,32,55,ABM,BS Accountancy
+5,6,4,2,3,4,28,100,STEM,BS Architecture
+6,6,3,3,2,4,21,114,STEM,BS Information Technology
+2,3,3,5,4,3,39,66,HUMSS,BS Psychology
+2,4,2,4,6,5,28,63,ABM,BS Accountancy
+3,3,3,5,3,2,37,120,HUMSS,BA Communication
+4,6,2,6,2,3,32,115,STEM,BS Biology
+2,3,7,3,2,3,35,120,Arts & Design,Bachelor of Fine Arts
+6,7,2,3,4,5,32,55,STEM,BS Civil Engineering
+2,5,3,7,2,2,35,99,STEM,BS Biology
+6,4,2,3,4,3,38,66,GAS,BS Agriculture
+6,6,4,3,3,6,24,119,STEM,BS Mechanical Engineering
+2,2,5,7,5,2,27,56,HUMSS,BS Education
+2,7,4,6,3,2,37,109,STEM,BS Nursing
+4,3,5,6,5,3,26,76,HUMSS,BA Communication
+3,2,4,7,4,2,40,62,HUMSS,BA Communication
+6,6,2,2,4,4,31,116,STEM,BS Information Technology
+3,4,6,5,4,2,35,48,Arts & Design,Bachelor of Fine Arts
+6,5,3,3,4,5,30,67,TVL,BS Industrial Technology
+4,6,3,2,3,4,25,47,STEM,BS Information Technology
+2,2,5,7,4,4,25,74,TVL,BS Hospitality Management
+2,3,4,7,5,4,24,45,TVL,BS Hospitality Management
+2,3,5,7,4,2,35,69,HUMSS,BS Tourism Management
+4,4,4,5,5,5,36,61,ABM,BS Marketing Management
+3,4,3,7,5,3,24,47,HUMSS,BS Psychology
+7,5,4,4,3,2,31,51,GAS,BS Agriculture
+3,3,4,5,5,4,32,108,HUMSS,BA Communication
+6,5,2,3,3,6,32,85,ABM,BS Computer Science
+2,4,3,7,3,4,31,54,HUMSS,BA Communication
+2,3,3,3,7,7,21,48,ABM,BS Business Administration
+6,7,3,3,2,4,33,75,STEM,BS Information Technology
+5,7,2,2,4,6,32,57,STEM,BS Computer Science
+2,2,2,3,6,6,40,53,ABM,BS Marketing Management
+5,5,3,4,4,5,20,58,STEM,BS Computer Science
+5,5,3,3,2,4,31,74,GAS,BS Agriculture
+4,6,3,3,3,6,37,57,STEM,BS Architecture
+5,7,3,4,2,4,21,46,STEM,BS Information Technology
+6,5,4,2,4,6,26,90,STEM,BS Information Systems
+5,5,2,2,2,4,22,84,STEM,BS Architecture
+4,6,3,7,4,2,22,105,STEM,BS Biology
+3,3,3,7,5,4,39,63,TVL,BA Communication
+5,5,3,2,2,4,24,53,GAS,BS Agriculture
+4,4,7,5,4,3,36,117,Arts & Design,Bachelor of Fine Arts
+5,6,3,2,2,5,19,108,STEM,BS Architecture
+6,5,4,2,3,6,24,75,STEM,BS Information Technology
+4,3,3,6,3,2,29,46,STEM,BA Communication
+5,4,3,3,2,4,36,91,STEM,BS Agriculture
+2,3,2,3,6,7,23,88,ABM,BS Business Administration
+4,5,2,2,3,4,18,62,STEM,BS Civil Engineering
+3,5,3,6,2,3,29,66,STEM,BS Nursing
+5,7,2,2,2,4,24,69,STEM,BS Architecture
+3,4,4,7,3,2,37,120,TVL,BS Hospitality Management
+6,4,3,2,2,4,26,61,GAS,BS Agriculture
+3,2,4,3,6,7,37,53,ABM,BS Marketing Management
+4,4,4,6,5,3,23,86,HUMSS,BS Tourism Management
+4,6,4,6,3,3,36,96,STEM,BS Biology
+4,2,2,3,5,6,25,95,ABM,BS Marketing Management
+6,4,2,3,5,4,20,62,GAS,BS Criminology
+3,4,4,5,5,2,32,110,HUMSS,BS Education
+6,3,3,3,5,3,28,79,GAS,BS Criminology
+3,2,3,5,5,6,20,82,ABM,BS Accountancy
+4,7,2,6,2,2,21,54,STEM,BS Biology
+5,5,2,4,3,3,27,80,GAS,BS Agriculture
+4,7,4,4,3,4,27,81,STEM,BS Architecture
+3,4,5,5,4,4,34,64,HUMSS,BS Tourism Management
+4,7,4,2,3,4,34,120,STEM,BS Civil Engineering
+6,6,3,2,3,4,31,98,TVL,BS Industrial Technology
+6,5,3,2,4,4,27,46,TVL,BS Industrial Technology
+3,2,4,6,5,3,40,113,TVL,BS Hospitality Management
+2,4,2,3,5,6,36,125,ABM,BS Marketing Management
+6,6,3,2,3,4,35,94,STEM,BS Architecture
+3,7,3,7,3,2,23,58,STEM,BS Nursing
+2,4,4,4,5,5,24,53,ABM,BS Accountancy
+3,2,3,6,5,4,20,103,TVL,BS Tourism Management
+4,6,3,3,2,4,22,113,STEM,BS Information Technology
+5,5,2,2,3,5,40,105,STEM,BS Information Systems
+3,4,2,5,7,7,32,80,ABM,BS Marketing Management
+3,2,4,7,3,4,28,117,HUMSS,BS Psychology
+5,7,2,4,2,5,38,103,TVL,BS Industrial Technology
+3,4,3,6,3,2,37,100,HUMSS,BS Education
+4,4,2,4,7,5,25,65,ABM,BS Accountancy
+6,6,2,4,4,4,24,108,GAS,BS Agriculture
+5,5,2,2,4,3,31,102,GAS,BS Agriculture
+4,2,3,3,5,7,40,104,ABM,BS Business Administration
+2,3,3,5,4,2,40,62,HUMSS,BS Tourism Management
+5,6,2,2,4,6,25,101,Sports,BS Industrial Technology
+4,5,2,4,2,4,27,60,STEM,BS Mechanical Engineering
+2,2,5,5,5,3,22,101,HUMSS,BS Tourism Management
+4,2,4,5,5,6,40,51,ABM,BS Business Administration
+4,7,4,7,2,3,40,84,STEM,BS Biology
+4,5,3,2,2,5,25,70,GAS,BS Architecture
+4,6,2,4,4,4,25,57,STEM,BS Information Technology
+4,2,2,4,7,5,28,86,ABM,BS Accountancy
+4,2,4,4,6,5,25,72,HUMSS,BS Business Administration
+2,3,4,4,5,6,24,103,ABM,BS Accountancy
+6,7,3,2,2,4,31,83,STEM,BS Mechanical Engineering
+2,4,7,5,2,3,21,121,Arts & Design,Bachelor of Fine Arts
+4,4,3,6,3,4,40,85,HUMSS,BS Tourism Management
+2,3,6,5,4,3,30,110,Arts & Design,Bachelor of Fine Arts
+6,7,4,2,2,4,37,60,STEM,BS Civil Engineering
+5,4,2,2,4,3,33,82,GAS,BS Criminology
+2,4,3,5,5,4,32,87,HUMSS,BS Tourism Management
+6,6,4,3,2,4,28,88,STEM,BS Computer Science
+5,6,2,4,4,4,25,122,GAS,BS Agriculture
+3,5,3,7,2,2,33,53,STEM,BS Biology
+6,5,2,2,2,4,36,115,STEM,BS Computer Science
+2,4,2,4,7,6,27,66,ABM,BS Business Administration
+5,5,4,2,3,5,36,102,STEM,BS Civil Engineering
+3,3,2,4,6,6,23,105,ABM,BS Business Administration
+4,7,3,5,3,2,30,99,STEM,BS Biology
+4,4,3,7,5,2,26,93,HUMSS,BS Education
+5,6,4,4,3,4,28,62,TVL,BS Industrial Technology
+2,2,2,3,7,7,29,107,ABM,BS Business Administration
+6,4,3,3,5,3,38,120,STEM,BS Criminology
+3,7,2,5,3,3,29,110,STEM,BS Nursing
+4,2,5,6,4,4,25,76,TVL,BS Hospitality Management
+4,4,5,5,5,4,38,63,TVL,BS Hospitality Management
+6,5,3,2,4,6,39,65,Sports,BS Industrial Technology
+6,7,3,3,4,6,20,111,STEM,BS Information Systems
+5,3,3,4,5,4,35,93,GAS,BS Criminology
+7,2,2,4,6,3,22,79,GAS,BS Criminology
+4,3,3,5,4,2,21,53,HUMSS,BS Tourism Management
+7,3,4,3,6,3,23,67,GAS,BS Criminology
+2,3,3,7,3,3,36,72,HUMSS,BS Psychology
+6,5,2,3,3,5,38,124,Arts & Design,BS Computer Science
+2,3,2,4,5,6,20,88,ABM,BS Accountancy
+3,4,6,3,2,3,18,119,Arts & Design,Bachelor of Fine Arts
+4,5,4,2,3,6,34,79,STEM,BS Computer Science
+3,4,7,4,3,4,28,85,Arts & Design,Bachelor of Fine Arts
+4,3,4,7,3,3,28,57,Sports,BS Hospitality Management
+4,2,3,7,3,4,26,76,HUMSS,BS Tourism Management
+6,7,3,4,3,6,24,45,STEM,BS Architecture
+2,4,4,5,5,3,39,101,HUMSS,BA Communication
+3,4,7,3,3,3,33,57,Arts & Design,Bachelor of Fine Arts
+4,2,5,5,5,4,40,109,GAS,BS Education
+5,7,4,3,2,5,21,106,STEM,BS Information Systems

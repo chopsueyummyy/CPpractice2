@@ -15,7 +15,7 @@ $gradeLevel   = $_GET['gradeLevel']   ?? 'all';
 $strand       = $_GET['strand']       ?? 'all';
 $dominantType = $_GET['dominantType'] ?? 'all'; 
 $rseLevel     = $_GET['rseLevel']     ?? 'all';
-$mbiStatus    = $_GET['mbiStatus']    ?? 'all';
+$cdsesLevel   = $_GET['cdsesLevel']   ?? 'all';
 $dateFrom     = $_GET['dateFrom']     ?? '';
 $dateTo       = $_GET['dateTo']       ?? '';
 $search       = $_GET['search']       ?? '';
@@ -49,9 +49,9 @@ if ($rseLevel !== 'all') {
     $params[] = $rseLevel;
     $types   .= "s";
 }
-if ($mbiStatus !== 'all') {
-    $where[] = "mbi.BurnoutStatus = ?";
-    $params[] = $mbiStatus;
+if ($cdsesLevel !== 'all') {
+    $where[] = "cdses.SelfEfficacyLevel = ?";
+    $params[] = $cdsesLevel;
     $types   .= "s";
 }
 if (!empty($dateFrom)) {
@@ -106,7 +106,7 @@ $query = "
     LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
     LEFT JOIN counselor_feedback cf ON cf.AssessmentID = a.AssessmentID
     LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
-    LEFT JOIN mbi_results mbi ON mbi.AssessmentID = a.AssessmentID
+    LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
     WHERE $whereClause
     ORDER BY a.SubmittedAt DESC
 ";
@@ -148,11 +148,11 @@ while ($row = $result->fetch_assoc()) {
     $rseRow = $rse->get_result()->fetch_assoc();
     $rse->close();
 
-    $mbi = $conn->prepare("SELECT EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus FROM mbi_results WHERE AssessmentID = ?");
-    $mbi->bind_param("i", $row['AssessmentID']);
-    $mbi->execute();
-    $mbiRow = $mbi->get_result()->fetch_assoc();
-    $mbi->close();
+    $cdses = $conn->prepare("SELECT SA_Score, OI_Score, GS_Score, PL_Score, PS_Score, TotalScore, SelfEfficacyLevel FROM cdses_results WHERE AssessmentID = ?");
+    $cdses->bind_param("i", $row['AssessmentID']);
+    $cdses->execute();
+    $cdsesRow = $cdses->get_result()->fetch_assoc();
+    $cdses->close();
 
     $records[] = [
         "assessmentId"   => $row['AssessmentID'],
@@ -180,14 +180,14 @@ while ($row = $result->fetch_assoc()) {
             "score" => (int)$rseRow['Score'],
             "level" => $rseRow['Level']
         ] : null,
-        "mbi" => $mbiRow ? [
-            "exScore" => (float)$mbiRow['EX_Score'],
-            "cyScore" => (float)$mbiRow['CY_Score'],
-            "efScore" => (float)$mbiRow['EF_Score'],
-            "exLevel" => $mbiRow['EX_Level'],
-            "cyLevel" => $mbiRow['CY_Level'],
-            "efLevel" => $mbiRow['EF_Level'],
-            "burnoutStatus" => $mbiRow['BurnoutStatus']
+        "cdses" => $cdsesRow ? [
+            "saScore" => (float)$cdsesRow['SA_Score'],
+            "oiScore" => (float)$cdsesRow['OI_Score'],
+            "gsScore" => (float)$cdsesRow['GS_Score'],
+            "plScore" => (float)$cdsesRow['PL_Score'],
+            "psScore" => (float)$cdsesRow['PS_Score'],
+            "totalScore" => (float)$cdsesRow['TotalScore'],
+            "selfEfficacyLevel" => $cdsesRow['SelfEfficacyLevel']
         ] : null,
         "counselorAction" => $row['CounselorAction'],
         "feedbackNotes"   => $row['FeedbackNotes'],

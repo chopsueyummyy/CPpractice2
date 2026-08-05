@@ -64,11 +64,12 @@ while ($row = $result->fetch_assoc()) {
     $rse->execute();
     $rseRow = $rse->get_result()->fetch_assoc();
 
-    // Fetch MBI results
-    $mbi = $conn->prepare("SELECT EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus FROM mbi_results WHERE AssessmentID = ?");
-    $mbi->bind_param("i", $row['AssessmentID']);
-    $mbi->execute();
-    $mbiRow = $mbi->get_result()->fetch_assoc();
+    // Fetch CDSES results
+    $cdses = $conn->prepare("SELECT SA_Score, OI_Score, GS_Score, PL_Score, PS_Score, TotalScore, SelfEfficacyLevel FROM cdses_results WHERE AssessmentID = ?");
+    $cdses->bind_param("i", $row['AssessmentID']);
+    $cdses->execute();
+    $cdsesRow = $cdses->get_result()->fetch_assoc();
+    $cdses->close();
 
     $pending[] = [
         "assessmentId"  => $row['AssessmentID'],
@@ -95,14 +96,14 @@ while ($row = $result->fetch_assoc()) {
             "score" => (int)$rseRow['Score'],
             "level" => $rseRow['Level']
         ] : null,
-        "mbi" => $mbiRow ? [
-            "exScore" => (float)$mbiRow['EX_Score'],
-            "cyScore" => (float)$mbiRow['CY_Score'],
-            "efScore" => (float)$mbiRow['EF_Score'],
-            "exLevel" => $mbiRow['EX_Level'],
-            "cyLevel" => $mbiRow['CY_Level'],
-            "efLevel" => $mbiRow['EF_Level'],
-            "burnoutStatus" => $mbiRow['BurnoutStatus']
+        "cdses" => $cdsesRow ? [
+            "saScore" => (float)$cdsesRow['SA_Score'],
+            "oiScore" => (float)$cdsesRow['OI_Score'],
+            "gsScore" => (float)$cdsesRow['GS_Score'],
+            "plScore" => (float)$cdsesRow['PL_Score'],
+            "psScore" => (float)$cdsesRow['PS_Score'],
+            "totalScore" => (float)$cdsesRow['TotalScore'],
+            "selfEfficacyLevel" => $cdsesRow['SelfEfficacyLevel']
         ] : null
     ];
 }

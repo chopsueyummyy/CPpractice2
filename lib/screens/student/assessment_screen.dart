@@ -22,7 +22,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   // Answers by scale
   final Map<int, int> _riasecAnswers = {};
   final Map<int, int> _rseAnswers = {};
-  final Map<int, int> _mbiAnswers = {};
+  final Map<int, int> _cdsesAnswers = {};
 
   List<Map<String, dynamic>> _questions = [];
   bool _isLoading = true;
@@ -40,7 +40,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final storage = html.window.localStorage;
     final savedRiasec = storage['riasec_answers_v2'];
     final savedRse = storage['rse_answers_v2'];
-    final savedMbi = storage['mbi_answers_v2'];
+    final savedCdses = storage['cdses_answers_v2'];
     final savedIndex = storage['currentIndex_v2'];
 
     if (savedRiasec != null) {
@@ -63,12 +63,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         });
       } catch (_) {}
     }
-    if (savedMbi != null) {
+    if (savedCdses != null) {
       try {
-        final Map<String, dynamic> decoded = jsonDecode(savedMbi);
+        final Map<String, dynamic> decoded = jsonDecode(savedCdses);
         setState(() {
           decoded.forEach((key, value) {
-            _mbiAnswers[int.parse(key)] = value;
+            _cdsesAnswers[int.parse(key)] = value;
           });
         });
       } catch (_) {}
@@ -92,9 +92,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     _rseAnswers.forEach((key, value) => encRse[key.toString()] = value);
     storage['rse_answers_v2'] = jsonEncode(encRse);
 
-    final Map<String, int> encMbi = {};
-    _mbiAnswers.forEach((key, value) => encMbi[key.toString()] = value);
-    storage['mbi_answers_v2'] = jsonEncode(encMbi);
+    final Map<String, int> encCdses = {};
+    _cdsesAnswers.forEach((key, value) => encCdses[key.toString()] = value);
+    storage['cdses_answers_v2'] = jsonEncode(encCdses);
 
     storage['currentIndex_v2'] = _currentIndex.toString();
   }
@@ -131,14 +131,14 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
           }
         }
         
-        // Add MBI questions
-        if (data['mbi'] != null) {
-          final mbi = List<Map<String, dynamic>>.from(data['mbi']);
-          for (var q in mbi) {
+        // Add CDSES questions
+        if (data['cdses'] != null) {
+          final cdses = List<Map<String, dynamic>>.from(data['cdses']);
+          for (var q in cdses) {
             loadedQuestions.add({
               'id': q['id'],
               'question': q['question'],
-              'type': 'mbi',
+              'type': 'cdses',
               'category': q['subscale'],
             });
           }
@@ -181,8 +181,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         _riasecAnswers[questionId] = score;
       } else if (type == 'rse') {
         _rseAnswers[questionId] = score;
-      } else if (type == 'mbi') {
-        _mbiAnswers[questionId] = score;
+      } else if (type == 'cdses') {
+        _cdsesAnswers[questionId] = score;
       }
     });
     _saveProgress();
@@ -211,8 +211,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       answered = _riasecAnswers.containsKey(questionId);
     } else if (type == 'rse') {
       answered = _rseAnswers.containsKey(questionId);
-    } else if (type == 'mbi') {
-      answered = _mbiAnswers.containsKey(questionId);
+    } else if (type == 'cdses') {
+      answered = _cdsesAnswers.containsKey(questionId);
     }
 
     if (!answered) {
@@ -276,7 +276,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final rseList = _rseAnswers.entries
         .map((e) => {'questionId': e.key, 'score': e.value})
         .toList();
-    final mbiList = _mbiAnswers.entries
+    final cdsesList = _cdsesAnswers.entries
         .map((e) => {'questionId': e.key, 'score': e.value})
         .toList();
 
@@ -285,7 +285,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         assessmentId: _session.currentAssessmentId!,
         answers: riasecList,
         rseAnswers: rseList,
-        mbiAnswers: mbiList,
+        cdsesAnswers: cdsesList,
       );
 
       if (data['status'] == 'success') {
@@ -298,7 +298,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
               icon: Icon(Icons.check_circle, color: AppTheme.success, size: 48),
               title: const Text('Assessment Submitted!'),
               content: const Text(
-                'Your assessments (RIASEC, Self-Esteem, and Academic Burnout) have been submitted and are now pending review by your guidance counselor. '
+                'Your assessments (RIASEC, Self-Esteem, and Career Decision Self-Efficacy) have been submitted and are now pending review by your guidance counselor. '
                 'You will be notified once results are available.',
                 textAlign: TextAlign.center,
               ),
@@ -308,7 +308,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                     Navigator.pop(ctx);
                     html.window.localStorage.remove('riasec_answers_v2');
                     html.window.localStorage.remove('rse_answers_v2');
-                    html.window.localStorage.remove('mbi_answers_v2');
+                    html.window.localStorage.remove('cdses_answers_v2');
                     html.window.localStorage.remove('currentIndex_v2');
                     context.go('/student/dashboard');
                   },
@@ -343,15 +343,13 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         case 4: return AppTheme.error;
         default: return AppTheme.textSecondary;
       }
-    } else { // mbi
+    } else { // cdses
       switch (value) {
-        case 0: return AppTheme.success;
-        case 1: return Colors.teal;
-        case 2: return Colors.blue;
+        case 1: return AppTheme.error;
+        case 2: return Colors.orange;
         case 3: return AppTheme.primaryYellow;
-        case 4: return AppTheme.warning;
-        case 5: return Colors.orange;
-        case 6: return AppTheme.error;
+        case 4: return Colors.blue;
+        case 5: return AppTheme.success;
         default: return AppTheme.textSecondary;
       }
     }
@@ -383,8 +381,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       selectedScore = _riasecAnswers[questionId];
     } else if (type == 'rse') {
       selectedScore = _rseAnswers[questionId];
-    } else if (type == 'mbi') {
-      selectedScore = _mbiAnswers[questionId];
+    } else if (type == 'cdses') {
+      selectedScore = _cdsesAnswers[questionId];
     }
 
     // Dynamic Title based on section
@@ -408,17 +406,15 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         {'label': 'Disagree', 'value': 3},
         {'label': 'Strongly Disagree', 'value': 4},
       ];
-    } else if (type == 'mbi') {
-      partTitle = 'Part 3: Academic Burnout (MBI-SS)';
-      partDesc = 'How often do you feel this way? (0 = Never, 6 = Everyday)';
+    } else if (type == 'cdses') {
+      partTitle = 'Part 3: Career Decision Self-Efficacy (CDSES-SF)';
+      partDesc = 'How much confidence do you have that you could:';
       options = [
-        {'label': 'Never', 'value': 0},
-        {'label': 'A few times a year or less', 'value': 1},
-        {'label': 'Once a month or less', 'value': 2},
-        {'label': 'A few times a month', 'value': 3},
-        {'label': 'Once a week', 'value': 4},
-        {'label': 'A few times a week', 'value': 5},
-        {'label': 'Everyday', 'value': 6},
+        {'label': 'No confidence at all', 'value': 1},
+        {'label': 'Very little confidence', 'value': 2},
+        {'label': 'Moderate confidence', 'value': 3},
+        {'label': 'Much confidence', 'value': 4},
+        {'label': 'Complete confidence', 'value': 5},
       ];
     }
 

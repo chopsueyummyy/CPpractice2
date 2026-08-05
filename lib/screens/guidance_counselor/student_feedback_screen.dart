@@ -274,7 +274,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 Expanded(
                   child: Text(
                     _action == 'approved'
-                        ? 'The student will be able to view their RIASEC results and course recommendations.'
+                        ? 'The student will be able to view their career assessment results and course recommendations.'
                         : 'The student will be asked to retake the assessment. Your notes below will help them understand why.',
                     style: TextStyle(
                       fontSize: 13,
@@ -301,7 +301,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               controller: _notesController,
               decoration: InputDecoration(
                 hintText: _action == 'approved'
-                    ? 'e.g. Great results! Your RIASEC profile clearly shows a strength in...'
+                    ? 'e.g. Great results! Your career and self-efficacy profile clearly shows a strength in...'
                     : 'e.g. Please retake the assessment more carefully. Some answers seemed inconsistent...',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 prefixIcon: const Icon(Icons.notes),

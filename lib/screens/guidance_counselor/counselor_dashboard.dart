@@ -139,7 +139,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   final strandStats = List<Map<String, dynamic>>.from(_stats['strandStats'] ?? []);
                   final riasecStats = List<Map<String, dynamic>>.from(_stats['riasecStats'] ?? []);
                   final rseStats = List<Map<String, dynamic>>.from(_stats['rseStats'] ?? []);
-                  final mbiStats = List<Map<String, dynamic>>.from(_stats['mbiStats'] ?? []);
+                  final cdsesStats = List<Map<String, dynamic>>.from(_stats['cdsesStats'] ?? []);
                   final recentActivity = List<Map<String, dynamic>>.from(_stats['recentActivity'] ?? []);
 
                   return Column(
@@ -240,12 +240,13 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                       const SizedBox(height: 24),
 
                       // RSE Profile + MBI-SS Profile side-by-side
+                      // RSE Profile + CDSES Profile side-by-side
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: _buildRseStatsCard(rseStats)),
                           const SizedBox(width: 16),
-                          Expanded(child: _buildMbiStatsCard(mbiStats)),
+                          Expanded(child: _buildCdsesStatsCard(cdsesStats)),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -589,8 +590,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
     );
   }
 
-  Widget _buildMbiStatsCard(List<Map<String, dynamic>> mbiStats) {
-    final total = mbiStats.fold(0, (sum, item) => sum + (item['count'] as int));
+  Widget _buildCdsesStatsCard(List<Map<String, dynamic>> cdsesStats) {
+    final total = cdsesStats.fold(0, (sum, item) => sum + (item['count'] as int));
 
     return Card(
       elevation: 0,
@@ -605,10 +606,10 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
           children: [
             Row(
               children: [
-                const Icon(Icons.local_fire_department_rounded, color: AppTheme.warning),
+                const Icon(Icons.psychology_rounded, color: AppTheme.primaryPurple),
                 const SizedBox(width: 8),
                 const Text(
-                  'Academic Burnout (MBI-SS)',
+                  'Career Self-Efficacy',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ],
@@ -618,17 +619,17 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               const SizedBox(
                 height: 120,
                 child: Center(
-                  child: Text('No academic burnout data available.',
+                  child: Text('No self-efficacy data available.',
                       style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                 ),
               )
             else ...[
-              ...mbiStats.map((item) {
-                final status = item['status'].toString();
+              ...cdsesStats.map((item) {
+                final levelName = item['level'].toString();
                 final count = item['count'] as int;
-                final isHigh = status.toLowerCase().contains('high');
-                final isMod = status.toLowerCase().contains('mod');
-                final color = isHigh ? const Color(0xFFE53E3E) : isMod ? AppTheme.warning : AppTheme.success;
+                final isHigh = levelName.toLowerCase().contains('high');
+                final isMod = levelName.toLowerCase().contains('mod');
+                final color = isHigh ? AppTheme.success : isMod ? AppTheme.warning : const Color(0xFFE53E3E);
                 final pct = total > 0 ? count / total : 0.0;
 
                 return Padding(
@@ -639,7 +640,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(status, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+                          Text(levelName.replaceAll(' Career Decision Self-Efficacy', ''), 
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
                           Text('$count Student(s)', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -659,7 +661,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               }).toList(),
               const SizedBox(height: 4),
               const Text(
-                'Monitors levels of emotional exhaustion, cynicism, and professional efficacy among students.',
+                'Tracks confidence in self-appraisal, occupational info gathering, goal selecting, planning, and problem-solving.',
                 style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
               ),
             ],

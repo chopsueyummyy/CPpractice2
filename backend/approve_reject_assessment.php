@@ -22,8 +22,10 @@ if (!$assessmentId || !in_array($action, ['approved', 'rejected']) || !$counselo
     exit();
 }
 
+$dbAction = ($action === 'rejected') ? 'declined' : $action;
+
 $upd = $conn->prepare("UPDATE assessments SET Status = ? WHERE AssessmentID = ?");
-$upd->bind_param("si", $action, $assessmentId);
+$upd->bind_param("si", $dbAction, $assessmentId);
 if (!$upd->execute()) {
     echo json_encode(["status" => "error", "message" => "Failed to update status"]);
     exit();
@@ -34,7 +36,7 @@ $fb = $conn->prepare("
     VALUES (?, ?, ?, ?, NOW())
     ON DUPLICATE KEY UPDATE Action = VALUES(Action), FeedbackNotes = VALUES(FeedbackNotes), ReviewedAt = NOW()
 ");
-$fb->bind_param("iiss", $assessmentId, $counselorId, $action, $notes);
+$fb->bind_param("iiss", $assessmentId, $counselorId, $dbAction, $notes);
 $fb->execute();
 
 $stuQuery = $conn->prepare("

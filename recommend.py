@@ -18,7 +18,7 @@ FEATURE_EXPLANATIONS = {
     'E': "Your potential for leadership, entrepreneurship, and persuasive communication (Enterprising) is highly valuable here.",
     'C': "Your detail-oriented, organized, and structured approach to tasks (Conventional) is highly suited for this program.",
     'RSES': "Your positive self-esteem and confidence in your academic capabilities support your readiness to excel in this field.",
-    'MBI': "Your resilience to academic strain and balanced study habits indicate you can manage the course demands effectively.",
+    'CDSES': "Your career decision self-efficacy indicates high confidence in successfully navigating major and career selection.",
     'Strand': "Your senior high school academic strand provides a highly compatible foundation for this college program."
 }
 
@@ -48,7 +48,7 @@ def main():
         e = float(input_data.get('E', 0))
         c = float(input_data.get('C', 0))
         rses = float(input_data.get('RSES', 0))
-        mbi = float(input_data.get('MBI', 0))
+        cdses = float(input_data.get('CDSES', 0))
         strand_str = str(input_data.get('Strand', 'STEM')).strip().upper()
 
         # Handle Strand mapping and encoding
@@ -66,8 +66,8 @@ def main():
         strand_encoded = int(se.transform([strand_str])[0])
 
         # Create input dataframe
-        feature_names = ['R', 'I', 'A', 'S', 'E', 'C', 'RSES', 'MBI', 'Strand']
-        input_df = pd.DataFrame([[r, i_feat, a, s, e, c, rses, mbi, strand_encoded]], columns=feature_names)
+        feature_names = ['R', 'I', 'A', 'S', 'E', 'C', 'RSES', 'CDSES', 'Strand']
+        input_df = pd.DataFrame([[r, i_feat, a, s, e, c, rses, cdses, strand_encoded]], columns=feature_names)
 
         # Predict probabilities
         probs = model.predict_proba(input_df)[0]
@@ -88,16 +88,24 @@ def main():
             CLASS_TO_COURSE_CODE = {
                 'BA Communication': 'BAComm',
                 'BS Accountancy': 'BSA-Acc',
+                'BS Agriculture': 'BSA',
                 'BS Architecture': 'BSArch',
+                'BS Biology': 'BSBio',
                 'BS Business Administration': 'BSBA',
                 'BS Civil Engineering': 'BSCE',
                 'BS Computer Science': 'BSCS',
+                'BS Criminology': 'BSCrim',
                 'BS Education': 'BSEd',
+                'BS Hospitality Management': 'BSHM',
+                'BS Industrial Technology': 'BSIT-Tech',
+                'BS Information Systems': 'BSIS',
                 'BS Information Technology': 'BSIT',
                 'BS Marketing Management': 'BSMktg',
-                'BS Multimedia Arts': 'BFA',
+                'BS Mechanical Engineering': 'BSME',
                 'BS Nursing': 'BSN',
-                'BS Psychology': 'BSPsych'
+                'BS Psychology': 'BSPsych',
+                'BS Tourism Management': 'BSTM',
+                'Bachelor of Fine Arts': 'BFA'
             }
             course_code = CLASS_TO_COURSE_CODE.get(class_name, 'BSCS')
 

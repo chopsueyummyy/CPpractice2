@@ -21,10 +21,10 @@ $data         = json_decode(file_get_contents("php://input"), true);
 $assessmentId = (int)($data['assessmentId'] ?? 0);
 $answers      = $data['answers'] ?? []; // RIASEC answers
 $rseAnswers   = $data['rseAnswers'] ?? [];
-$mbiAnswers   = $data['mbiAnswers'] ?? [];
+$cdsesAnswers = $data['cdsesAnswers'] ?? [];
 
 $rseSum = 20; // Default fallback raw sum
-$mbiSum = 30; // Default fallback raw sum
+$cdsesTotal = 75; // Default fallback CDSES total score
 
 if (empty($assessmentId) || empty($answers)) {
     echo json_encode(["status" => "error", "message" => "Missing assessmentId or RIASEC answers"]);
@@ -150,93 +150,86 @@ if (!empty($rseAnswers)) {
     $rseRes->execute();
 }
 
-// 3. SCORING MASLACH BURNOUT INVENTORY (MBI-SS)
-if (!empty($mbiAnswers)) {
+// 3. SCORING CAREER DECISION SELF-EFFICACY SCALE (CDSES-SF)
+if (!empty($cdsesAnswers)) {
     // Delete old answers if exist
-    $conn->query("DELETE FROM mbi_answers WHERE AssessmentID = $assessmentId");
+    $conn->query("DELETE FROM cdses_answers WHERE AssessmentID = $assessmentId");
 
-    $exSum = 0; $exCount = 0;
-    $cySum = 0; $cyCount = 0;
-    $efSum = 0; $efCount = 0;
-    $mbiSum = 0; // Reset default fallback
+    $saSum = 0; $saCount = 0;
+    $oiSum = 0; $oiCount = 0;
+    $gsSum = 0; $gsCount = 0;
+    $plSum = 0; $plCount = 0;
+    $psSum = 0; $psCount = 0;
+    $cdsesTotal = 0;
 
-    foreach ($mbiAnswers as $ans) {
+    foreach ($cdsesAnswers as $ans) {
         $qId = (int)$ans['questionId'];
-        $scoreVal = (int)$ans['score']; // 0 to 6
+        $scoreVal = max(1, min(5, (int)$ans['score'])); // Likert scale 1 to 5
 
-        // Accumulate raw sum for ML model
-        $mbiSum += $scoreVal;
+        $cdsesTotal += $scoreVal;
 
         // Check subscale
-        $mbiQ = $conn->prepare("SELECT Subscale FROM mbi_questions WHERE QuestionID = ?");
-        $mbiQ->bind_param("i", $qId);
-        $mbiQ->execute();
-        $mbiQRes = $mbiQ->get_result()->fetch_assoc();
-        $subscale = $mbiQRes['Subscale'] ?? '';
+        $cdsesQ = $conn->prepare("SELECT Subscale FROM cdses_questions WHERE QuestionID = ?");
+        $cdsesQ->bind_param("i", $qId);
+        $cdsesQ->execute();
+        $cdsesQRes = $cdsesQ->get_result()->fetch_assoc();
+        $subscale = $cdsesQRes['Subscale'] ?? '';
+        $cdsesQ->close();
 
-        if ($subscale === 'EX') {
-            $exSum += $scoreVal;
-            $exCount++;
-        } elseif ($subscale === 'CY') {
-            $cySum += $scoreVal;
-            $cyCount++;
-        } elseif ($subscale === 'EF') {
-            $efSum += $scoreVal;
-            $efCount++;
+        if ($subscale === 'SA') {
+            $saSum += $scoreVal;
+            $saCount++;
+        } elseif ($subscale === 'OI') {
+            $oiSum += $scoreVal;
+            $oiCount++;
+        } elseif ($subscale === 'GS') {
+            $gsSum += $scoreVal;
+            $gsCount++;
+        } elseif ($subscale === 'PL') {
+            $plSum += $scoreVal;
+            $plCount++;
+        } elseif ($subscale === 'PS') {
+            $psSum += $scoreVal;
+            $psCount++;
         }
 
-        $insMbi = $conn->prepare("INSERT INTO mbi_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?)");
-        $insMbi->bind_param("iii", $assessmentId, $qId, $scoreVal);
-        $insMbi->execute();
+        $insCdses = $conn->prepare("INSERT INTO cdses_answers (AssessmentID, QuestionID, Score) VALUES (?, ?, ?)");
+        $insCdses->bind_param("iii", $assessmentId, $qId, $scoreVal);
+        $insCdses->execute();
+        $insCdses->close();
     }
 
-    $exMean = $exCount > 0 ? round($exSum / $exCount, 2) : 0.00;
-    $cyMean = $cyCount > 0 ? round($cySum / $cyCount, 2) : 0.00;
-    $efMean = $efCount > 0 ? round($efSum / $efCount, 2) : 0.00;
+    // Subscale average scores (1.0 to 5.0)
+    $saScore = $saCount > 0 ? round($saSum / $saCount, 2) : 0.00;
+    $oiScore = $oiCount > 0 ? round($oiSum / $oiCount, 2) : 0.00;
+    $gsScore = $gsCount > 0 ? round($gsSum / $gsCount, 2) : 0.00;
+    $plScore = $plCount > 0 ? round($plSum / $plCount, 2) : 0.00;
+    $psScore = $psCount > 0 ? round($psSum / $psCount, 2) : 0.00;
 
-    // EX: Low < 2.00, Moderate 2.00-2.80, High > 2.80
-    $exLevel = 'Low';
-    if ($exMean > 2.80) {
-        $exLevel = 'High';
-    } elseif ($exMean >= 2.00) {
-        $exLevel = 'Moderate';
-    }
-
-    // CY: Low < 0.50, Moderate 0.50-1.50, High > 1.50
-    $cyLevel = 'Low';
-    if ($cyMean > 1.50) {
-        $cyLevel = 'High';
-    } elseif ($cyMean >= 0.50) {
-        $cyLevel = 'Moderate';
-    }
-
-    // EF: Low risk > 4.50, Moderate risk 3.83-4.50, High risk < 3.83
-    $efLevel = 'Low';
-    if ($efMean < 3.83) {
-        $efLevel = 'High';
-    } elseif ($efMean <= 4.50) {
-        $efLevel = 'Moderate';
-    }
-
-    // Overall Burnout Status
-    if ($exLevel === 'High' && $cyLevel === 'High' && $efLevel === 'High') {
-        $burnoutStatus = 'High Burnout Risk';
-    } elseif ($exLevel === 'Low' && $cyLevel === 'Low' && $efLevel === 'Low') {
-        $burnoutStatus = 'Low Burnout Risk';
+    // Categorize overall self-efficacy level:
+    // High (>= 88), Moderate (63-87), Low (<= 62)
+    if ($cdsesTotal >= 88) {
+        $selfEfficacyLevel = 'High Career Decision Self-Efficacy';
+    } elseif ($cdsesTotal >= 63) {
+        $selfEfficacyLevel = 'Moderate Career Decision Self-Efficacy';
     } else {
-        $burnoutStatus = 'Moderate Burnout Risk';
+        $selfEfficacyLevel = 'Low Career Decision Self-Efficacy';
     }
 
-    $mbiRes = $conn->prepare("
-        INSERT INTO mbi_results (AssessmentID, EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus)
+    $cdsesRes = $conn->prepare("
+        INSERT INTO cdses_results (AssessmentID, SA_Score, OI_Score, GS_Score, PL_Score, PS_Score, TotalScore, SelfEfficacyLevel)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE 
-            EX_Score=VALUES(EX_Score), CY_Score=VALUES(CY_Score), EF_Score=VALUES(EF_Score),
-            EX_Level=VALUES(EX_Level), CY_Level=VALUES(CY_Level), EF_Level=VALUES(EF_Level),
-            BurnoutStatus=VALUES(BurnoutStatus)
+            SA_Score=VALUES(SA_Score), OI_Score=VALUES(OI_Score), GS_Score=VALUES(GS_Score),
+            PL_Score=VALUES(PL_Score), PS_Score=VALUES(PS_Score), TotalScore=VALUES(TotalScore),
+            SelfEfficacyLevel=VALUES(SelfEfficacyLevel)
     ");
-    $mbiRes->bind_param("idddssss", $assessmentId, $exMean, $cyMean, $efMean, $exLevel, $cyLevel, $efLevel, $burnoutStatus);
-    $mbiRes->execute();
+    $cdsesRes->bind_param("idddddds", $assessmentId, $saScore, $oiScore, $gsScore, $plScore, $psScore, $cdsesTotal, $selfEfficacyLevel);
+    $cdsesRes->execute();
+    $cdsesRes->close();
+
+    // Project CDSES total score onto expected MBI range (0 to 90) for XGBoost model compatibility
+    $mbiSum = (($cdsesTotal - 25) / 100.0) * 90.0;
 }
 
 // 4. GENERATING RECOMMENDATIONS VIA XGBOOST & SHAP MODEL
@@ -253,16 +246,16 @@ $pi->execute();
 $piRow = $pi->get_result()->fetch_assoc();
 $strand = $piRow['Strand'] ?? 'STEM';
 
-// Map RIASEC Agree/Disagree (0/1) raw scores to original Likert (1-5) scale sums
+// Map RIASEC raw scores to the model's expected range (2 to 7)
 $payload = [
-    "R" => $rawScores['R'] * 4 + 9,
-    "I" => $rawScores['I'] * 4 + 7,
-    "A" => $rawScores['A'] * 4 + 6,
-    "S" => $rawScores['S'] * 4 + 6,
-    "E" => $rawScores['E'] * 4 + 7,
-    "C" => $rawScores['C'] * 4 + 7,
-    "RSES" => $rseSum,
-    "MBI" => $mbiSum,
+    "R" => 2.0 + ($rawScores['R'] / 9.0) * 5.0,
+    "I" => 2.0 + ($rawScores['I'] / 7.0) * 5.0,
+    "A" => 2.0 + ($rawScores['A'] / 6.0) * 5.0,
+    "S" => 2.0 + ($rawScores['S'] / 6.0) * 5.0,
+    "E" => 2.0 + ($rawScores['E'] / 7.0) * 5.0,
+    "C" => 2.0 + ($rawScores['C'] / 7.0) * 5.0,
+    "RSES" => max(18.0, min(40.0, (double)$rseSum)),
+    "CDSES" => max(45.0, min(125.0, (double)$cdsesTotal)),
     "Strand" => $strand
 ];
 

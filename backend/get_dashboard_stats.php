@@ -103,19 +103,19 @@ while ($row = $res->fetch_assoc()) {
     }
 }
 
-// 4. Burnout risk levels distribution
-$mbiStats = [];
+// 4. Career Decision Self-Efficacy (CDSES) levels distribution
+$cdsesStats = [];
 $res = $conn->query("
-    SELECT m.BurnoutStatus, COUNT(*) as count 
+    SELECT c.SelfEfficacyLevel, COUNT(*) as count 
     FROM assessments a
-    JOIN mbi_results m ON m.AssessmentID = a.AssessmentID
+    JOIN cdses_results c ON c.AssessmentID = a.AssessmentID
     WHERE a.Status = 'approved' AND $dateCondition
-    GROUP BY m.BurnoutStatus
+    GROUP BY c.SelfEfficacyLevel
 ");
 while ($row = $res->fetch_assoc()) {
-    if ($row['BurnoutStatus']) {
-        $mbiStats[] = [
-            "status" => $row['BurnoutStatus'],
+    if ($row['SelfEfficacyLevel']) {
+        $cdsesStats[] = [
+            "level" => $row['SelfEfficacyLevel'],
             "count" => (int)$row['count']
         ];
     }
@@ -152,7 +152,7 @@ echo json_encode([
     "strandStats"      => $strandStats,
     "riasecStats"      => $riasecStats,
     "rseStats"         => $rseStats,
-    "mbiStats"         => $mbiStats,
+    "cdsesStats"       => $cdsesStats,
     "recentActivity"   => $recentActivity
 ]);
 

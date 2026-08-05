@@ -328,30 +328,31 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                           ),
                                         ],
 
-                                        // MBI-SS Burnout
-                                        if (a['mbi'] != null) ...[
+                                        // Career Decision Self-Efficacy
+                                        if (a['cdses'] != null) ...[
                                           const Divider(height: 24),
-                                          Text('Academic Burnout Profile (MBI-SS)',
+                                          Text('Career Decision Self-Efficacy Profile (CDSES-SF)',
                                             style: Theme.of(context).textTheme.titleSmall
                                                 ?.copyWith(fontWeight: FontWeight.bold)),
                                           const SizedBox(height: 8),
                                           Text(
-                                            'Burnout Status: ${a['mbi']['burnoutStatus']}',
+                                            'Self-Efficacy Level: ${a['cdses']['selfEfficacyLevel']}',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: a['mbi']['burnoutStatus'].toString().toLowerCase().contains('high')
-                                                  ? const Color(0xFFE53E3E)
-                                                  : a['mbi']['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                              color: a['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('high')
+                                                  ? AppTheme.success
+                                                  : a['cdses']['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
                                                       ? AppTheme.warning
-                                                      : AppTheme.success,
+                                                      : const Color(0xFFE53E3E),
                                               fontSize: 13,
                                             ),
                                           ),
                                           const SizedBox(height: 6),
                                           Text(
-                                            '• Emotional Exhaustion: ${a['mbi']['exScore']} (${a['mbi']['exLevel']})\n'
-                                            '• Cynicism: ${a['mbi']['cyScore']} (${a['mbi']['cyLevel']})\n'
-                                            '• Professional Efficacy: ${a['mbi']['efScore']} (${a['mbi']['efLevel']})',
+                                            '• Total Score: ${a['cdses']['totalScore'].toInt()} / 125\n'
+                                            '• SA: ${a['cdses']['saScore']} | OI: ${a['cdses']['oiScore']} | '
+                                            'GS: ${a['cdses']['gsScore']} | PL: ${a['cdses']['plScore']} | '
+                                            'PS: ${a['cdses']['psScore']}',
                                             style: const TextStyle(fontSize: 12, height: 1.4),
                                           ),
                                         ],
@@ -523,7 +524,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
       'E': 'Enterprising (E)',
       'C': 'Conventional (C)',
       'RSES': 'Rosenberg Self-Esteem',
-      'MBI': 'Burnout Resilience',
+      'MBI': 'Career Self-Efficacy',
     };
 
     return Padding(

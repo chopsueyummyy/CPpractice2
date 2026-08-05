@@ -155,7 +155,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final strand    = (_resultsData!['strand'] as String?) ?? 'Not Specified';
 
     final rseData   = _resultsData!['rse'] as Map<String, dynamic>?;
-    final mbiData   = _resultsData!['mbi'] as Map<String, dynamic>?;
+    final cdsesData = _resultsData!['cdses'] as Map<String, dynamic>?;
 
     final sortedScores = scores.entries.toList()
       ..sort((a, b) {
@@ -193,6 +193,50 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ],
             ),
           ),
+          
+          // Counselor Notes Callout
+          if (_resultsData!['counselorNotes'] != null && _resultsData!['counselorNotes'].toString().trim().isNotEmpty)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryPurple.withOpacity(0.05),
+                border: Border(
+                  bottom: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.12), width: 1),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.comment_outlined, color: AppTheme.primaryPurple, size: 22),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Counselor Notes & Guidance',
+                          style: TextStyle(
+                            color: AppTheme.primaryPurple,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _resultsData!['counselorNotes'].toString(),
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           Padding(
             padding: const EdgeInsets.all(24.0),
@@ -271,33 +315,39 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         ),
                     const SizedBox(height: 32),
 
-                    // --- SECTION 3: ACADEMIC BURNOUT (MBI-SS) ---
-                    _buildSectionHeader('Academic Burnout Profile (MBI-SS)', Icons.psychology_rounded),
+                    // --- SECTION 3: CAREER DECISION SELF-EFFICACY (CDSES-SF) ---
+                    _buildSectionHeader('Career Decision Self-Efficacy Profile (CDSES-SF)', Icons.psychology_rounded),
                     const SizedBox(height: 12),
-                    mbiData == null 
-                      ? const Center(child: Text('No Academic Burnout results available for this record.'))
+                    cdsesData == null 
+                      ? const Center(child: Text('No Career Decision Self-Efficacy results available for this record.'))
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildMbiOverviewCard(mbiData),
+                            _buildCdsesOverviewCard(cdsesData),
                             const SizedBox(height: 20),
-                            Text('Academic Burnout Subscale Scores',
+                            Text('CDSES Subscale Scores',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 12),
-                            _buildMbiScoreCard('EX', 'Emotional Exhaustion', mbiData['exScore'], mbiData['exLevel'], 
-                                'Measures feelings of being emotionally overextended and exhausted by schoolwork.', 
-                                AppTheme.error, maxVal: 6.0),
-                            _buildMbiScoreCard('CY', 'Cynicism', mbiData['cyScore'], mbiData['cyLevel'], 
-                                'Measures detached, cynical, or indifferent attitude towards academic commitments.', 
-                                Colors.orange, maxVal: 6.0),
-                            _buildMbiScoreCard('EF', 'Professional Efficacy', mbiData['efScore'], mbiData['efLevel'], 
-                                'Measures feelings of academic competence and achievements. Lower efficacy signifies higher risk.', 
-                                AppTheme.success, maxVal: 6.0, isEfficacy: true),
+                            _buildCdsesScoreCard('SA', 'Self-Appraisal', cdsesData['saScore'], 
+                                'Measures confidence to accurately assess your own career-related abilities and interests.', 
+                                AppTheme.primaryPurple),
+                            _buildCdsesScoreCard('OI', 'Occupational Information', cdsesData['oiScore'], 
+                                'Measures confidence to gather accurate information about occupations and labor market trends.', 
+                                Colors.teal),
+                            _buildCdsesScoreCard('GS', 'Goal Selection', cdsesData['gsScore'], 
+                                'Measures confidence to choose a major or career path that fits your values and lifestyle.', 
+                                Colors.blue),
+                            _buildCdsesScoreCard('PL', 'Planning', cdsesData['plScore'], 
+                                'Measures confidence to establish step-by-step plans to achieve your long-term goals.', 
+                                AppTheme.warning),
+                            _buildCdsesScoreCard('PS', 'Problem Solving', cdsesData['psScore'], 
+                                'Measures confidence to persist through frustrations and identify backup career alternatives.', 
+                                AppTheme.success),
                             const SizedBox(height: 20),
-                            Text('Academic Burnout Risk Scale Details',
+                            Text('CDSES-SF Scale Details',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 12),
-                            _buildMbiInterpretationPanel(),
+                            _buildCdsesInterpretationPanel(),
                           ],
                         ),
                     const SizedBox(height: 32),
@@ -311,7 +361,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       const SizedBox(height: 16),
 
                       // Why recommended? (SHAP dynamic explanations summary)
-                      _buildWhyRecommendedCard(primary, rseData, mbiData, strand),
+                      _buildWhyRecommendedCard(primary, rseData, cdsesData, strand),
                       const SizedBox(height: 16),
 
                       // Disclaimer Card
@@ -376,7 +426,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _buildWhyRecommendedCard(String primary, Map<String, dynamic>? rse, Map<String, dynamic>? mbi, String strand) {
+  Widget _buildWhyRecommendedCard(String primary, Map<String, dynamic>? rse, Map<String, dynamic>? cdses, String strand) {
     final interestName = AppTheme.riasecName(primary);
     final riasecText = 'Strong $interestName interest';
 
@@ -390,15 +440,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
       }
     }
 
-    String mbiText = 'Low Academic Burnout';
-    if (mbi != null) {
-      final status = mbi['burnoutStatus'].toString().toLowerCase();
-      if (status.contains('high') || status.contains('burnout')) {
-        mbiText = 'High Academic Burnout Risk';
-      } else if (status.contains('moderate') || status.contains('mod')) {
-        mbiText = 'Moderate Academic Burnout Risk';
+    String cdsesText = 'High Career Decision Self-Efficacy';
+    if (cdses != null) {
+      final level = cdses['selfEfficacyLevel'].toString().toLowerCase();
+      if (level.contains('low')) {
+        cdsesText = 'Low Career Decision Self-Efficacy';
+      } else if (level.contains('moderate') || level.contains('mod')) {
+        cdsesText = 'Moderate Career Decision Self-Efficacy';
       } else {
-        mbiText = 'Low Academic Burnout';
+        cdsesText = 'High Career Decision Self-Efficacy';
       }
     }
 
@@ -434,7 +484,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(height: 16),
           _whyBullet(riasecText),
           _whyBullet(rseText),
-          _whyBullet(mbiText),
+          _whyBullet(cdsesText),
           _whyBullet(strandText),
         ],
       ),
@@ -876,57 +926,108 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  // MBI-SS Helpers
-  Widget _buildMbiOverviewCard(Map<String, dynamic> mbi) {
-    final String status = mbi['burnoutStatus'] ?? 'Low Burnout Risk';
-    final bool isHigh = status.toLowerCase().contains('high');
-    final bool isMod = status.toLowerCase().contains('mod');
-    final color = isHigh 
-      ? const Color(0xFFE53E3E) 
-      : isMod 
-        ? AppTheme.warning 
-        : AppTheme.success;
+  // CDSES-SF Helpers
+  Widget _buildCdsesOverviewCard(Map<String, dynamic> cdses) {
+    final double totalScore = cdses['totalScore'] ?? 0.0;
+    final String level = cdses['selfEfficacyLevel'] ?? 'Moderate Career Decision Self-Efficacy';
+    
+    Color levelColor;
+    IconData levelIcon;
+    if (level.toLowerCase().contains('high')) {
+      levelColor = AppTheme.success;
+      levelIcon = Icons.stars_rounded;
+    } else if (level.toLowerCase().contains('mod')) {
+      levelColor = AppTheme.warning;
+      levelIcon = Icons.trending_up_rounded;
+    } else {
+      levelColor = const Color(0xFFE53E3E);
+      levelIcon = Icons.info_outline_rounded;
+    }
 
     return Card(
       elevation: 0,
-      color: color.withOpacity(0.08),
+      color: levelColor.withOpacity(0.06),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withOpacity(0.2), width: 1)
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: levelColor.withOpacity(0.15), width: 1.5)
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
-                child: Icon(
-                  isHigh 
-                    ? Icons.local_fire_department 
-                    : isMod 
-                      ? Icons.warning_amber_rounded 
-                      : Icons.battery_charging_full, 
-                  color: color, 
-                  size: 48
+            Row(
+              children: [
+                // Circular Gauge
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 90,
+                      height: 90,
+                      child: CircularProgressIndicator(
+                        value: totalScore / 125,
+                        strokeWidth: 10,
+                        backgroundColor: AppTheme.dividerColor.withOpacity(0.4),
+                        valueColor: AlwaysStoppedAnimation<Color>(levelColor),
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${totalScore.toInt()}',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: levelColor,
+                          ),
+                        ),
+                        const Text(
+                          '/ 125',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              status,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              isHigh 
-                ? 'Your scores indicate a high risk of academic learning burnout. Low professional efficacy coupled with high exhaustion and cynicism shows a high strain on school-life balance. Speaking to guidance counsel is highly recommended.'
-                : isMod
-                  ? 'Your scores indicate a moderate burnout risk. Take steps to establish boundaries, schedule breaks, and consult guidance officers to discuss stress management.'
-                  : 'Your academic burnout risk is low! Keep maintaining healthy study schedules, positive strategies, and active school-life boundaries.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textSecondary),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(levelIcon, color: levelColor, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              level,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: levelColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Career Decision Self-Efficacy measures your confidence in successfully navigating career choices, goal planning, and academic decisions.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -934,16 +1035,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _buildMbiScoreCard(String code, String name, double score, String riskLevel, String desc, Color color, {required double maxVal, bool isEfficacy = false}) {
-    // Risk level display color
-    final riskColor = riskLevel.toLowerCase().contains('high') 
-      ? const Color(0xFFE53E3E) 
-      : riskLevel.toLowerCase().contains('mod') 
-        ? AppTheme.warning 
-        : AppTheme.success;
-
+  Widget _buildCdsesScoreCard(String code, String name, double score, String desc, Color color) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -952,20 +1046,33 @@ class _ResultsScreenState extends State<ResultsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$name ($code)',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        code,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: riskColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8)
-                  ),
-                  child: Text(
-                    '$riskLevel Risk',
-                    style: TextStyle(color: riskColor, fontWeight: FontWeight.bold, fontSize: 11),
-                  ),
+                Text(
+                  '${score.toStringAsFixed(2)} / 5.00',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ],
             ),
@@ -975,25 +1082,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
               style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: score / maxVal,
-                      minHeight: 8,
-                      backgroundColor: AppTheme.dividerColor,
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '${score.toStringAsFixed(2)} / ${maxVal.toInt()}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-              ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: score / 5.0,
+                minHeight: 8,
+                backgroundColor: AppTheme.dividerColor,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
             ),
           ],
         ),
@@ -1001,7 +1097,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _buildMbiInterpretationPanel() {
+  Widget _buildCdsesInterpretationPanel() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1013,22 +1109,26 @@ class _ResultsScreenState extends State<ResultsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'The Maslach Burnout Inventory - Student Survey (MBI-SS) evaluates academic learning burnout across three distinct subscales:',
+            'The Career Decision Self-Efficacy Scale (CDSES-SF) evaluates your level of confidence across 5 core subscales:',
             style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textSecondary),
           ),
           SizedBox(height: 12),
           Divider(),
           SizedBox(height: 12),
-          Text('Academic Burnout Ranges (Based on Subscale Item Means):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Text('• Self-Appraisal (SA):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text('  Confidence to accurately assess your own career-related abilities and interests.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
           SizedBox(height: 8),
-          Text('• Emotional Exhaustion (EX):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-          Text('  - Low: < 2.00  |  Moderate: 2.00 - 2.80  |  High: > 2.80', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+          Text('• Occupational Information (OI):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text('  Confidence to gather accurate information about occupations and labor market trends.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
           SizedBox(height: 8),
-          Text('• Cynicism (CY):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-          Text('  - Low: < 0.50  |  Moderate: 0.50 - 1.50  |  High: > 1.50', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+          Text('• Goal Selection (GS):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text('  Confidence to choose a major or career path that fits your values and lifestyle.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
           SizedBox(height: 8),
-          Text('• Professional Efficacy (EF):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-          Text('  - Low Burnout Risk: > 4.50  |  Moderate: 3.83 - 4.50  |  High Burnout Risk (Low Efficacy): < 3.83', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+          Text('• Planning (PL):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text('  Confidence to establish step-by-step plans to achieve your long-term goals.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+          SizedBox(height: 8),
+          Text('• Problem Solving (PS):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text('  Confidence to persist through frustrations and identify backup career alternatives.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
         ],
       ),
     );
