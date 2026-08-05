@@ -23,6 +23,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
   String _gradeLevel   = 'all';
   String _strand       = 'all';
   String _dominantType = 'all';
+  String _rseLevel     = 'all';
+  String _mbiStatus    = 'all';
   String _dateFrom     = '';
   String _dateTo       = '';
   String _search       = '';
@@ -63,6 +65,20 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
     'C': 'C - Conventional',
   };
 
+  final _rseOptions = {
+    'all': 'All Self-Esteem Levels',
+    'High Self-Esteem': 'High Self-Esteem',
+    'Normal Self-Esteem': 'Normal Self-Esteem',
+    'Low Self-Esteem': 'Low Self-Esteem',
+  };
+
+  final _mbiOptions = {
+    'all': 'All Burnout Levels',
+    'High Burnout Risk': 'High Burnout Risk',
+    'Moderate Burnout Risk': 'Moderate Burnout Risk',
+    'Low Burnout Risk': 'Low Burnout Risk',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +99,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
         gradeLevel: _gradeLevel,
         strand: _strand,
         dominantType: _dominantType,
+        rseLevel: _rseLevel,
+        mbiStatus: _mbiStatus,
         dateFrom: _dateFrom,
         dateTo: _dateTo,
         search: _search,
@@ -100,6 +118,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       _gradeLevel   = 'all';
       _strand       = 'all';
       _dominantType = 'all';
+      _rseLevel     = 'all';
+      _mbiStatus    = 'all';
       _dateFrom     = '';
       _dateTo       = '';
       _search       = '';
@@ -235,6 +255,18 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                 ),
                 const SizedBox(height: 8),
 
+                // Filter dropdowns row 3 (RSE and MBI-SS)
+                Row(
+                  children: [
+                    Expanded(child: _filterDropdown('Self-Esteem (RSE)', _rseOptions, _rseLevel,
+                        (v) => setState(() => _rseLevel = v!))),
+                    const SizedBox(width: 8),
+                    Expanded(child: _filterDropdown('Burnout Level (MBI-SS)', _mbiOptions, _mbiStatus,
+                        (v) => setState(() => _mbiStatus = v!))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
                 // Date range + buttons
                 Row(
                   children: [
@@ -333,6 +365,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                           final r = _records[i];
                           final scores = r['scores'] as Map<String, dynamic>;
                           final statusColor = _statusColor(r['status']);
+                          final rse = r['rse'] as Map<String, dynamic>?;
+                          final mbi = r['mbi'] as Map<String, dynamic>?;
+                          final recs = List<Map<String, dynamic>>.from(r['recommendations'] ?? []);
                           return Card(
                             margin: const EdgeInsets.only(bottom: 12),
                             child: ExpansionTile(
@@ -369,30 +404,60 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Divider(),
-                                      // Basic info
-                                      _infoRow('Gender', r['gender'] ?? '-'),
-                                      _infoRow('Age', '${r['age'] ?? '-'}'),
-                                      _infoRow('Submitted', r['submittedAt'] ?? '-'),
-                                      const SizedBox(height: 12),
-                                      // RIASEC profile
-                                      Text('RIASEC Profile', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.primaryPurple)),
                                       const SizedBox(height: 8),
-                                      Row(
-                                        children: ['R','I','A','S','E','C'].map((t) {
-                                          final pct = double.tryParse((scores[t] ?? "0").toString()) ?? 0.0;
-                                          return Expanded(
-                                            child: Column(
-                                              children: [
-                                                Text(t, style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.riasecColor(t), fontSize: 12)),
-                                                const SizedBox(height: 4),
-                                                Text('${pct.toStringAsFixed(0)}%', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-                                              ],
-                                            ),
-                                          );
-                                        }).toList(),
+                                      // Student details chips
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 6,
+                                        children: [
+                                          _infoChip(Icons.person_outline, r['gender'] ?? '-'),
+                                          _infoChip(Icons.cake_outlined, '${r['age'] ?? '-'} yrs old'),
+                                          _infoChip(Icons.calendar_month_outlined, r['submittedAt'] ?? '-'),
+                                        ],
                                       ),
+                                      const SizedBox(height: 16),
+                                      // RIASEC profile progress bars
+                                      Text(
+                                        'RIASEC Profile Scores',
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      ...['R','I','A','S','E','C'].map((t) {
+                                        final pct = double.tryParse((scores[t] ?? "0").toString()) ?? 0.0;
+                                        final color = AppTheme.riasecColor(t);
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0),
+                                          child: Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 110,
+                                                child: Text(
+                                                  '$t - ${AppTheme.riasecName(t)}',
+                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  child: LinearProgressIndicator(
+                                                    value: pct / 100,
+                                                    backgroundColor: AppTheme.dividerColor.withOpacity(0.3),
+                                                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                                                    minHeight: 6,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Text(
+                                                '${pct.toStringAsFixed(0)}%',
+                                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
                                       const SizedBox(height: 8),
-                                      // Top 3
+                                      // Top 3 Badge indicators
                                       Row(
                                         children: [
                                           if (r['primaryType'] != null)
@@ -407,11 +472,197 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                           ],
                                         ],
                                       ),
+                                      
+                                      // Self-Esteem Profile (RSE)
+                                      if (rse != null) ...[
+                                        const Divider(height: 24),
+                                        Text(
+                                          'Self-Esteem Profile (RSE)',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              rse['level'].toString().toLowerCase().contains('low')
+                                                  ? Icons.sentiment_very_dissatisfied
+                                                  : Icons.sentiment_satisfied_alt,
+                                              color: rse['level'].toString().toLowerCase().contains('low')
+                                                  ? const Color(0xFFE53E3E)
+                                                  : AppTheme.success,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Score: ${rse['score']} / 30 (${rse['level']})',
+                                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+
+                                      // Academic Burnout Profile (MBI-SS)
+                                      if (mbi != null) ...[
+                                        const Divider(height: 24),
+                                        Text(
+                                          'Academic Burnout Profile (MBI-SS)',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Burnout Status: ${mbi['burnoutStatus']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: mbi['burnoutStatus'].toString().toLowerCase().contains('high')
+                                                ? const Color(0xFFE53E3E)
+                                                : mbi['burnoutStatus'].toString().toLowerCase().contains('mod')
+                                                    ? AppTheme.warning
+                                                    : AppTheme.success,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          '• Emotional Exhaustion: ${mbi['exScore']} (${mbi['exLevel']})\n'
+                                          '• Cynicism: ${mbi['cyScore']} (${mbi['cyLevel']})\n'
+                                          '• Professional Efficacy: ${mbi['efScore']} (${mbi['efLevel']})',
+                                          style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
+                                        ),
+                                      ],
+
+                                      // Recommended Courses & AI Explanations
+                                      if (recs.isNotEmpty) ...[
+                                        const Divider(height: 24),
+                                        Text(
+                                          'Recommended Courses & AI Explanations',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        ...recs.map((rec) {
+                                          final explanation = rec['Explanation'] ?? '';
+                                          final rank = rec['Rank'] ?? 1;
+                                          final cType = rec['RIASECCategory'] ?? 'R';
+                                          final cColor = AppTheme.riasecColor(cType);
+                                          
+                                          Color rankBgColor;
+                                          Color rankTxtColor;
+                                          String rankLabel;
+                                          IconData rankIcon;
+                                          
+                                          if (rank == 1) {
+                                            rankBgColor = const Color(0xFFFFD700).withOpacity(0.15);
+                                            rankTxtColor = const Color(0xFFB8860B);
+                                            rankLabel = 'Top Match';
+                                            rankIcon = Icons.emoji_events_rounded;
+                                          } else if (rank == 2) {
+                                            rankBgColor = AppTheme.primaryPurple.withOpacity(0.1);
+                                            rankTxtColor = AppTheme.primaryPurple;
+                                            rankLabel = 'Strong Match';
+                                            rankIcon = Icons.verified_rounded;
+                                          } else {
+                                            rankBgColor = Colors.teal.withOpacity(0.1);
+                                            rankTxtColor = Colors.teal.shade800;
+                                            rankLabel = 'Suitable Match';
+                                            rankIcon = Icons.thumb_up_rounded;
+                                          }
+
+                                          return Card(
+                                            margin: const EdgeInsets.only(bottom: 12),
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                              side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.5)),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                ListTile(
+                                                  leading: CircleAvatar(
+                                                    backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
+                                                    child: const Icon(Icons.school, color: AppTheme.primaryPurple, size: 20),
+                                                  ),
+                                                  title: Text(
+                                                    rec['CourseName'] ?? '',
+                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                                  ),
+                                                  subtitle: Text(
+                                                    '${rec['CourseCode']} • ${AppTheme.riasecName(cType)} • ✦ Match: ${(double.tryParse((rec['MatchScore'] ?? '0').toString()) ?? 0.0).toStringAsFixed(1)}%',
+                                                    style: const TextStyle(fontSize: 11),
+                                                  ),
+                                                  trailing: Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: rankBgColor,
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(color: rankTxtColor.withOpacity(0.3)),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Icon(rankIcon, color: rankTxtColor, size: 10),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          rankLabel,
+                                                          style: TextStyle(color: rankTxtColor, fontWeight: FontWeight.bold, fontSize: 9),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                if (explanation.isNotEmpty)
+                                                  Container(
+                                                    width: double.infinity,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                    decoration: BoxDecoration(
+                                                      color: AppTheme.primaryPurple.withOpacity(0.03),
+                                                      borderRadius: const BorderRadius.only(
+                                                        bottomLeft: Radius.circular(12),
+                                                        bottomRight: Radius.circular(12),
+                                                      ),
+                                                    ),
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(
+                                                          explanation,
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            height: 1.4,
+                                                            color: Colors.purple.shade900,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                        _buildShapChart(rec['shapWeights'] as Map<String, dynamic>?, Colors.purple.shade700),
+                                                      ],
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+
+                                      // Counselor notes
                                       if (r['feedbackNotes'] != null && (r['feedbackNotes'] as String).isNotEmpty) ...[
-                                        const SizedBox(height: 12),
-                                        Text('Counselor Notes', style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.primaryPurple)),
-                                        const SizedBox(height: 4),
-                                        Text(r['feedbackNotes'], style: TextStyle(color: AppTheme.textSecondary)),
+                                        const Divider(height: 24),
+                                        Text(
+                                          'Counselor Notes',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.warning.withOpacity(0.08),
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
+                                          ),
+                                          child: Text(
+                                            r['feedbackNotes'],
+                                            style: const TextStyle(fontSize: 12, height: 1.4),
+                                          ),
+                                        ),
                                       ],
                                     ],
                                   ),
@@ -465,6 +716,133 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       child: Text(
         '$rank: $type',
         style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11),
+      ),
+    );
+  }
+
+  Widget _infoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundLight,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppTheme.textSecondary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShapChart(Map<String, dynamic>? weights, Color color) {
+    if (weights == null || weights.isEmpty) return const SizedBox.shrink();
+    
+    final featureOrder = ['Strand', 'R', 'I', 'A', 'S', 'E', 'C', 'RSES', 'MBI'];
+    final labels = {
+      'Strand': 'Strand Compatibility',
+      'R': 'Realistic (R)',
+      'I': 'Investigative (I)',
+      'A': 'Artistic (A)',
+      'S': 'Social (S)',
+      'E': 'Enterprising (E)',
+      'C': 'Conventional (C)',
+      'RSES': 'Rosenberg Self-Esteem',
+      'MBI': 'Burnout Resilience',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(Icons.bar_chart_rounded, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                '✦ AI Diagnostics (SHAP Feature Attribution):',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...featureOrder.map((feat) {
+            final weight = double.tryParse(weights[feat]?.toString() ?? '0.0') ?? 0.0;
+            if (weight == 0.0) return const SizedBox.shrink();
+            
+            const double maxRef = 3.0;
+            final double absoluteVal = weight.abs();
+            final double barWidthRatio = (absoluteVal / maxRef).clamp(0.02, 1.0);
+            
+            final bool isPositive = weight > 0;
+            final Color barColor = isPositive ? AppTheme.success : const Color(0xFFE53E3E);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 130,
+                    child: Text(
+                      labels[feat] ?? feat,
+                      style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: barWidthRatio,
+                          child: Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 45,
+                    child: Text(
+                      '${isPositive ? "+" : ""}${weight.toStringAsFixed(2)}',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: barColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

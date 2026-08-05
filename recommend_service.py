@@ -104,11 +104,15 @@ class RecommendationHandler(BaseHTTPRequestHandler):
                     if not explanation_text:
                         explanation_text = f"This course aligns with your general academic strand and interest profile."
 
+                    # Exact SHAP feature contribution weights for counselor diagnostics
+                    shap_weights = {feature_names[i]: float(class_shap[i]) for i in range(len(feature_names))}
+
                     recommendations.append({
                         "rank": rank,
                         "course_code": course_code,
                         "probability": probability,
-                        "explanation": explanation_text
+                        "explanation": explanation_text,
+                        "shap_weights": shap_weights
                     })
 
                 response_body = json.dumps({

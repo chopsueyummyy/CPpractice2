@@ -14,6 +14,8 @@ $status       = $_GET['status']       ?? 'all';
 $gradeLevel   = $_GET['gradeLevel']   ?? 'all';
 $strand       = $_GET['strand']       ?? 'all';
 $dominantType = $_GET['dominantType'] ?? 'all'; 
+$rseLevel     = $_GET['rseLevel']     ?? 'all';
+$mbiStatus    = $_GET['mbiStatus']    ?? 'all';
 $dateFrom     = $_GET['dateFrom']     ?? '';
 $dateTo       = $_GET['dateTo']       ?? '';
 $search       = $_GET['search']       ?? '';
@@ -40,6 +42,16 @@ if ($strand !== 'all') {
 if ($dominantType !== 'all') {
     $where[] = "ar.PrimaryType = ?";
     $params[] = $dominantType;
+    $types   .= "s";
+}
+if ($rseLevel !== 'all') {
+    $where[] = "rse.Level = ?";
+    $params[] = $rseLevel;
+    $types   .= "s";
+}
+if ($mbiStatus !== 'all') {
+    $where[] = "mbi.BurnoutStatus = ?";
+    $params[] = $mbiStatus;
     $types   .= "s";
 }
 if (!empty($dateFrom)) {
@@ -84,6 +96,7 @@ $query = "
         ar.S_Percentage,
         ar.E_Percentage,
         ar.C_Percentage,
+        ar.ResultID,
         cf.Action AS CounselorAction,
         cf.FeedbackNotes,
         cf.ReviewedAt
@@ -92,6 +105,8 @@ $query = "
     JOIN students s ON s.StudentID = a.StudentID
     LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
     LEFT JOIN counselor_feedback cf ON cf.AssessmentID = a.AssessmentID
+    LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
+    LEFT JOIN mbi_results mbi ON mbi.AssessmentID = a.AssessmentID
     WHERE $whereClause
     ORDER BY a.SubmittedAt DESC
 ";
@@ -107,6 +122,38 @@ if (!empty($params)) {
 
 $records = [];
 while ($row = $result->fetch_assoc()) {
+    $recommendations = [];
+    if (!empty($row['ResultID'])) {
+        $rec = $conn->prepare("
+            SELECT rr.Rank, rr.MatchScore, rr.Explanation, rr.ShapWeights, rc.CourseName, rc.CourseCode, rc.RIASECCategory
+            FROM riasec_recommendations rr
+            JOIN riasec_courses rc ON rc.CourseID = rr.CourseID
+            WHERE rr.ResultID = ?
+            ORDER BY rr.Rank
+        ");
+        $rec->bind_param("i", $row['ResultID']);
+        $rec->execute();
+        $recResult = $rec->get_result();
+        while ($r = $recResult->fetch_assoc()) {
+            $r['shapWeights'] = !empty($r['ShapWeights']) ? json_decode($r['ShapWeights'], true) : null;
+            unset($r['ShapWeights']);
+            $recommendations[] = $r;
+        }
+        $rec->close();
+    }
+
+    $rse = $conn->prepare("SELECT Score, Level FROM rse_results WHERE AssessmentID = ?");
+    $rse->bind_param("i", $row['AssessmentID']);
+    $rse->execute();
+    $rseRow = $rse->get_result()->fetch_assoc();
+    $rse->close();
+
+    $mbi = $conn->prepare("SELECT EX_Score, CY_Score, EF_Score, EX_Level, CY_Level, EF_Level, BurnoutStatus FROM mbi_results WHERE AssessmentID = ?");
+    $mbi->bind_param("i", $row['AssessmentID']);
+    $mbi->execute();
+    $mbiRow = $mbi->get_result()->fetch_assoc();
+    $mbi->close();
+
     $records[] = [
         "assessmentId"   => $row['AssessmentID'],
         "studentId"      => $row['StudentID'],
@@ -128,6 +175,20 @@ while ($row = $result->fetch_assoc()) {
             "E" => $row['E_Percentage'],
             "C" => $row['C_Percentage'],
         ],
+        "recommendations" => $recommendations,
+        "rse" => $rseRow ? [
+            "score" => (int)$rseRow['Score'],
+            "level" => $rseRow['Level']
+        ] : null,
+        "mbi" => $mbiRow ? [
+            "exScore" => (float)$mbiRow['EX_Score'],
+            "cyScore" => (float)$mbiRow['CY_Score'],
+            "efScore" => (float)$mbiRow['EF_Score'],
+            "exLevel" => $mbiRow['EX_Level'],
+            "cyLevel" => $mbiRow['CY_Level'],
+            "efLevel" => $mbiRow['EF_Level'],
+            "burnoutStatus" => $mbiRow['BurnoutStatus']
+        ] : null,
         "counselorAction" => $row['CounselorAction'],
         "feedbackNotes"   => $row['FeedbackNotes'],
         "reviewedAt"      => $row['ReviewedAt']

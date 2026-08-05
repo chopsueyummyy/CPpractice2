@@ -291,6 +291,7 @@ try {
                 $mScore = (float)($rec['probability'] * 100);
                 $explanation = $rec['explanation'];
                 $rank = (int)$rec['rank'];
+                $shapWeights = isset($rec['shap_weights']) ? json_encode($rec['shap_weights']) : null;
                 
                 // Find CourseID from the CourseCode
                 $cStmt = $conn->prepare("SELECT CourseID FROM riasec_courses WHERE CourseCode = ? LIMIT 1");
@@ -301,10 +302,10 @@ try {
                 if ($cRow) {
                     $courseId = (int)$cRow['CourseID'];
                     $recStmt = $conn->prepare("
-                        INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`, ShapWeights)
+                        VALUES (?, ?, ?, ?, ?, ?)
                     ");
-                    $recStmt->bind_param("iidsi", $resultId, $courseId, $mScore, $explanation, $rank);
+                    $recStmt->bind_param("iidsis", $resultId, $courseId, $mScore, $explanation, $rank, $shapWeights);
                     $recStmt->execute();
                 }
             }
@@ -347,11 +348,21 @@ if (!$recommendationsSaved) {
                 $explanation .= " Your positive self-esteem and confidence in your academic capabilities support your readiness to excel in this course.";
             }
 
+            // Simulated fallback weights
+            $simWeights = [
+                'R' => 0.0, 'I' => 0.0, 'A' => 0.0, 'S' => 0.0, 'E' => 0.0, 'C' => 0.0,
+                'RSES' => ($rseSum >= 15) ? 0.8 : 0.1,
+                'MBI' => 0.4,
+                'Strand' => 1.5
+            ];
+            $simWeights[$type] = 2.5;
+            $shapWeights = json_encode($simWeights);
+
             $recStmt = $conn->prepare("
-                INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`, ShapWeights)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
-            $recStmt->bind_param("iidsi", $resultId, $course['CourseID'], $matchScore, $explanation, $rank);
+            $recStmt->bind_param("iidsis", $resultId, $course['CourseID'], $matchScore, $explanation, $rank, $shapWeights);
             $recStmt->execute();
             $rank++;
         }

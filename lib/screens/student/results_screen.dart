@@ -731,15 +731,37 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              Text(
-                                rec['Explanation'] ?? '',
-                                style: const TextStyle(
-                                  color: Color(0xFF4A4A4A),
-                                  fontSize: 13,
-                                  height: 1.6,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              ...(() {
+                                final explanationText = rec['Explanation'] as String? ?? '';
+                                final sentences = explanationText
+                                    .split('.')
+                                    .map((s) => s.trim())
+                                    .where((s) => s.isNotEmpty)
+                                    .toList();
+                                return sentences.map((sentence) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.auto_awesome, color: color, size: 14),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            '$sentence.',
+                                            style: const TextStyle(
+                                              color: Color(0xFF4A4A4A),
+                                              fontSize: 13,
+                                              height: 1.55,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
+                              })(),
                             ],
                           ),
                         ),

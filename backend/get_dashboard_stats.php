@@ -51,14 +51,109 @@ $total = $conn->query("
 
 $approvalRate = $total > 0 ? round(($approved / $total) * 100, 1) : 0;
 
+// 1. Strand distribution
+$strandStats = [];
+$res = $conn->query("
+    SELECT pi.Strand, COUNT(*) as count 
+    FROM assessments a
+    JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+    WHERE a.Status = 'approved' AND $dateCondition
+    GROUP BY pi.Strand
+");
+while ($row = $res->fetch_assoc()) {
+    $strandStats[] = [
+        "strand" => $row['Strand'],
+        "count" => (int)$row['count']
+    ];
+}
+
+// 2. RIASEC dominant types distribution
+$riasecStats = [];
+$res = $conn->query("
+    SELECT ar.PrimaryType, COUNT(*) as count 
+    FROM assessments a
+    JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
+    WHERE a.Status = 'approved' AND $dateCondition
+    GROUP BY ar.PrimaryType
+");
+while ($row = $res->fetch_assoc()) {
+    if ($row['PrimaryType']) {
+        $riasecStats[] = [
+            "type" => $row['PrimaryType'],
+            "count" => (int)$row['count']
+        ];
+    }
+}
+
+// 3. Self-esteem levels distribution
+$rseStats = [];
+$res = $conn->query("
+    SELECT r.Level, COUNT(*) as count 
+    FROM assessments a
+    JOIN rse_results r ON r.AssessmentID = a.AssessmentID
+    WHERE a.Status = 'approved' AND $dateCondition
+    GROUP BY r.Level
+");
+while ($row = $res->fetch_assoc()) {
+    if ($row['Level']) {
+        $rseStats[] = [
+            "level" => $row['Level'],
+            "count" => (int)$row['count']
+        ];
+    }
+}
+
+// 4. Burnout risk levels distribution
+$mbiStats = [];
+$res = $conn->query("
+    SELECT m.BurnoutStatus, COUNT(*) as count 
+    FROM assessments a
+    JOIN mbi_results m ON m.AssessmentID = a.AssessmentID
+    WHERE a.Status = 'approved' AND $dateCondition
+    GROUP BY m.BurnoutStatus
+");
+while ($row = $res->fetch_assoc()) {
+    if ($row['BurnoutStatus']) {
+        $mbiStats[] = [
+            "status" => $row['BurnoutStatus'],
+            "count" => (int)$row['count']
+        ];
+    }
+}
+
+// 5. Recent activity logs
+$recentActivity = [];
+$res = $conn->query("
+    SELECT a.AssessmentID, a.SubmittedAt, a.Status, pi.FirstName, pi.LastName, pi.Strand 
+    FROM assessments a
+    JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+    WHERE a.Status != 'in_progress'
+    ORDER BY a.SubmittedAt DESC
+    LIMIT 5
+");
+while ($row = $res->fetch_assoc()) {
+    $recentActivity[] = [
+        "assessmentId" => (int)$row['AssessmentID'],
+        "studentName"  => $row['FirstName'] . ' ' . $row['LastName'],
+        "strand"       => $row['Strand'],
+        "submittedAt"  => $row['SubmittedAt'],
+        "status"       => $row['Status']
+    ];
+}
+
 echo json_encode([
-    "status"         => "success",
-    "pendingCount"   => (int)$pending,
-    "totalStudents"  => (int)$totalStudents,
+    "status"           => "success",
+    "pendingCount"     => (int)$pending,
+    "totalStudents"    => (int)$totalStudents,
     "assessmentsToday" => (int)$assessmentsToday,
-    "feedbackGiven"  => (int)$feedbackGiven,
-    "approvalRate"   => $approvalRate,
-    "inProgress"     => (int)$conn->query("SELECT COUNT(*) as count FROM live_sessions ls JOIN assessments a ON a.AssessmentID = ls.AssessmentID WHERE ls.IsActive = TRUE AND a.Status = 'in_progress'")->fetch_assoc()['count']
+    "feedbackGiven"    => (int)$feedbackGiven,
+    "approvalRate"     => $approvalRate,
+    "inProgress"       => (int)$conn->query("SELECT COUNT(*) as count FROM live_sessions ls JOIN assessments a ON a.AssessmentID = ls.AssessmentID WHERE ls.IsActive = TRUE AND a.Status = 'in_progress'")->fetch_assoc()['count'],
+    "strandStats"      => $strandStats,
+    "riasecStats"      => $riasecStats,
+    "rseStats"         => $rseStats,
+    "mbiStats"         => $mbiStats,
+    "recentActivity"   => $recentActivity
 ]);
 
 $conn->close();

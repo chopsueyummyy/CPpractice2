@@ -388,13 +388,28 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                       '${rec['CourseCode']} • ${AppTheme.riasecName(rec['RIASECCategory'] ?? '')}',
                                                       style: const TextStyle(fontSize: 12),
                                                     ),
-                                                    trailing: Text(
-                                                      'Rank ${rec['Rank']}',
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        color: AppTheme.primaryPurple,
-                                                        fontSize: 12,
-                                                      ),
+                                                    trailing: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                      children: [
+                                                        Text(
+                                                          'Rank ${rec['Rank']}',
+                                                          style: TextStyle(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: AppTheme.primaryPurple,
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 4),
+                                                        Text(
+                                                          '✦ Match: ${(double.tryParse((rec['MatchScore'] ?? '0').toString()) ?? 0.0).toStringAsFixed(1)}%',
+                                                          style: const TextStyle(
+                                                            fontSize: 10,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: AppTheme.textSecondary,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                   if (explanation.isNotEmpty)
@@ -435,6 +450,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                               fontWeight: FontWeight.w500,
                                                             ),
                                                           ),
+                                                          _buildShapChart(rec['shapWeights'] as Map<String, dynamic>?, Colors.purple.shade700),
                                                         ],
                                                       ),
                                                     ),
@@ -491,6 +507,108 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 13))),
         Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
       ]),
+    );
+  }
+
+  Widget _buildShapChart(Map<String, dynamic>? weights, Color color) {
+    if (weights == null || weights.isEmpty) return const SizedBox.shrink();
+    
+    final featureOrder = ['Strand', 'R', 'I', 'A', 'S', 'E', 'C', 'RSES', 'MBI'];
+    final labels = {
+      'Strand': 'Strand Compatibility',
+      'R': 'Realistic (R)',
+      'I': 'Investigative (I)',
+      'A': 'Artistic (A)',
+      'S': 'Social (S)',
+      'E': 'Enterprising (E)',
+      'C': 'Conventional (C)',
+      'RSES': 'Rosenberg Self-Esteem',
+      'MBI': 'Burnout Resilience',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(Icons.bar_chart_rounded, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                '✦ AI Diagnostics (SHAP Feature Attribution):',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...featureOrder.map((feat) {
+            final weight = double.tryParse(weights[feat]?.toString() ?? '0.0') ?? 0.0;
+            if (weight == 0.0) return const SizedBox.shrink();
+            
+            const double maxRef = 3.0;
+            final double absoluteVal = weight.abs();
+            final double barWidthRatio = (absoluteVal / maxRef).clamp(0.02, 1.0);
+            
+            final bool isPositive = weight > 0;
+            final Color barColor = isPositive ? AppTheme.success : const Color(0xFFE53E3E);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 130,
+                    child: Text(
+                      labels[feat] ?? feat,
+                      style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        FractionallySizedBox(
+                          widthFactor: barWidthRatio,
+                          child: Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 45,
+                    child: Text(
+                      '${isPositive ? "+" : ""}${weight.toStringAsFixed(2)}',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: barColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

@@ -76,7 +76,7 @@ if ($result['Status'] === 'pending_review') {
 }
 
 $rec = $conn->prepare("
-    SELECT rr.Rank, rr.MatchScore, rr.Explanation, rc.CourseName, rc.CourseCode, rc.RIASECCategory
+    SELECT rr.Rank, rr.MatchScore, rr.Explanation, rr.ShapWeights, rc.CourseName, rc.CourseCode, rc.RIASECCategory
     FROM riasec_recommendations rr
     JOIN riasec_courses rc ON rc.CourseID = rr.CourseID
     WHERE rr.ResultID = ?
@@ -87,6 +87,8 @@ $rec->execute();
 $recResult = $rec->get_result();
 $recommendations = [];
 while ($row = $recResult->fetch_assoc()) {
+    $row['shapWeights'] = !empty($row['ShapWeights']) ? json_decode($row['ShapWeights'], true) : null;
+    unset($row['ShapWeights']);
     $recommendations[] = $row;
 }
 
