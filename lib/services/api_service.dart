@@ -271,4 +271,8 @@ class ApiService {
   static String getExportUrl(int adminId) {
     return '$baseUrl/admin_archive.php?exportCsv=true&adminId=$adminId';
   }
+
+  static String getExportPdfUrl(String adminId, {String roleId = '2'}) {
+    return '$baseUrl/export_pdf_summary.php?adminId=$adminId&roleId=$roleId';
+  }
 }

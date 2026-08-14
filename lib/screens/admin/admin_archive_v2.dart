@@ -43,6 +43,13 @@ class _AdminArchiveV2State extends State<AdminArchiveV2> {
     _showSnackBar('Preparing CSV export. The download will begin shortly.', AppTheme.info);
   }
 
+  void _exportPdf() {
+    final url = ApiService.getExportPdfUrl((_session.adminId ?? 0).toString());
+    html.window.open(url, '_blank');
+    
+    _showSnackBar('Preparing General PDF Summary Report. Opening shortly...', AppTheme.info);
+  }
+
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: color),
@@ -113,20 +120,36 @@ class _AdminArchiveV2State extends State<AdminArchiveV2> {
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'This will generate a CSV file containing all Student assessment results, school strands, grade levels, and top career match codes.',
+                Text(
+                  'Generate official PDF summary reports or download CSV data files containing all Student assessment results, SHS strands, personality trends, and psychometric benchmarks.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: _exportCsv,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(Icons.file_download),
-                  label: const Text('Export System Records (.CSV)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _exportPdf,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.picture_as_pdf_rounded),
+                      label: const Text('Download General PDF Report', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _exportCsv,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.file_download),
+                      label: const Text('Export System Records (.CSV)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 const Text(

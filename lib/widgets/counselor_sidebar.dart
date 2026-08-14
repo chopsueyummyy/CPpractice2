@@ -53,7 +53,7 @@ class CounselorSidebar extends StatelessWidget {
                   ),
                 ),
                 const Text(
-                  'RIASEC Assessment System',
+                  'Career Assessment Suite',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14,

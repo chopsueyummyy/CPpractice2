@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../services/api_service.dart';
 import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/theme_manager.dart';
+import '../../widgets/glass_card.dart';
 import '../../widgets/student_sidebar.dart';
 
 class StudentDashboard extends StatefulWidget {
@@ -106,6 +108,16 @@ class _StudentDashboardState extends State<StudentDashboard> {
         ),
         actions: [
           IconButton(
+            icon: ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeManager.themeModeNotifier,
+              builder: (context, mode, child) {
+                return Icon(mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode);
+              },
+            ),
+            tooltip: 'Toggle Theme',
+            onPressed: ThemeManager.toggleTheme,
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () {
@@ -122,10 +134,15 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    AppTheme.backgroundLight,
-                    AppTheme.primaryPurple.withOpacity(0.04),
-                  ],
+                  colors: Theme.of(context).brightness == Brightness.dark
+                      ? [
+                          const Color(0xFF12121E),
+                          const Color(0xFF1A1A2A),
+                        ]
+                      : [
+                          AppTheme.backgroundLight,
+                          AppTheme.lilac.withOpacity(0.2),
+                        ],
                 ),
               ),
               child: Center(
@@ -133,15 +150,10 @@ class _StudentDashboardState extends State<StudentDashboard> {
                   padding: const EdgeInsets.all(24.0),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 650),
-                    child: Card(
-                      elevation: 6,
-                      shadowColor: Colors.black12,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40.0, vertical: 48.0),
+                    child: GlassCard(
+                      borderRadius: 24,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40.0, vertical: 48.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +189,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
-                                color: AppTheme.primaryPurple,
+                                color: Theme.of(context).brightness == Brightness.dark ? AppTheme.lilac : AppTheme.primaryPurple,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -192,7 +204,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                           : 'Kickstart your journey by taking our Course Assessment to discover the best course path for you today!',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppTheme.textSecondary,
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : AppTheme.textSecondary,
                                 height: 1.55,
                               ),
                             ),
@@ -211,10 +223,10 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                       }
                                     : null,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _buttonEnabled ? _buttonColor : Colors.grey.shade200,
+                                  backgroundColor: _buttonEnabled ? _buttonColor : (Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
                                   foregroundColor: _buttonEnabled 
                                       ? (_buttonColor == AppTheme.primaryYellow ? AppTheme.primaryPurple : Colors.white)
-                                      : Colors.grey,
+                                      : (Theme.of(context).brightness == Brightness.dark ? Colors.white30 : Colors.grey),
                                   elevation: _buttonEnabled ? 2 : 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -268,7 +280,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
                   ),
                 ),
               ),
-            ),
     );
   }
 
@@ -400,7 +411,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+              style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
             ),
           ),
         ],

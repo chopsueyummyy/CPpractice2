@@ -15,7 +15,7 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
     $adminId = $_GET['adminId'] ?? null;
     $roleId = $_GET['roleId'] ?? null;
     
-    if (!$adminId) {
+    if ($adminId === null || $adminId === '') {
         die("Unauthorized Citadel access.");
     }
     
@@ -31,14 +31,17 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
     ];
     
     // We export the completed assessments for Archiving / Analysis
-    // Sub-join on personal_information ensures we only get the latest profile per student,
-    // avoiding duplicates without using illegal GROUP BY clauses.
+    // Sub-join on personal_information ensures we only get the latest profile per student
     $res = $conn->query("
         SELECT a.AssessmentID, a.StudentID, s.FirstName, s.LastName, 
                pi.Strand, pi.GradeLevel,
                r.PrimaryType, r.SecondaryType, r.TertiaryType,
+               r.R_Score, r.I_Score, r.A_Score, r.S_Score, r.E_Score, r.C_Score,
+               rse.Score as RSES_Score, rse.Level as RSES_Level,
+               cdses.TotalScore as CDSES_Score, cdses.SelfEfficacyLevel as CDSES_Level,
+               a.AgreedToDisclaimer,
                a.Status, 
-               DATE_FORMAT(a.SubmittedAt, '%Y-%m-%d') as DateSubmitted,
+               DATE_FORMAT(a.SubmittedAt, '%Y-%m-%d %H:%i:%s') as DateSubmitted,
                (SELECT GROUP_CONCAT(c.CourseName SEPARATOR '; ') 
                 FROM riasec_recommendations rec 
                 JOIN riasec_courses c ON c.CourseID = rec.CourseID 
@@ -53,6 +56,8 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
             ) pi2 ON pi1.PI_ID = pi2.max_id
         ) pi ON pi.StudentID = s.StudentID
         LEFT JOIN assessment_results r ON r.AssessmentID = a.AssessmentID
+        LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
+        LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
         WHERE a.Status != 'in_progress'
         ORDER BY a.SubmittedAt DESC
     ");
@@ -68,13 +73,41 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
     // Add UTF-8 BOM to force Excel to read the file with correct encoding (fixes characters like ñ)
     fwrite($output, "\xEF\xBB\xBF");
     
-    fputcsv($output, array('Assessment ID', 'Student ID', 'First Name', 'Last Name', 'Strand', 'Grade Level', 'Recommended Courses', 'Primary Type', 'Secondary Type', 'Tertiary Type', 'Status', 'Date Submitted'));
+    fputcsv($output, array(
+        'Assessment ID', 
+        'Student ID', 
+        'First Name', 
+        'Last Name', 
+        'Strand', 
+        'Grade Level', 
+        'Recommended Courses', 
+        'Primary Type', 
+        'Secondary Type', 
+        'Tertiary Type', 
+        'R Score',
+        'I Score',
+        'A Score',
+        'S Score',
+        'E Score',
+        'C Score',
+        'RSES Score',
+        'RSES Level',
+        'CDSES-SF Score',
+        'CDSES-SF Level',
+        'Disclaimer Agreed',
+        'Status', 
+        'Date Submitted'
+    ));
     
     while ($row = $res->fetch_assoc()) {
         $strand = $row['Strand'] ?? 'Unknown';
         if (isset($strandMapping[$strand])) {
             $strand = $strandMapping[$strand];
         }
+        
+        $disclaimerAgreed = ($row['AgreedToDisclaimer'] == 1 || $row['AgreedToDisclaimer'] === '1' || $row['AgreedToDisclaimer'] === true)
+            ? 'Yes (Agreed)'
+            : 'No';
         
         fputcsv($output, [
             $row['AssessmentID'],
@@ -83,10 +116,21 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
             $row['LastName'],
             $strand,
             $row['GradeLevel'],
-            $row['RecommendedCourses'],
-            $row['PrimaryType'],
-            $row['SecondaryType'],
-            $row['TertiaryType'],
+            $row['RecommendedCourses'] ?? 'N/A',
+            $row['PrimaryType'] ?? 'N/A',
+            $row['SecondaryType'] ?? 'N/A',
+            $row['TertiaryType'] ?? 'N/A',
+            $row['R_Score'] ?? 0,
+            $row['I_Score'] ?? 0,
+            $row['A_Score'] ?? 0,
+            $row['S_Score'] ?? 0,
+            $row['E_Score'] ?? 0,
+            $row['C_Score'] ?? 0,
+            $row['RSES_Score'] ?? 'N/A',
+            $row['RSES_Level'] ?? 'N/A',
+            $row['CDSES_Score'] ?? 'N/A',
+            $row['CDSES_Level'] ?? 'N/A',
+            $disclaimerAgreed,
             $row['Status'],
             $row['DateSubmitted']
         ]);

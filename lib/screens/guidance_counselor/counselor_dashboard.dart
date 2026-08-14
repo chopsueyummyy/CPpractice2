@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/theme_manager.dart';
 import '../../services/api_service.dart';
 import '../../services/session_manager.dart';
 import '../../widgets/counselor_sidebar.dart';
+import '../../widgets/glass_card.dart';
 
 class CounselorDashboard extends StatefulWidget {
   const CounselorDashboard({super.key});
@@ -49,6 +52,16 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
         ),
         actions: [
           IconButton(
+            icon: ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeManager.themeModeNotifier,
+              builder: (context, mode, child) {
+                return Icon(mode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode);
+              },
+            ),
+            tooltip: 'Toggle Theme',
+            onPressed: ThemeManager.toggleTheme,
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadStats,
           ),
@@ -70,47 +83,46 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Profile picture settings coming soon!')),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(30),
-                        child: CircleAvatar(
-                          radius: 30,
-                          backgroundColor: AppTheme.primaryPurple.withOpacity(0.15),
-                          child: const Icon(Icons.psychology, size: 30, color: AppTheme.primaryPurple),
-                        ),
+              GlassCard(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Profile picture settings coming soon!')),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(30),
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: AppTheme.primaryPurple.withOpacity(0.15),
+                        child: const Icon(Icons.psychology, size: 30, color: AppTheme.primaryPurple),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Welcome, ${_session.counselorFirstName ?? 'Counselor'}!',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome, ${_session.counselorFirstName ?? 'Counselor'}!',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Monitor student assessments and review recommendations.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.textSecondary,
-                              ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Monitor student assessments and review recommendations.',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppTheme.textSecondary,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
@@ -145,41 +157,83 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Stat cards
-                      Row(
-                        children: [
-                          Expanded(child: _statCard(
-                            context, 'Pending Approvals',
-                            '${_stats['pendingCount'] ?? 0}',
-                            Icons.pending_actions_rounded, AppTheme.warning,
-                            () => context.go('/guidance-counselor/pending-approvals'),
-                          )),
-                          const SizedBox(width: 16),
-                          Expanded(child: _statCard(
-                            context, 'Total Students',
-                            '${_stats['totalStudents'] ?? 0}',
-                            Icons.people_alt_rounded, AppTheme.info,
-                            () => context.go('/guidance-counselor/student-records'),
-                          )),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(child: _statCard(
-                            context, 'Assessments Today',
-                            '${_stats['assessmentsToday'] ?? 0}',
-                            Icons.assessment_rounded, AppTheme.success,
-                            () => context.go('/guidance-counselor/monitoring'),
-                          )),
-                          const SizedBox(width: 16),
-                          Expanded(child: _statCard(
-                            context, 'Live Now',
-                            '${_stats['inProgress'] ?? 0}',
-                            Icons.sensors_rounded, AppTheme.primaryPurple,
-                            () => context.go('/guidance-counselor/monitoring'),
-                          )),
-                        ],
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isWide = constraints.maxWidth > 900;
+                          if (isWide) {
+                            return Row(
+                              children: [
+                                Expanded(child: _statCard(
+                                  context, 'Pending Approvals',
+                                  '${_stats['pendingCount'] ?? 0}',
+                                  Icons.pending_actions_rounded, AppTheme.warning,
+                                  () => context.go('/guidance-counselor/pending-approvals'),
+                                )),
+                                const SizedBox(width: 16),
+                                Expanded(child: _statCard(
+                                  context, 'Total Students',
+                                  '${_stats['totalStudents'] ?? 0}',
+                                  Icons.people_alt_rounded, AppTheme.info,
+                                  () => context.go('/guidance-counselor/student-records'),
+                                )),
+                                const SizedBox(width: 16),
+                                Expanded(child: _statCard(
+                                  context, 'Assessments Today',
+                                  '${_stats['assessmentsToday'] ?? 0}',
+                                  Icons.assessment_rounded, AppTheme.success,
+                                  () => context.go('/guidance-counselor/monitoring'),
+                                )),
+                                const SizedBox(width: 16),
+                                Expanded(child: _statCard(
+                                  context, 'Live Now',
+                                  '${_stats['inProgress'] ?? 0}',
+                                  Icons.sensors_rounded, AppTheme.primaryPurple,
+                                  () => context.go('/guidance-counselor/monitoring'),
+                                )),
+                              ],
+                            );
+                          } else {
+                            return Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(child: _statCard(
+                                      context, 'Pending Approvals',
+                                      '${_stats['pendingCount'] ?? 0}',
+                                      Icons.pending_actions_rounded, AppTheme.warning,
+                                      () => context.go('/guidance-counselor/pending-approvals'),
+                                    )),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: _statCard(
+                                      context, 'Total Students',
+                                      '${_stats['totalStudents'] ?? 0}',
+                                      Icons.people_alt_rounded, AppTheme.info,
+                                      () => context.go('/guidance-counselor/student-records'),
+                                    )),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(child: _statCard(
+                                      context, 'Assessments Today',
+                                      '${_stats['assessmentsToday'] ?? 0}',
+                                      Icons.assessment_rounded, AppTheme.success,
+                                      () => context.go('/guidance-counselor/monitoring'),
+                                    )),
+                                    const SizedBox(width: 16),
+                                    Expanded(child: _statCard(
+                                      context, 'Live Now',
+                                      '${_stats['inProgress'] ?? 0}',
+                                      Icons.sensors_rounded, AppTheme.primaryPurple,
+                                      () => context.go('/guidance-counselor/monitoring'),
+                                    )),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(height: 24),
 
@@ -305,33 +359,72 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
 
   Widget _statCard(BuildContext context, String label, String value,
       IconData icon, Color color, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.dividerColor.withOpacity(0.5),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: color, size: 24),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: AppTheme.textSecondary.withOpacity(0.4),
+                      size: 14,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                const SizedBox(height: 18),
+                Text(
+                  value,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : AppTheme.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -339,25 +432,59 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
   }
 
   Widget _analyticItem(String label, String value, Color color, IconData icon) {
+    final isDark = ThemeManager.isDarkMode;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color),
+        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : color.withOpacity(0.15),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-            textAlign: TextAlign.center,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : AppTheme.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -389,8 +516,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 16),
             if (total == 0)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: Text('No approved assessment results yet.',
                       style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
@@ -461,7 +588,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 16),
             if (total == 0)
-              const SizedBox(
+              SizedBox(
                 height: 100,
                 child: Center(
                   child: Text('No strand data available.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
@@ -482,7 +609,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(strandName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                            Text('$count student(s)', style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                            Text('$count student(s)', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -532,7 +659,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 16),
             if (total == 0)
-              const SizedBox(
+              SizedBox(
                 height: 120,
                 child: Center(
                   child: Text('No self-esteem data available.',
@@ -570,7 +697,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                           const SizedBox(height: 4),
                           Text(
                             '$count Student(s)',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                           ),
                         ],
                       ),
@@ -579,7 +706,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                 }).toList(),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Identifies students with low self-esteem levels who may benefit from academic self-worth enrichment programs.',
                 style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
               ),
@@ -616,7 +743,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 16),
             if (total == 0)
-              const SizedBox(
+              SizedBox(
                 height: 120,
                 child: Center(
                   child: Text('No self-efficacy data available.',
@@ -660,7 +787,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                 );
               }).toList(),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Tracks confidence in self-appraisal, occupational info gathering, goal selecting, planning, and problem-solving.',
                 style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, height: 1.4),
               ),
@@ -692,8 +819,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 16),
             if (recentActivity.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Center(
                   child: Text('No student activity logged yet.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
                 ),
@@ -727,7 +854,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                             const SizedBox(height: 2),
                             Text(
                               'Strand: ${act['strand']} • Submitted: ${act['submittedAt']}',
-                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                              style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                             ),
                           ],
                         ),

@@ -56,7 +56,7 @@ class StudentSidebar extends StatelessWidget {
                   ),
                 ),
                 const Text(
-                  'RIASEC Assessment',
+                  'Career Assessment Suite',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
@@ -70,7 +70,7 @@ class StudentSidebar extends StatelessWidget {
           _buildNavItem(
             context,
             icon: Icons.quiz,
-            title: 'RIASEC Assessment',
+            title: 'Career Assessment',
             route: '/student/student-details',
             isSelected: currentRoute == '/student/assessment' ||
                       currentRoute == '/student/student-details' ||

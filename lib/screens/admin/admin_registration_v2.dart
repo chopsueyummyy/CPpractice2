@@ -215,7 +215,7 @@ class _AdminRegistrationV2State extends State<AdminRegistrationV2> {
               
               if (_targetType == 'student') ...[
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Note: Full profile details will be provided by the student during their first login.',
                   style: TextStyle(fontStyle: FontStyle.italic, color: AppTheme.textSecondary, fontSize: 13),
                 ),

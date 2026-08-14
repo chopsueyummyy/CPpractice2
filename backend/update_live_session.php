@@ -21,7 +21,7 @@ if (empty($assessmentId)) {
 }
 
 $stmt = $conn->prepare("
-    UPDATE live_sessions SET CurrentQuestion = ?, Duration = ?
+    UPDATE live_sessions SET CurrentQuestion = ?, Duration = ?, TotalQuestions = 77
     WHERE AssessmentID = ? AND IsActive = TRUE
 ");
 $stmt->bind_param("iii", $currentQuestion, $duration, $assessmentId);

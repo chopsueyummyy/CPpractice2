@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme_manager.dart';
 
 class AppTheme {
   // School Color Palette
@@ -17,12 +18,12 @@ class AppTheme {
   static const Color info     = Color(0xFF2980B9);
 
   // Neutral
-  static const Color backgroundLight = Color(0xFFF8F5FF); // Tinted with purple
-  static const Color backgroundWhite = Color(0xFFFFFFFF);
-  static const Color textPrimary     = Color(0xFF1A1A1A);
-  static const Color textSecondary   = Color(0xFF6B6B6B);
-  static const Color dividerColor    = Color(0xFFE8E0F0);
-  static const Color cardBackground  = Color(0xFFFFFFFF);
+  static Color get backgroundLight => ThemeManager.isDarkMode ? const Color(0xFF12121E) : const Color(0xFFF8F5FF);
+  static Color get backgroundWhite => ThemeManager.isDarkMode ? const Color(0xFF1E1E2E) : const Color(0xFFFFFFFF);
+  static Color get textPrimary     => ThemeManager.isDarkMode ? const Color(0xFFF1F1F1) : const Color(0xFF1A1A1A);
+  static Color get textSecondary   => ThemeManager.isDarkMode ? const Color(0xFFA0A0B0) : const Color(0xFF6B6B6B);
+  static Color get dividerColor    => ThemeManager.isDarkMode ? const Color(0xFF2E2E3E) : const Color(0xFFE8E0F0);
+  static Color get cardBackground  => ThemeManager.isDarkMode ? const Color(0xFF1E1E2E) : const Color(0xFFFFFFFF);
 
   // RIASEC type colors (kept distinct for data visualization)
   static const Color riasecR = Color(0xFFE74C3C);
@@ -103,11 +104,11 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: dividerColor),
+          borderSide: BorderSide(color: dividerColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: dividerColor),
+          borderSide: BorderSide(color: dividerColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -116,7 +117,7 @@ class AppTheme {
         filled: true,
         fillColor: backgroundWhite,
         prefixIconColor: primaryPurple,
-        labelStyle: const TextStyle(color: textSecondary),
+        labelStyle: TextStyle(color: textSecondary),
         floatingLabelStyle: const TextStyle(color: primaryPurple),
       ),
       chipTheme: ChipThemeData(
@@ -124,9 +125,108 @@ class AppTheme {
         labelStyle: const TextStyle(color: primaryPurple),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
+      progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryPurple,
         linearTrackColor: dividerColor,
+      ),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryPurple,
+        brightness: Brightness.dark,
+        primary: primaryPurple,
+        secondary: primaryYellow,
+        surface: const Color(0xFF1E1E2E),
+        onPrimary: white,
+        onSecondary: black,
+      ),
+      scaffoldBackgroundColor: const Color(0xFF12121E),
+      appBarTheme: const AppBarTheme(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Color(0xFF1A1A2A),
+        foregroundColor: white,
+        titleTextStyle: TextStyle(
+          color: white,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(color: white),
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: const Color(0xFF1E1E2E),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryPurple,
+          foregroundColor: white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: lilac,
+          side: const BorderSide(color: lilac),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return primaryPurple;
+            return const Color(0xFF1E1E2E);
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return white;
+            return primaryPurple;
+          }),
+        ),
+      ),
+      drawerTheme: const DrawerThemeData(
+        backgroundColor: Color(0xFF1E1E2E),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2E2E3E)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2E2E3E)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: primaryPurple, width: 2),
+        ),
+        filled: true,
+        fillColor: const Color(0xFF1E1E2E),
+        prefixIconColor: primaryPurple,
+        labelStyle: const TextStyle(color: Color(0xFF8E8E9F)),
+        floatingLabelStyle: const TextStyle(color: primaryPurple),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: primaryPurple.withOpacity(0.3),
+        labelStyle: const TextStyle(color: white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primaryPurple,
+        linearTrackColor: Color(0xFF2E2E3E),
       ),
     );
   }

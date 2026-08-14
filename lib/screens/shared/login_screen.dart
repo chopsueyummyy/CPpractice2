@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/theme_manager.dart';
 import '../../utils/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -147,6 +148,31 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
+          // ── Theme toggle switch ───────────────────────────
+          Positioned(
+            top: 24,
+            right: 24,
+            child: ValueListenableBuilder<ThemeMode>(
+              valueListenable: ThemeManager.themeModeNotifier,
+              builder: (context, mode, child) {
+                final isDark = mode == ThemeMode.dark;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: (isDark ? Colors.black : Colors.white).withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      isDark ? Icons.light_mode : Icons.dark_mode,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                    onPressed: ThemeManager.toggleTheme,
+                  ),
+                );
+              },
+            ),
+          ),
+
           // ── Login Card ────────────────────────────────────
           Center(
             child: SingleChildScrollView(
@@ -159,15 +185,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.92), // Glass style background color
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black.withOpacity(0.4)
+                            : Colors.white.withOpacity(0.55), // More translucent for real glass effect
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.55),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withOpacity(0.12)
+                              : Colors.white.withOpacity(0.4),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.35 : 0.08),
                             blurRadius: 24,
                             offset: const Offset(0, 8),
                           ),

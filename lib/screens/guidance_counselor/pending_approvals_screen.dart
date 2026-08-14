@@ -404,7 +404,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                         const SizedBox(height: 4),
                                                         Text(
                                                           '✦ Match: ${(double.tryParse((rec['MatchScore'] ?? '0').toString()) ?? 0.0).toStringAsFixed(1)}%',
-                                                          style: const TextStyle(
+                                                          style: TextStyle(
                                                             fontSize: 10,
                                                             fontWeight: FontWeight.w600,
                                                             color: AppTheme.textSecondary,

@@ -52,7 +52,7 @@ if ($stmt->execute()) {
 
     $live = $conn->prepare("
         INSERT INTO live_sessions (AssessmentID, StudentID, PI_ID, CurrentQuestion, TotalQuestions, IsActive)
-        VALUES (?, ?, ?, 1, 42, TRUE)
+        VALUES (?, ?, ?, 1, 77, TRUE)
     ");
     $live->bind_param("isi", $assessmentId, $studentId, $piId);
     $live->execute();

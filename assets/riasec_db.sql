@@ -139,7 +139,7 @@ CREATE TABLE `live_sessions` (
   `StudentID` bigint(20) NOT NULL,
   `PI_ID` bigint(20) NOT NULL,
   `CurrentQuestion` int(11) NOT NULL DEFAULT 1,
-  `TotalQuestions` int(11) NOT NULL DEFAULT 42,
+  `TotalQuestions` int(11) NOT NULL DEFAULT 77,
   `Duration` bigint(20) NOT NULL DEFAULT 0,
   `IsActive` tinyint(1) NOT NULL DEFAULT 1,
   `StartedAt` timestamp NOT NULL DEFAULT current_timestamp(),

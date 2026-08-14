@@ -235,7 +235,7 @@ class _MonitoringScreenState extends State<MonitoringScreen> {
                                       const SizedBox(height: 12),
                                       Row(
                                         children: [
-                                          const Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary),
+                                          Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary),
                                           const SizedBox(width: 4),
                                           Text(
                                             'Time elapsed: ${_formatDuration(s['duration'])}',

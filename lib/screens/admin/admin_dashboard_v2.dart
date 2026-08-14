@@ -88,9 +88,9 @@ class _AdminDashboardV2State extends State<AdminDashboardV2> {
               onDestinationSelected: (int index) {
                 setState(() => _selectedIndex = index);
               },
-              unselectedIconTheme: const IconThemeData(color: AppTheme.textSecondary),
+              unselectedIconTheme: IconThemeData(color: AppTheme.textSecondary),
               selectedIconTheme: const IconThemeData(color: AppTheme.primaryPurple, size: 28),
-              unselectedLabelTextStyle: const TextStyle(color: AppTheme.textSecondary),
+              unselectedLabelTextStyle: TextStyle(color: AppTheme.textSecondary),
               selectedLabelTextStyle: const TextStyle(color: AppTheme.primaryPurple, fontWeight: FontWeight.bold),
               indicatorColor: AppTheme.primaryPurple.withOpacity(0.1),
               destinations: [

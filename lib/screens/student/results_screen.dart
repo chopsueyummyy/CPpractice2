@@ -225,7 +225,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         const SizedBox(height: 6),
                         Text(
                           _resultsData!['counselorNotes'].toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 13,
                             height: 1.4,
@@ -269,13 +269,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                 alignment: WrapAlignment.center,
                                 children: [
                                   _typeChip(primary, rank: 1),
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 16.0),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
                                     child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
                                   ),
                                   _typeChip(secondary, rank: 2),
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 16.0),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
                                     child: Icon(Icons.add, color: AppTheme.textSecondary, size: 16),
                                   ),
                                   _typeChip(tertiary, rank: 3),
@@ -466,14 +466,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7FAFC),
+        color: AppTheme.backgroundLight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.dividerColor.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Why were these courses recommended?',
             style: TextStyle(
               fontWeight: FontWeight.w800,
@@ -501,7 +501,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -527,7 +527,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         children: [
           Icon(Icons.info_outline_rounded, color: Colors.amber.shade800, size: 20),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'These recommendations represent the best course matches based on your assessment results. They are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
               style: TextStyle(
@@ -703,7 +703,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                     title: Text(
                       rec['CourseName'] as String,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                         color: AppTheme.textPrimary,
@@ -799,8 +799,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                         Expanded(
                                           child: Text(
                                             '$sentence.',
-                                            style: const TextStyle(
-                                              color: Color(0xFF4A4A4A),
+                                            style: TextStyle(
+                                              color: AppTheme.textPrimary,
                                               fontSize: 13,
                                               height: 1.55,
                                               fontWeight: FontWeight.w500,
@@ -861,7 +861,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             const SizedBox(height: 8),
             Text(
               'Your RSE Score: $score / 30',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
             ),
             const SizedBox(height: 12),
             Text(
@@ -869,7 +869,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ? 'Your self-esteem score suggests low self-esteem. We advise speaking with your guidance counselor for helpful self-esteem enhancement activities.'
                 : 'Your self-esteem score is within the normal range. Keep nurturing a positive and healthy relationship with yourself!',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textSecondary),
+              style: TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -885,7 +885,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.dividerColor)
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -982,7 +982,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                             color: levelColor,
                           ),
                         ),
-                        const Text(
+                        Text(
                           '/ 125',
                           style: TextStyle(
                             fontSize: 10,
@@ -1016,7 +1016,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Career Decision Self-Efficacy measures your confidence in successfully navigating career choices, goal planning, and academic decisions.',
                         style: TextStyle(
                           fontSize: 12,
@@ -1105,7 +1105,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.dividerColor)
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(

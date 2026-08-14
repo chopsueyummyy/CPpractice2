@@ -128,6 +128,38 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
     _loadRecords();
   }
 
+  Future<void> _downloadPdfSummary() async {
+    try {
+      final String adminId = _session.counselorId?.toString() ?? '0';
+      final String roleId = _session.roleId?.toString() ?? '2';
+      
+      final Uri uri = Uri.parse(
+        '${ApiService.baseUrl}/export_pdf_summary.php'
+        '?adminId=$adminId'
+        '&roleId=$roleId'
+      );
+      
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        throw 'Could not launch $uri';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Opening General PDF Summary Report...'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF Export failed: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
   Future<void> _downloadCsv() async {
     try {
       final String adminId = _session.counselorId?.toString() ?? '0';
@@ -192,6 +224,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_rounded),
+            tooltip: 'Download General PDF Report',
+            onPressed: _downloadPdfSummary,
+          ),
           IconButton(
             icon: const Icon(Icons.download),
             tooltip: 'Export CSV',
@@ -337,7 +374,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
               children: [
                 Text(
                   '${_records.length} record(s) found',
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                  style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
                 ),
               ],
             ),
@@ -348,12 +385,12 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _records.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.folder_open, size: 64, color: AppTheme.textSecondary),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Text('No records found', style: TextStyle(color: AppTheme.textSecondary)),
                           ],
                         ),
@@ -527,7 +564,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                           '• SA: ${cdses['saScore']} | OI: ${cdses['oiScore']} | '
                                           'GS: ${cdses['gsScore']} | PL: ${cdses['plScore']} | '
                                           'PS: ${cdses['psScore']}',
-                                          style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
+                                          style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
                                         ),
                                       ],
 
@@ -698,7 +735,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          SizedBox(width: 80, child: Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12))),
+          SizedBox(width: 80, child: Text(label, style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))),
           Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
@@ -735,7 +772,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               color: AppTheme.textPrimary,
               fontWeight: FontWeight.w500,
