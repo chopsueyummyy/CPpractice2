@@ -107,7 +107,12 @@ $resultId = (int)$conn->insert_id;
 // 2. SCORING ROSENBERG SELF-ESTEEM SCALE (RSE)
 if (!empty($rseAnswers)) {
     // Delete old answers if exist
-    $conn->query("DELETE FROM rse_answers WHERE AssessmentID = $assessmentId");
+    $delRse = $conn->prepare("DELETE FROM rse_answers WHERE AssessmentID = ?");
+    if ($delRse) {
+        $delRse->bind_param("i", $assessmentId);
+        $delRse->execute();
+        $delRse->close();
+    }
     
     $rseScore = 0;
     $rseSum = 0; // Reset default fallback
@@ -153,7 +158,12 @@ if (!empty($rseAnswers)) {
 // 3. SCORING CAREER DECISION SELF-EFFICACY SCALE (CDSES-SF)
 if (!empty($cdsesAnswers)) {
     // Delete old answers if exist
-    $conn->query("DELETE FROM cdses_answers WHERE AssessmentID = $assessmentId");
+    $delCdses = $conn->prepare("DELETE FROM cdses_answers WHERE AssessmentID = ?");
+    if ($delCdses) {
+        $delCdses->bind_param("i", $assessmentId);
+        $delCdses->execute();
+        $delCdses->close();
+    }
 
     $saSum = 0; $saCount = 0;
     $oiSum = 0; $oiCount = 0;
@@ -260,7 +270,12 @@ $payload = [
 ];
 
 // Clear previous recommendations for this ResultID if any
-$conn->query("DELETE FROM riasec_recommendations WHERE ResultID = $resultId");
+$delRec = $conn->prepare("DELETE FROM riasec_recommendations WHERE ResultID = ?");
+if ($delRec) {
+    $delRec->bind_param("i", $resultId);
+    $delRec->execute();
+    $delRec->close();
+}
 
 $recommendationsSaved = false;
 

@@ -23,16 +23,28 @@ if ($method === 'GET') {
     
     if ($assessmentId > 0) {
         $details = [];
-        $res = $conn->query("SELECT * FROM assessment_results WHERE AssessmentID = $assessmentId");
-        if ($res && $resRow = $res->fetch_assoc()) {
-            $details['results'] = $resRow;
-            $resultId = $resRow['ResultID'];
-            $reqs = $conn->query("SELECT r.*, c.CourseName FROM riasec_recommendations r JOIN riasec_courses c ON r.CourseID = c.CourseID WHERE r.ResultID = $resultId ORDER BY r.Rank ASC");
-            $recommendations = [];
-            if ($reqs) {
-                while($reqRow = $reqs->fetch_assoc()) $recommendations[] = $reqRow;
+        $stmtRes = $conn->prepare("SELECT * FROM assessment_results WHERE AssessmentID = ?");
+        if ($stmtRes) {
+            $stmtRes->bind_param("i", $assessmentId);
+            $stmtRes->execute();
+            $res = $stmtRes->get_result();
+            if ($res && $resRow = $res->fetch_assoc()) {
+                $details['results'] = $resRow;
+                $resultId = $resRow['ResultID'];
+                $stmtReqs = $conn->prepare("SELECT r.*, c.CourseName FROM riasec_recommendations r JOIN riasec_courses c ON r.CourseID = c.CourseID WHERE r.ResultID = ? ORDER BY r.Rank ASC");
+                if ($stmtReqs) {
+                    $stmtReqs->bind_param("i", $resultId);
+                    $stmtReqs->execute();
+                    $reqs = $stmtReqs->get_result();
+                    $recommendations = [];
+                    if ($reqs) {
+                        while($reqRow = $reqs->fetch_assoc()) $recommendations[] = $reqRow;
+                    }
+                    $details['recommendations'] = $recommendations;
+                    $stmtReqs->close();
+                }
             }
-            $details['recommendations'] = $recommendations;
+            $stmtRes->close();
         }
         echo json_encode(["status" => "success", "details" => $details]);
         exit();

@@ -37,7 +37,6 @@ class SessionManager {
     studentId           = storage['riasec_studentId'];
     studentFirstName    = storage['riasec_studentFirstName'];
     studentLastName     = storage['riasec_studentLastName'];
-    studentLastName     = storage['riasec_studentLastName'];
     
     counselorId         = int.tryParse(storage['riasec_counselorId'] ?? '');
     counselorFirstName  = storage['riasec_counselorFirstName'];
@@ -57,7 +56,6 @@ class SessionManager {
     final storage = html.window.localStorage;
     storage['riasec_studentId']           = studentId ?? '';
     storage['riasec_studentFirstName']    = studentFirstName ?? '';
-    storage['riasec_studentLastName']     = studentLastName ?? '';
     storage['riasec_studentLastName']     = studentLastName ?? '';
     
     storage['riasec_counselorId']         = counselorId?.toString() ?? '';
@@ -131,7 +129,6 @@ class SessionManager {
     storage.clear(); // Wipe everything
     studentId            = null;
     studentFirstName     = null;
-    studentLastName      = null;
     studentLastName      = null;
     counselorId          = null;
     counselorFirstName   = null;

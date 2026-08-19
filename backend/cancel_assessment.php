@@ -14,9 +14,24 @@ $data = json_decode(file_get_contents("php://input"), true);
 $assessmentId = (int)($data['assessmentId'] ?? 0);
 
 if ($assessmentId > 0) {
-    $conn->query("DELETE FROM live_sessions WHERE AssessmentID = $assessmentId");
-    $conn->query("DELETE FROM assessment_answers WHERE AssessmentID = $assessmentId");
-    $conn->query("DELETE FROM assessments WHERE AssessmentID = $assessmentId");
+    $stmt1 = $conn->prepare("DELETE FROM live_sessions WHERE AssessmentID = ?");
+    if ($stmt1) {
+        $stmt1->bind_param("i", $assessmentId);
+        $stmt1->execute();
+        $stmt1->close();
+    }
+    $stmt2 = $conn->prepare("DELETE FROM assessment_answers WHERE AssessmentID = ?");
+    if ($stmt2) {
+        $stmt2->bind_param("i", $assessmentId);
+        $stmt2->execute();
+        $stmt2->close();
+    }
+    $stmt3 = $conn->prepare("DELETE FROM assessments WHERE AssessmentID = ?");
+    if ($stmt3) {
+        $stmt3->bind_param("i", $assessmentId);
+        $stmt3->execute();
+        $stmt3->close();
+    }
     
     echo json_encode(["status" => "success", "message" => "Ghost Session Deleted."]);
 } else {

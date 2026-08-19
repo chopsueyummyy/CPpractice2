@@ -103,20 +103,68 @@ if ($method === 'GET') {
     $id = (int)($data['id'] ?? 0);
     
     if ($role === 'student') {
-        $conn->query("DELETE FROM live_sessions WHERE StudentID = $id");
-        $assRes = $conn->query("SELECT AssessmentID FROM assessments WHERE StudentID = $id");
-        while($r = $assRes->fetch_assoc()) {
-            $aId = $r['AssessmentID'];
-            $conn->query("DELETE FROM assessment_answers WHERE AssessmentID = $aId");
-            $conn->query("DELETE FROM riasec_recommendations WHERE ResultID IN (SELECT ResultID FROM assessment_results WHERE AssessmentID = $aId)");
-            $conn->query("DELETE FROM assessment_results WHERE AssessmentID = $aId");
-            $conn->query("DELETE FROM counselor_feedback WHERE AssessmentID = $aId");
-            $conn->query("DELETE FROM assessments WHERE AssessmentID = $aId");
+        $stmtDelLive = $conn->prepare("DELETE FROM live_sessions WHERE StudentID = ?");
+        if ($stmtDelLive) {
+            $stmtDelLive->bind_param("i", $id);
+            $stmtDelLive->execute();
+            $stmtDelLive->close();
         }
-        $conn->query("DELETE FROM personal_information WHERE StudentID = $id");
+        $stmtAss = $conn->prepare("SELECT AssessmentID FROM assessments WHERE StudentID = ?");
+        if ($stmtAss) {
+            $stmtAss->bind_param("i", $id);
+            $stmtAss->execute();
+            $assRes = $stmtAss->get_result();
+            
+            $stmtDelAns = $conn->prepare("DELETE FROM assessment_answers WHERE AssessmentID = ?");
+            $stmtDelRec = $conn->prepare("DELETE FROM riasec_recommendations WHERE ResultID IN (SELECT ResultID FROM assessment_results WHERE AssessmentID = ?)");
+            $stmtDelRes = $conn->prepare("DELETE FROM assessment_results WHERE AssessmentID = ?");
+            $stmtDelFeed = $conn->prepare("DELETE FROM counselor_feedback WHERE AssessmentID = ?");
+            $stmtDelAs = $conn->prepare("DELETE FROM assessments WHERE AssessmentID = ?");
+            
+            while ($r = $assRes->fetch_assoc()) {
+                $aId = $r['AssessmentID'];
+                if ($stmtDelAns) {
+                    $stmtDelAns->bind_param("i", $aId);
+                    $stmtDelAns->execute();
+                }
+                if ($stmtDelRec) {
+                    $stmtDelRec->bind_param("i", $aId);
+                    $stmtDelRec->execute();
+                }
+                if ($stmtDelRes) {
+                    $stmtDelRes->bind_param("i", $aId);
+                    $stmtDelRes->execute();
+                }
+                if ($stmtDelFeed) {
+                    $stmtDelFeed->bind_param("i", $aId);
+                    $stmtDelFeed->execute();
+                }
+                if ($stmtDelAs) {
+                    $stmtDelAs->bind_param("i", $aId);
+                    $stmtDelAs->execute();
+                }
+            }
+            if ($stmtDelAns) $stmtDelAns->close();
+            if ($stmtDelRec) $stmtDelRec->close();
+            if ($stmtDelRes) $stmtDelRes->close();
+            if ($stmtDelFeed) $stmtDelFeed->close();
+            if ($stmtDelAs) $stmtDelAs->close();
+            $stmtAss->close();
+        }
+        $stmtDelInfo = $conn->prepare("DELETE FROM personal_information WHERE StudentID = ?");
+        if ($stmtDelInfo) {
+            $stmtDelInfo->bind_param("i", $id);
+            $stmtDelInfo->execute();
+            $stmtDelInfo->close();
+        }
         $stmt = $conn->prepare("DELETE FROM students WHERE StudentID = ?");
     } else {
-        $conn->query("DELETE FROM counselor_feedback WHERE CounselorID = $id");
+        $stmtDelFeed = $conn->prepare("DELETE FROM counselor_feedback WHERE CounselorID = ?");
+        if ($stmtDelFeed) {
+            $stmtDelFeed->bind_param("i", $id);
+            $stmtDelFeed->execute();
+            $stmtDelFeed->close();
+        }
         $stmt = $conn->prepare("DELETE FROM counselors WHERE CounselorID = ?");
     }
     

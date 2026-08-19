@@ -88,11 +88,29 @@ if ($method === 'POST') {
             if (!$studentId) die(json_encode(["status" => "error", "message" => "Student ID is required."]));
             
             // Explicit checks to provide better UI feedback
-            $checkId = $conn->query("SELECT StudentID FROM students WHERE StudentID = '$studentId'");
-            if ($checkId->num_rows > 0) die(json_encode(["status" => "error", "message" => "Student ID $studentId already exists."]));
+            $stmtCheckId = $conn->prepare("SELECT StudentID FROM students WHERE StudentID = ?");
+            if ($stmtCheckId) {
+                $stmtCheckId->bind_param("s", $studentId);
+                $stmtCheckId->execute();
+                $checkId = $stmtCheckId->get_result();
+                if ($checkId->num_rows > 0) {
+                    $stmtCheckId->close();
+                    die(json_encode(["status" => "error", "message" => "Student ID $studentId already exists."]));
+                }
+                $stmtCheckId->close();
+            }
             
-            $checkEmail = $conn->query("SELECT Email FROM students WHERE Email = '$email'");
-            if ($checkEmail->num_rows > 0) die(json_encode(["status" => "error", "message" => "Email $email is already registered."]));
+            $stmtCheckEmail = $conn->prepare("SELECT Email FROM students WHERE Email = ?");
+            if ($stmtCheckEmail) {
+                $stmtCheckEmail->bind_param("s", $email);
+                $stmtCheckEmail->execute();
+                $checkEmail = $stmtCheckEmail->get_result();
+                if ($checkEmail->num_rows > 0) {
+                    $stmtCheckEmail->close();
+                    die(json_encode(["status" => "error", "message" => "Email $email is already registered."]));
+                }
+                $stmtCheckEmail->close();
+            }
 
             $conn->begin_transaction();
             try {
@@ -155,13 +173,48 @@ if ($method === 'POST') {
             try {
                 if ($targetType === 'student') {
                     // Stepwise purge of all student-related telemetry
-                    $conn->query("DELETE FROM riasec_recommendations WHERE ResultID IN (SELECT ResultID FROM assessment_results WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = '$targetId'))");
-                    $conn->query("DELETE FROM assessment_results WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = '$targetId')");
-                    $conn->query("DELETE FROM assessment_answers WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = '$targetId')");
-                    $conn->query("DELETE FROM counselor_feedback WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = '$targetId')");
-                    $conn->query("DELETE FROM live_sessions WHERE StudentID = '$targetId'");
-                    $conn->query("DELETE FROM assessments WHERE StudentID = '$targetId'");
-                    $conn->query("DELETE FROM personal_information WHERE StudentID = '$targetId'");
+                    $stmt1 = $conn->prepare("DELETE FROM riasec_recommendations WHERE ResultID IN (SELECT ResultID FROM assessment_results WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = ?))");
+                    if ($stmt1) {
+                        $stmt1->bind_param("s", $targetId);
+                        $stmt1->execute();
+                        $stmt1->close();
+                    }
+                    $stmt2 = $conn->prepare("DELETE FROM assessment_results WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = ?)");
+                    if ($stmt2) {
+                        $stmt2->bind_param("s", $targetId);
+                        $stmt2->execute();
+                        $stmt2->close();
+                    }
+                    $stmt3 = $conn->prepare("DELETE FROM assessment_answers WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = ?)");
+                    if ($stmt3) {
+                        $stmt3->bind_param("s", $targetId);
+                        $stmt3->execute();
+                        $stmt3->close();
+                    }
+                    $stmt4 = $conn->prepare("DELETE FROM counselor_feedback WHERE AssessmentID IN (SELECT AssessmentID FROM assessments WHERE StudentID = ?)");
+                    if ($stmt4) {
+                        $stmt4->bind_param("s", $targetId);
+                        $stmt4->execute();
+                        $stmt4->close();
+                    }
+                    $stmt5 = $conn->prepare("DELETE FROM live_sessions WHERE StudentID = ?");
+                    if ($stmt5) {
+                        $stmt5->bind_param("s", $targetId);
+                        $stmt5->execute();
+                        $stmt5->close();
+                    }
+                    $stmt6 = $conn->prepare("DELETE FROM assessments WHERE StudentID = ?");
+                    if ($stmt6) {
+                        $stmt6->bind_param("s", $targetId);
+                        $stmt6->execute();
+                        $stmt6->close();
+                    }
+                    $stmt7 = $conn->prepare("DELETE FROM personal_information WHERE StudentID = ?");
+                    if ($stmt7) {
+                        $stmt7->bind_param("s", $targetId);
+                        $stmt7->execute();
+                        $stmt7->close();
+                    }
                     $stmt = $conn->prepare("DELETE FROM students WHERE StudentID = ?");
                 } else {
                     $stmt = $conn->prepare("DELETE FROM $table WHERE $idCol = ?");
