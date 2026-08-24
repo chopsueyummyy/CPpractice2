@@ -1,5 +1,5 @@
 # Stage 1: Build the Flutter Web application
-FROM ghcr.io/cirruslabs/flutter:stable AS build
+FROM ghcr.io/cirruslabs/flutter:stable@sha256:46691e311715845de03a3ba4753a475476936805b29431b1f00f1816981033f8 AS build
 WORKDIR /app
 
 # Copy dependency files first to leverage Docker cache
@@ -8,13 +8,12 @@ RUN flutter pub get
 
 # Copy the rest of the application
 COPY . .
-RUN flutter pub get
 
 # Build the frontend application for the web
 RUN flutter build web --release
 
 # Stage 2: Serve the application with Nginx
-FROM nginxinc/nginx-unprivileged:alpine
+FROM nginxinc/nginx-unprivileged:alpine@sha256:901e944d1f4fc2bd077e8f5568b98c1f6f8cdacf6b97a87747c43134a339b9a7
 
 # Copy the custom Nginx configuration for single-page routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf

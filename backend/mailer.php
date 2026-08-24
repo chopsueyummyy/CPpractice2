@@ -79,10 +79,12 @@ function sendGenericEmail($toEmail, $recipientName, $subject, $htmlBody) {
         $mail->AltBody = strip_tags($htmlBody);
 
         $mail->send();
-        error_log("SUCCESS: Email sent to $toEmail");
+        $safeToEmail = preg_replace('/[\r\n]/', '', $toEmail);
+        error_log("SUCCESS: Email sent to $safeToEmail");
         return true;
     } catch (Exception $e) {
-        error_log("MAILER ERROR (Email to $toEmail): {$mail->ErrorInfo}");
+        $safeToEmail = preg_replace('/[\r\n]/', '', $toEmail);
+        error_log("MAILER ERROR (Email to $safeToEmail): {$mail->ErrorInfo}");
         return false;
     }
 }

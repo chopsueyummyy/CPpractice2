@@ -144,7 +144,8 @@ try {
                             "adminId"  => $user['AdminID']
                         ]);
                     } else {
-                        error_log("Failed to send OTP to $email - check Mailtrap or Gmail settings.");
+                        $safeEmail = preg_replace('/[\r\n]/', '', $email);
+                        error_log("Failed to send OTP to $safeEmail - check Mailtrap or Gmail settings.");
                         echo json_encode([
                             "status"   => "error",
                             "message"  => "Failed to send OTP email. Port might be blocked."
