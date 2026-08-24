@@ -8,6 +8,7 @@ RUN flutter pub get
 
 # Copy the rest of the application
 COPY . .
+RUN flutter pub get
 
 # Build the frontend application for the web
 RUN flutter build web --release

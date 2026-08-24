@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../services/api_service.dart';
 import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/student_sidebar.dart';
 
 class AssessmentScreen extends StatefulWidget {
   const AssessmentScreen({super.key});
@@ -83,7 +82,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
   void _saveProgress() {
     final storage = html.window.localStorage;
-    
+
     final Map<String, int> encRiasec = {};
     _riasecAnswers.forEach((key, value) => encRiasec[key.toString()] = value);
     storage['riasec_answers_v2'] = jsonEncode(encRiasec);
@@ -104,7 +103,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       final data = await ApiService.getQuestions();
       if (data['status'] == 'success') {
         final List<Map<String, dynamic>> loadedQuestions = [];
-        
+
         // Add RIASEC questions
         if (data['riasec'] != null) {
           final riasec = List<Map<String, dynamic>>.from(data['riasec']);
@@ -117,7 +116,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             });
           }
         }
-        
+
         // Add RSE questions
         if (data['rse'] != null) {
           final rse = List<Map<String, dynamic>>.from(data['rse']);
@@ -130,7 +129,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             });
           }
         }
-        
+
         // Add CDSES questions
         if (data['cdses'] != null) {
           final cdses = List<Map<String, dynamic>>.from(data['cdses']);
@@ -143,7 +142,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             });
           }
         }
-        
+
         setState(() {
           _questions = loadedQuestions;
           _isLoading = false;
@@ -385,36 +384,48 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       selectedScore = _cdsesAnswers[questionId];
     }
 
-    // Dynamic Title based on section
+    // Dynamic Title and Instruction setup based on section
     String partTitle = '';
     String partDesc = '';
+    String instructionHeader = '';
+    IconData partIcon = Icons.quiz_outlined;
+    Color partThemeColor = AppTheme.primaryPurple;
     List<Map<String, dynamic>> options = [];
 
     if (type == 'riasec') {
       partTitle = 'Part 1: Career Interests (RIASEC)';
-      partDesc = 'Select "Agree" or "Disagree" for each statement based on your preferences.';
+      instructionHeader = 'How to Answer:';
+      partDesc = 'Read each statement carefully and select "Agree" if it describes an activity or interest you enjoy, or "Disagree" if it does not.';
+      partIcon = Icons.psychology_outlined;
+      partThemeColor = AppTheme.primaryPurple;
       options = [
-        {'label': 'Agree', 'value': 1},
-        {'label': 'Disagree', 'value': 0},
+        {'label': 'Agree', 'value': 1, 'subtitle': 'I like or prefer this'},
+        {'label': 'Disagree', 'value': 0, 'subtitle': 'I do not like or prefer this'},
       ];
     } else if (type == 'rse') {
       partTitle = 'Part 2: Rosenberg Self-Esteem';
-      partDesc = 'Rate your agreement with the self-esteem statements below.';
+      instructionHeader = 'Rate Your Agreement:';
+      partDesc = 'Select how strongly you agree or disagree with each statement regarding your general feelings about yourself.';
+      partIcon = Icons.sentiment_satisfied_alt_outlined;
+      partThemeColor = Colors.teal;
       options = [
-        {'label': 'Strongly Agree', 'value': 1},
-        {'label': 'Agree', 'value': 2},
-        {'label': 'Disagree', 'value': 3},
-        {'label': 'Strongly Disagree', 'value': 4},
+        {'label': 'Strongly Agree', 'value': 1, 'subtitle': 'Completely true for me'},
+        {'label': 'Agree', 'value': 2, 'subtitle': 'Mostly true for me'},
+        {'label': 'Disagree', 'value': 3, 'subtitle': 'Mostly untrue for me'},
+        {'label': 'Strongly Disagree', 'value': 4, 'subtitle': 'Completely untrue for me'},
       ];
     } else if (type == 'cdses') {
-      partTitle = 'Part 3: Career Decision Self-Efficacy (CDSES-SF)';
-      partDesc = 'How much confidence do you have that you could:';
+      partTitle = 'Part 3: Career Decision Self-Efficacy';
+      instructionHeader = 'Rate Your Confidence:';
+      partDesc = 'Indicate how much confidence you have that you could successfully accomplish each career-related task below.';
+      partIcon = Icons.auto_graph_outlined;
+      partThemeColor = Colors.indigo;
       options = [
-        {'label': 'No confidence at all', 'value': 1},
-        {'label': 'Very little confidence', 'value': 2},
-        {'label': 'Moderate confidence', 'value': 3},
-        {'label': 'Much confidence', 'value': 4},
-        {'label': 'Complete confidence', 'value': 5},
+        {'label': 'No Confidence At All', 'value': 1, 'subtitle': 'Cannot do this at all'},
+        {'label': 'Very Little Confidence', 'value': 2, 'subtitle': 'Low chance of doing this'},
+        {'label': 'Moderate Confidence', 'value': 3, 'subtitle': 'Somewhat confident'},
+        {'label': 'Much Confidence', 'value': 4, 'subtitle': 'Fairly confident'},
+        {'label': 'Complete Confidence', 'value': 5, 'subtitle': 'Extremely confident'},
       ];
     }
 
@@ -425,233 +436,511 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         _showExitDialog();
       },
       child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
         appBar: AppBar(
-          title: Text(partTitle),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => _showExitDialog(),
+          elevation: 0,
+          backgroundColor: AppTheme.backgroundWhite,
+          surfaceTintColor: Colors.transparent,
+          title: Text(
+            partTitle,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
-        ),
-        body: Column(
-          children: [
-            // Progress Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              color: AppTheme.backgroundWhite,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+          leadingWidth: 150,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 16, top: 10, bottom: 10),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showExitDialog(),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.close_rounded, color: Color(0xFFDC2626), size: 16),
+                      SizedBox(width: 4),
                       Text(
-                        'Question ${_currentIndex + 1} of ${_questions.length}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryPurple.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${(progress * 100).toInt()}%',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryPurple,
-                          ),
+                        'Leave Portal',
+                        style: TextStyle(
+                          color: Color(0xFFDC2626),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.5,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    partDesc,
-                    style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-
-            // Question text and choices list
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Question Card
-                        Card(
-                          elevation: 3,
-                          shadowColor: Colors.black12,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppTheme.backgroundWhite,
-                                  AppTheme.backgroundLight.withOpacity(0.3),
-                                ],
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primaryPurple.withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      type == 'riasec'
-                                          ? 'Career Interest Statement'
-                                          : type == 'rse'
-                                              ? 'Self-Esteem Statement'
-                                              : 'Academic Burnout Indicator',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryPurple,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    current['question'],
-                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: AppTheme.textPrimary,
-                                      height: 1.35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Options mapping
-                        ...options.map((option) {
-                          final value = option['value'] as int;
-                          final isSelected = selectedScore == value;
-                          final color = _getScoreColorForType(type, value);
-                          
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: GestureDetector(
-                              onTap: () => _selectScore(value),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? color.withOpacity(0.06) : AppTheme.backgroundWhite,
-                                  border: Border.all(
-                                    color: isSelected ? color : AppTheme.dividerColor.withOpacity(0.8),
-                                    width: isSelected ? 2 : 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: isSelected ? [
-                                    BoxShadow(
-                                      color: color.withOpacity(0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    )
-                                  ] : null,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 24,
-                                      height: 24,
-                                      decoration: BoxDecoration(
-                                        color: isSelected ? color : Colors.transparent,
-                                        border: Border.all(
-                                          color: isSelected ? color : AppTheme.textSecondary.withOpacity(0.4),
-                                          width: 2,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: isSelected 
-                                          ? const Icon(Icons.check, size: 14, color: Colors.white)
-                                          : const SizedBox(),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Text(
-                                        option['label'],
-                                        style: TextStyle(
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                          color: isSelected ? color : AppTheme.textPrimary,
-                                          fontSize: 15
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
                 ),
               ),
             ),
-
-            // Footer navigation bar
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: AppTheme.backgroundWhite,
+          ),
+          actions: [
+            // Stage Stepper Chips
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (_currentIndex > 0)
-                    OutlinedButton.icon(
-                      onPressed: _previous,
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous'),
-                    )
-                  else
-                    const SizedBox(),
-                  _isSubmitting
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton.icon(
-                          onPressed: _next,
-                          icon: Icon(
-                            _currentIndex == _questions.length - 1
-                                ? Icons.check
-                                : Icons.arrow_forward,
-                          ),
-                          label: Text(
-                            _currentIndex == _questions.length - 1 ? 'Submit' : 'Next',
-                          ),
-                        ),
+                  _buildStageChip('1. RIASEC', type == 'riasec', AppTheme.primaryPurple),
+                  const SizedBox(width: 6),
+                  _buildStageChip('2. Self-Esteem', type == 'rse', Colors.teal),
+                  const SizedBox(width: 6),
+                  _buildStageChip('3. CDSES', type == 'cdses', Colors.indigo),
                 ],
               ),
             ),
           ],
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF6F8FC),
+                Color(0xFFEDF2F9),
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              // Progress Bar Header Container
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundWhite,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(partIcon, size: 18, color: partThemeColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Question ${_currentIndex + 1} of ${_questions.length}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: partThemeColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${(progress * 100).toInt()}% Complete',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: partThemeColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: partThemeColor.withOpacity(0.12),
+                        color: partThemeColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Main Assessment Scroll Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 780),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Prominent Instruction Banner Card
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  partThemeColor.withOpacity(0.09),
+                                  partThemeColor.withOpacity(0.03),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: partThemeColor.withOpacity(0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: partThemeColor.withOpacity(0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.lightbulb_outline_rounded,
+                                    color: partThemeColor,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        instructionHeader,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 14,
+                                          color: partThemeColor,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        partDesc,
+                                        style: const TextStyle(
+                                          fontSize: 13.5,
+                                          height: 1.45,
+                                          color: Color(0xFF334155),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Glassmorphic / Modern Elevated Question Card
+                          Container(
+                            padding: const EdgeInsets.all(28),
+                            decoration: BoxDecoration(
+                              color: AppTheme.backgroundWhite,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: partThemeColor.withOpacity(0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: partThemeColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(partIcon, size: 14, color: partThemeColor),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            type == 'riasec'
+                                                ? 'Career Statement'
+                                                : type == 'rse'
+                                                    ? 'Self-Esteem Item'
+                                                    : 'Decision Confidence Task',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: partThemeColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      '#${_currentIndex + 1}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textSecondary.withOpacity(0.6),
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  current['question'],
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF0F172A),
+                                    height: 1.4,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Choice Options Header
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4, bottom: 12),
+                            child: Text(
+                              'SELECT YOUR RESPONSE:',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF64748B),
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+
+                          // Options Cards Mapping
+                          ...options.map((option) {
+                            final value = option['value'] as int;
+                            final isSelected = selectedScore == value;
+                            final color = _getScoreColorForType(type, value);
+                            final subtitle = option['subtitle'] as String?;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => _selectScore(value),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 180),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                    decoration: BoxDecoration(
+                                      color: isSelected 
+                                          ? color.withOpacity(0.08) 
+                                          : AppTheme.backgroundWhite,
+                                      border: Border.all(
+                                        color: isSelected ? color : const Color(0xFFE2E8F0),
+                                        width: isSelected ? 2.5 : 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: isSelected
+                                          ? [
+                                              BoxShadow(
+                                                color: color.withOpacity(0.18),
+                                                blurRadius: 12,
+                                                offset: const Offset(0, 4),
+                                              )
+                                            ]
+                                          : [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.02),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              )
+                                            ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(milliseconds: 180),
+                                          width: 26,
+                                          height: 26,
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? color : Colors.transparent,
+                                            border: Border.all(
+                                              color: isSelected ? color : const Color(0xFF94A3B8),
+                                              width: 2,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: isSelected
+                                                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                                : const SizedBox(),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                option['label'],
+                                                style: TextStyle(
+                                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                                  color: isSelected ? color : const Color(0xFF1E293B),
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              if (subtitle != null) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  subtitle,
+                                                  style: TextStyle(
+                                                    fontSize: 12.5,
+                                                    color: isSelected 
+                                                        ? color.withOpacity(0.85) 
+                                                        : const Color(0xFF64748B),
+                                                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 16,
+                                            color: color,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Sleek Footer Navigation Bar
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundWhite,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (_currentIndex > 0)
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: _previous,
+                        icon: const Icon(Icons.arrow_back, size: 18),
+                        label: const Text(
+                          'Previous',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      )
+                    else
+                      const SizedBox(),
+                    _isSubmitting
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: partThemeColor,
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: _next,
+                            icon: Icon(
+                              _currentIndex == _questions.length - 1
+                                  ? Icons.check_circle_outline
+                                  : Icons.arrow_forward_rounded,
+                              size: 20,
+                            ),
+                            label: Text(
+                              _currentIndex == _questions.length - 1 ? 'Submit Assessment' : 'Next Question',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStageChip(String label, bool isActive, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? color.withOpacity(0.12) : Colors.transparent,
+        border: Border.all(
+          color: isActive ? color : const Color(0xFFCBD5E1),
+          width: isActive ? 1.5 : 1,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+          color: isActive ? color : const Color(0xFF64748B),
         ),
       ),
     );
@@ -685,7 +974,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                 html.window.localStorage.remove('mbi_answers_v2');
                 html.window.localStorage.remove('currentIndex_v2');
               } catch (_) {}
-              
+
               if (mounted) {
                 context.go('/student/dashboard');
               }
