@@ -1,5 +1,6 @@
 .env
 .git
 .gitignore
-vendor/
-node_modules/
+Dockerfile
+riasec_db.sql
+*.sql
