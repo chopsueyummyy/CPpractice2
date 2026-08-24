@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff
         with:
           channel: 'stable'
 
@@ -27,6 +27,6 @@ jobs:
         run: flutter pub get
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@e544b780808654ba8ceba5fb2fe2897103d92ff4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

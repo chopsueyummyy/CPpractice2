@@ -1,7 +1,7 @@
 <?php
 // get_admin_logs.php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+include 'cors.php';
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 

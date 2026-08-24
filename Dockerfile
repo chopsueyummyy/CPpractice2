@@ -13,7 +13,7 @@ COPY . .
 RUN flutter build web --release
 
 # Stage 2: Serve the application with Nginx
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
 # Copy the custom Nginx configuration for single-page routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -22,7 +22,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build/web /usr/share/nginx/html
 
 # Expose port (Nginx default)
-EXPOSE 80
+EXPOSE 8080
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
