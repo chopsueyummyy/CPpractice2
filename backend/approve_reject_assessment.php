@@ -2,14 +2,14 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 header("Content-Type: application/json");
-include 'cors.php';
+require_once 'cors.php';
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
 
-include 'db_connect.php';
-include 'mailer.php';
+require_once 'db_connect.php';
+require_once 'mailer.php';
 
 $data         = json_decode(file_get_contents("php://input"), true);
 $assessmentId = (int)($data['assessmentId'] ?? 0);

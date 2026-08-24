@@ -4,7 +4,7 @@ error_reporting(0);
 ini_set('display_errors', 0);
 date_default_timezone_set('Asia/Manila');
 
-include 'db_connect.php';
+require_once 'db_connect.php';
 require_once __DIR__ . '/vendor/fpdf/fpdf.php';
 
 $adminId = $_GET['adminId'] ?? null;
@@ -121,7 +121,7 @@ $recordsRes = $conn->query("
 
 // --- EXTENDED FPDF CLASS ---
 class SummaryPDF extends FPDF {
-    function Header() {
+    public function Header() {
         $logoImg = __DIR__ . '/jmc_logo.png';
         if (file_exists($logoImg)) {
             // High-resolution crisp JMC Logo on top left (22mm x 22mm)
@@ -157,14 +157,14 @@ class SummaryPDF extends FPDF {
         $this->Ln(6);
     }
 
-    function Footer() {
+    public function Footer() {
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(150, 150, 150);
         $this->Cell(0, 10, 'CourseAlign Career Assessment System  |  Page ' . $this->PageNo() . '/{nb}', 0, 0, 'C');
     }
 
-    function SectionHeader($title) {
+    public function SectionHeader($title) {
         $this->SetFont('Arial', 'B', 11);
         $this->SetFillColor(243, 244, 246);
         $this->SetTextColor(91, 33, 182); // Purple

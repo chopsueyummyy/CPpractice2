@@ -1,9 +1,9 @@
 <?php
-include 'db_connect.php';
+require_once 'db_connect.php';
 
 // Production Registration API
 header("Content-Type: application/json");
-include 'cors.php';
+require_once 'cors.php';
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 

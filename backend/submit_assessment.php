@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 header("Content-Type: application/json");
-include 'cors.php';
+require_once 'cors.php';
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
@@ -15,7 +15,7 @@ register_shutdown_function(function() {
     }
 });
 
-include 'db_connect.php';
+require_once 'db_connect.php';
 
 $data         = json_decode(file_get_contents("php://input"), true);
 $assessmentId = (int)($data['assessmentId'] ?? 0);
