@@ -17,7 +17,7 @@ $stats['total_counselors'] = (int)$conn->query("SELECT COUNT(*) FROM counselors"
 $stats['total_students'] = (int)$conn->query("SELECT COUNT(*) FROM students")->fetch_row()[0];
 
 // 3. Completed Assessments (Approved or Declined)
-$stats['completed_assessments'] = (int)$conn->query("SELECT COUNT(*) FROM assessments WHERE Status IN ('approved', 'declined')")->fetch_row()[0];
+$stats['completed_assessments'] = (int)$conn->query("SELECT COUNT(*) FROM assessments WHERE Status IN ('approved', 'declined', 'rejected')")->fetch_row()[0];
 
 // 4. Total Results Generated
 $stats['total_results'] = (int)$conn->query("SELECT COUNT(*) FROM assessment_results")->fetch_row()[0];

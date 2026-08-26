@@ -22,7 +22,7 @@ if (!$assessmentId || !in_array($action, ['approved', 'rejected']) || !$counselo
     exit();
 }
 
-$dbAction = ($action === 'rejected') ? 'declined' : $action;
+$dbAction = ($action === 'rejected') ? 'rejected' : $action;
 
 $upd = $conn->prepare("UPDATE assessments SET Status = ? WHERE AssessmentID = ?");
 $upd->bind_param("si", $dbAction, $assessmentId);

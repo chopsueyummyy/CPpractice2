@@ -36,7 +36,7 @@ function getStrandCode($strand) {
 $totalAssessments = (int)($conn->query("SELECT COUNT(*) as c FROM assessments WHERE Status != 'in_progress'")->fetch_assoc()['c'] ?? 0);
 $approvedCount    = (int)($conn->query("SELECT COUNT(*) as c FROM assessments WHERE Status = 'approved'")->fetch_assoc()['c'] ?? 0);
 $pendingCount     = (int)($conn->query("SELECT COUNT(*) as c FROM assessments WHERE Status = 'pending_review'")->fetch_assoc()['c'] ?? 0);
-$declinedCount    = (int)($conn->query("SELECT COUNT(*) as c FROM assessments WHERE Status = 'declined'")->fetch_assoc()['c'] ?? 0);
+$declinedCount    = (int)($conn->query("SELECT COUNT(*) as c FROM assessments WHERE Status IN ('declined', 'rejected')")->fetch_assoc()['c'] ?? 0);
 $approvalRate     = ($totalAssessments > 0) ? round(($approvedCount / $totalAssessments) * 100, 1) : 0;
 
 // 2. STRAND DISTRIBUTION

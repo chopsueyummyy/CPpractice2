@@ -546,7 +546,8 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           ),
           const SizedBox(height: 10),
           ...featureOrder.map((feat) {
-            final weight = double.tryParse(weights[feat]?.toString() ?? '0.0') ?? 0.0;
+            final weightVal = (feat == 'MBI' && weights[feat] == null) ? weights['CDSES'] : weights[feat];
+            final weight = double.tryParse(weightVal?.toString() ?? '0.0') ?? 0.0;
             if (weight == 0.0) return const SizedBox.shrink();
             
             const double maxRef = 3.0;

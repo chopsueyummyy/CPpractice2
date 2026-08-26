@@ -25,9 +25,13 @@ $params = [];
 $types  = "";
 
 if ($status !== 'all') {
-    $where[] = "a.Status = ?";
-    $params[] = $status;
-    $types   .= "s";
+    if ($status === 'declined' || $status === 'rejected') {
+        $where[] = "(a.Status = 'declined' OR a.Status = 'rejected')";
+    } else {
+        $where[] = "a.Status = ?";
+        $params[] = $status;
+        $types   .= "s";
+    }
 }
 if ($gradeLevel !== 'all') {
     $where[] = "pi.GradeLevel = ?";
