@@ -51,6 +51,12 @@ class _StudentDetailsFormState extends State<StudentDetailsForm> {
   // Block access if student already has a pending or approved assessment.
   // Only rejected students (or first-timers) are allowed through.
   Future<void> _checkIfAllowed() async {
+    if (!_session.hasAgreedToDisclaimer && _session.assessmentStatus != 'in_progress') {
+      if (mounted) {
+        context.go('/student/dashboard');
+      }
+      return;
+    }
     try {
       final data = await ApiService.getStudentStatus(_session.studentId!);
       if (data['status'] == 'success') {

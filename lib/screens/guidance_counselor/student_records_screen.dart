@@ -79,6 +79,21 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
     'Low Career Decision Self-Efficacy': 'Low Self-Efficacy',
   };
 
+  bool _isFilterExpanded = false;
+
+  int get _activeFilterCount {
+    int count = 0;
+    if (_status != 'all') count++;
+    if (_gradeLevel != 'all') count++;
+    if (_strand != 'all') count++;
+    if (_dominantType != 'all') count++;
+    if (_rseLevel != 'all') count++;
+    if (_cdsesLevel != 'all') count++;
+    if (_dateFrom.isNotEmpty) count++;
+    if (_dateTo.isNotEmpty) count++;
+    return count;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -213,6 +228,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final approvedCount = _records.where((r) => r['status'] == 'approved').length;
+    final pendingCount = _records.where((r) => r['status'] == 'pending_review').length;
+
     return Scaffold(
       drawer: CounselorSidebar(currentRoute: '/guidance-counselor/student-records'),
       appBar: AppBar(
@@ -239,143 +257,272 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
       ),
       body: Column(
         children: [
-          // Filter panel
+          // Top Search & Filter Bar
           Container(
             color: AppTheme.backgroundWhite,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Search
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by name or student ID...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _search.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _search = '');
-                              _loadRecords();
-                            },
-                          )
-                        : null,
+                // Single line: Search Input + Filter Toggle Button + Reset
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search by name or student ID...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          suffixIcon: _search.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _search = '');
+                                    _loadRecords();
+                                  },
+                                )
+                              : null,
+                        ),
+                        onChanged: (v) => setState(() => _search = v),
+                        onSubmitted: (_) => _loadRecords(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Collapsible Filter Button with Badge
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() => _isFilterExpanded = !_isFilterExpanded);
+                      },
+                      icon: Icon(
+                        _isFilterExpanded ? Icons.filter_list_off : Icons.tune_rounded,
+                        size: 18,
+                      ),
+                      label: Row(
+                        children: [
+                          Text(_isFilterExpanded ? 'Hide Filters' : 'Filters'),
+                          if (_activeFilterCount > 0) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryYellow,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$_activeFilterCount',
+                                style: const TextStyle(
+                                  color: AppTheme.primaryPurple,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isFilterExpanded || _activeFilterCount > 0 
+                            ? AppTheme.primaryPurple 
+                            : Colors.purple.shade50,
+                        foregroundColor: _isFilterExpanded || _activeFilterCount > 0 
+                            ? Colors.white 
+                            : AppTheme.primaryPurple,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    if (_activeFilterCount > 0 || _search.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.restart_alt_rounded, color: Color(0xFFE53E3E)),
+                        tooltip: 'Reset All Filters',
+                        onPressed: _resetFilters,
+                      ),
+                    ],
+                  ],
+                ),
+
+                // Active Filter Badges (Horizontal Chips)
+                if (_activeFilterCount > 0) ...[
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Active:',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                        ),
+                        const SizedBox(width: 8),
+                        if (_status != 'all')
+                          _activeFilterChip('Status: ${_statusOptions[_status]}', () {
+                            setState(() => _status = 'all');
+                            _loadRecords();
+                          }),
+                        if (_gradeLevel != 'all')
+                          _activeFilterChip('Grade: $_gradeLevel', () {
+                            setState(() => _gradeLevel = 'all');
+                            _loadRecords();
+                          }),
+                        if (_strand != 'all')
+                          _activeFilterChip('Strand: $_strand', () {
+                            setState(() => _strand = 'all');
+                            _loadRecords();
+                          }),
+                        if (_dominantType != 'all')
+                          _activeFilterChip('RIASEC: $_dominantType', () {
+                            setState(() => _dominantType = 'all');
+                            _loadRecords();
+                          }),
+                        if (_rseLevel != 'all')
+                          _activeFilterChip('Self-Esteem: ${_rseOptions[_rseLevel]}', () {
+                            setState(() => _rseLevel = 'all');
+                            _loadRecords();
+                          }),
+                        if (_cdsesLevel != 'all')
+                          _activeFilterChip('Self-Efficacy: ${_cdsesOptions[_cdsesLevel]}', () {
+                            setState(() => _cdsesLevel = 'all');
+                            _loadRecords();
+                          }),
+                        if (_dateFrom.isNotEmpty || _dateTo.isNotEmpty)
+                          _activeFilterChip('Date: ${_dateFrom.isEmpty ? '...' : _dateFrom} to ${_dateTo.isEmpty ? '...' : _dateTo}', () {
+                            setState(() {
+                              _dateFrom = '';
+                              _dateTo = '';
+                            });
+                            _loadRecords();
+                          }),
+                      ],
+                    ),
                   ),
-                  onChanged: (v) => setState(() => _search = v),
-                  onSubmitted: (_) => _loadRecords(),
-                ),
-                const SizedBox(height: 12),
+                ],
 
-                // Filter dropdowns row 1
-                Row(
-                  children: [
-                    Expanded(child: _filterDropdown('Approval Status', _statusOptions, _status,
-                        (v) => setState(() => _status = v!))),
-                    const SizedBox(width: 8),
-                    Expanded(child: _filterDropdown('Grade Level', _gradeLevelOptions, _gradeLevel,
-                        (v) => setState(() => _gradeLevel = v!))),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Filter dropdowns row 2
-                Row(
-                  children: [
-                    Expanded(child: _filterDropdown('Strand', _strandOptions, _strand,
-                        (v) => setState(() => _strand = v!))),
-                    const SizedBox(width: 8),
-                    Expanded(child: _filterDropdown('Dominant Type', _typeOptions, _dominantType,
-                        (v) => setState(() => _dominantType = v!))),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Filter dropdowns row 3 (RSE and MBI-SS)
-                Row(
-                  children: [
-                    Expanded(child: _filterDropdown('Self-Esteem (RSE)', _rseOptions, _rseLevel,
-                        (v) => setState(() => _rseLevel = v!))),
-                    const SizedBox(width: 8),
-                    Expanded(child: _filterDropdown('Self-Efficacy (CDSES)', _cdsesOptions, _cdsesLevel,
-                        (v) => setState(() => _cdsesLevel = v!))),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Date range + buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.calendar_today, size: 16),
-                        label: Text(
-                          _dateFrom.isEmpty ? 'Date From' : _dateFrom,
-                          style: const TextStyle(fontSize: 12),
+                // Expanded Dropdowns Panel
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 250),
+                  crossFadeState: _isFilterExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Padding(
+                    padding: const EdgeInsets.only(top: 14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: _filterDropdown('Approval Status', _statusOptions, _status,
+                                (v) => setState(() => _status = v!))),
+                            const SizedBox(width: 8),
+                            Expanded(child: _filterDropdown('Grade Level', _gradeLevelOptions, _gradeLevel,
+                                (v) => setState(() => _gradeLevel = v!))),
+                          ],
                         ),
-                        onPressed: () async {
-                          final d = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime.now(),
-                          );
-                          if (d != null) setState(() => _dateFrom = '${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}');
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.calendar_today, size: 16),
-                        label: Text(
-                          _dateTo.isEmpty ? 'Date To' : _dateTo,
-                          style: const TextStyle(fontSize: 12),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: _filterDropdown('Strand', _strandOptions, _strand,
+                                (v) => setState(() => _strand = v!))),
+                            const SizedBox(width: 8),
+                            Expanded(child: _filterDropdown('Dominant Type', _typeOptions, _dominantType,
+                                (v) => setState(() => _dominantType = v!))),
+                          ],
                         ),
-                        onPressed: () async {
-                          final d = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime.now(),
-                          );
-                          if (d != null) setState(() => _dateTo = '${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}');
-                        },
-                      ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(child: _filterDropdown('Self-Esteem (RSE)', _rseOptions, _rseLevel,
+                                (v) => setState(() => _rseLevel = v!))),
+                            const SizedBox(width: 8),
+                            Expanded(child: _filterDropdown('Self-Efficacy (CDSES)', _cdsesOptions, _cdsesLevel,
+                                (v) => setState(() => _cdsesLevel = v!))),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.calendar_today, size: 16),
+                                label: Text(
+                                  _dateFrom.isEmpty ? 'Date From' : _dateFrom,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                onPressed: () async {
+                                  final d = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (d != null) setState(() => _dateFrom = '${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}');
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.calendar_today, size: 16),
+                                label: Text(
+                                  _dateTo.isEmpty ? 'Date To' : _dateTo,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                onPressed: () async {
+                                  final d = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2020),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (d != null) setState(() => _dateTo = '${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}');
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  _loadRecords();
+                                  setState(() => _isFilterExpanded = false);
+                                },
+                                icon: const Icon(Icons.filter_list),
+                                label: const Text('Apply & Close Filters'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryPurple,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _loadRecords,
-                        icon: const Icon(Icons.filter_list),
-                        label: const Text('Apply Filters'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      onPressed: _resetFilters,
-                      child: const Text('Reset'),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          // Results count
+          // Summary Metrics Banner
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Row(
               children: [
-                Text(
-                  '${_records.length} record(s) found',
-                  style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
-                ),
+                _metricBadge(Icons.folder_shared_rounded, '${_records.length} Total Records', Colors.purple.shade700),
+                const SizedBox(width: 10),
+                _metricBadge(Icons.hourglass_top_rounded, '$pendingCount Pending', AppTheme.warning),
+                const SizedBox(width: 10),
+                _metricBadge(Icons.check_circle_rounded, '$approvedCount Approved', AppTheme.success),
               ],
             ),
           ),
@@ -880,6 +1027,53 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
               ),
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  Widget _activeFilterChip(String label, VoidCallback onRemove) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: Chip(
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primaryPurple),
+        ),
+        deleteIcon: const Icon(Icons.close_rounded, size: 14, color: AppTheme.primaryPurple),
+        onDeleted: onRemove,
+        backgroundColor: AppTheme.primaryPurple.withOpacity(0.08),
+        padding: EdgeInsets.zero,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.2)),
+        ),
+      ),
+    );
+  }
+
+  Widget _metricBadge(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
         ],
       ),
     );

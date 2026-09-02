@@ -71,7 +71,7 @@ class StudentSidebar extends StatelessWidget {
             context,
             icon: Icons.quiz,
             title: 'Career Assessment',
-            route: '/student/student-details',
+            route: '/student/dashboard',
             isSelected: currentRoute == '/student/assessment' ||
                       currentRoute == '/student/student-details' ||
                       currentRoute == '/student/assessment-instructions',
