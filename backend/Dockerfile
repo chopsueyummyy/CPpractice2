@@ -15,8 +15,8 @@ RUN a2enmod rewrite
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy the PHP files into the container
-COPY . /var/www/html/
+# Copy the PHP and image assets explicitly into the container
+COPY *.php *.png opcache.ini /var/www/html/
 
 # Run the downloader to install PHPMailer in the vendor folder
 RUN php download_phpmailer.php

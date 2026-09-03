@@ -23,6 +23,79 @@ try {
         die(json_encode(["status" => "error", "message" => "Fields cannot be empty"]));
     }
 
+    $ip_address = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+
+    // Helper to log a failed attempt
+    $recordFailedAttempt = function($conn, $identifier, $ip) {
+        if (empty($identifier)) return;
+        $stmt = $conn->prepare("INSERT INTO login_attempts (identifier, ip_address, attempt_time) VALUES (?, ?, NOW())");
+        if ($stmt) {
+            $stmt->bind_param("ss", $identifier, $ip);
+            $stmt->execute();
+        }
+    };
+
+    // Helper to clear failed attempts on successful login
+    $clearLoginAttempts = function($conn, $identifier, $ip) {
+        if (empty($identifier)) return;
+        $stmt = $conn->prepare("DELETE FROM login_attempts WHERE identifier = ? OR ip_address = ?");
+        if ($stmt) {
+            $stmt->bind_param("ss", $identifier, $ip);
+            $stmt->execute();
+        }
+    };
+
+    // Ensure login_attempts table exists
+    @$conn->query("CREATE TABLE IF NOT EXISTS login_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        identifier VARCHAR(100) NOT NULL,
+        ip_address VARCHAR(45) NOT NULL,
+        attempt_time DATETIME NOT NULL,
+        INDEX idx_ident (identifier),
+        INDEX idx_ip (ip_address),
+        INDEX idx_time (attempt_time)
+    )");
+
+    // Clean up attempts older than 5 minutes
+    @$conn->query("DELETE FROM login_attempts WHERE attempt_time < NOW() - INTERVAL 5 MINUTE");
+
+    // Determine user identifier based on role
+    $identifier = '';
+    if ($role === 'student' || $role === 'student_role') {
+        $identifier = $data['student_id'] ?? '';
+    } else {
+        $identifier = $data['email'] ?? '';
+    }
+
+    // Check rate limiting
+    if (!empty($identifier)) {
+        $check_stmt = $conn->prepare("SELECT COUNT(*) AS failure_count, MAX(attempt_time) AS last_attempt FROM login_attempts WHERE (identifier = ? OR ip_address = ?) AND attempt_time >= NOW() - INTERVAL 3 MINUTE");
+        if ($check_stmt) {
+            $check_stmt->bind_param("ss", $identifier, $ip_address);
+            $check_stmt->execute();
+            $rate_res = $check_stmt->get_result()->fetch_assoc();
+            $failures = (int)($rate_res['failure_count'] ?? 0);
+            
+            if ($failures >= 5 && !empty($rate_res['last_attempt'])) {
+                $last_time = strtotime($rate_res['last_attempt']);
+                $now = time();
+                $elapsed = $now - $last_time;
+                $cooldown = 60; // 60 seconds lock
+                
+                if ($elapsed < $cooldown) {
+                    $remaining = $cooldown - $elapsed;
+                    http_response_code(429);
+                    die(json_encode([
+                        "status"           => "error",
+                        "error_type"       => "rate_limit",
+                        "message"          => "Too many failed login attempts. Please wait {$remaining} seconds before trying again.",
+                        "remainingSeconds" => $remaining
+                    ]));
+                }
+            }
+        }
+    }
+
     if ($role === 'student' || $role === 'student_role') {
         $student_id = $data['student_id'] ?? '';
         if (empty($student_id)) {
@@ -31,13 +104,11 @@ try {
 
         $stmt = $conn->prepare("SELECT StudentID, FirstName, LastName, Password, IsBlocked FROM students WHERE StudentID = ? LIMIT 1");
         if (!$stmt) {
-            die(json_encode(["status" => "error", "message" => "Database Search Error (S1). Please check if 'students' table exists."]));
+            die(json_encode(["status" => "error", "message" => "Database Search Error (S1)."]));
         }
 
         $stmt->bind_param("s", $student_id);
-        if (!$stmt->execute()) {
-            die(json_encode(["status" => "error", "message" => "Database Execution Error (S2)"]));
-        }
+        $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows === 1) {
@@ -46,7 +117,8 @@ try {
                 die(json_encode(["status" => "error", "message" => "Account has been suspended by an Admin."]));
             }
             if (password_verify($password, $user['Password'])) {
-                // Check for latest assessment status
+                $clearLoginAttempts($conn, $student_id, $ip_address);
+
                 $assessmentStatus = null;
                 $statusQuery = $conn->prepare("SELECT Status FROM assessments WHERE StudentID = ? ORDER BY CreatedAt DESC LIMIT 1");
                 if ($statusQuery) {
@@ -65,9 +137,11 @@ try {
                     "assessmentStatus" => $assessmentStatus
                 ]);
             } else {
+                $recordFailedAttempt($conn, $student_id, $ip_address);
                 echo json_encode(["status" => "error", "message" => "Invalid credentials (password mismatch)"]);
             }
         } else {
+            $recordFailedAttempt($conn, $student_id, $ip_address);
             echo json_encode(["status" => "error", "message" => "Invalid credentials (user not found)"]);
         }
 
@@ -92,6 +166,7 @@ try {
                 die(json_encode(["status" => "error", "message" => "Counselor account suspended by Admin."]));
             }
             if (password_verify($password, $user['Password'])) {
+                $clearLoginAttempts($conn, $email, $ip_address);
                 echo json_encode([
                     "status" => "success",
                     "role" => "guidance_counselor",
@@ -100,9 +175,11 @@ try {
                     "lastName" => $user['LastName']
                 ]);
             } else {
+                $recordFailedAttempt($conn, $email, $ip_address);
                 echo json_encode(["status" => "error", "message" => "Invalid credentials (password mismatch)"]);
             }
         } else {
+            $recordFailedAttempt($conn, $email, $ip_address);
             echo json_encode(["status" => "error", "message" => "Invalid credentials (counselor not found)"]);
         }
 
@@ -127,7 +204,7 @@ try {
                 die(json_encode(["status" => "error", "message" => "Account suspended by Super Admin."]));
             }
             if (password_verify($password, $user['Password'])) {
-                // --- CITADEL V2: 2-STEP AUTH FOR ADMINS ONLY ---
+                $clearLoginAttempts($conn, $email, $ip_address);
                 $otp = sprintf("%06d", random_int(100000, 999999));
                 $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
                 
@@ -136,7 +213,8 @@ try {
                 
                 if ($upd->execute()) {
                     require_once 'mailer.php';
-                    error_log("OTP code generated for Admin {$email}: {$otp}");
+                    $adminID = (int) $user['AdminID'];
+                    error_log("OTP code generated for Admin ID: {$adminID}");
                     if (sendOTPEmail($email, $user['FirstName'], $otp)) {
                         echo json_encode([
                             "status"   => "otp_pending",
@@ -155,11 +233,12 @@ try {
                 } else {
                     echo json_encode(["status" => "error", "message" => "Failed to generate security code."]);
                 }
-                // ------------------------------------
             } else {
+                $recordFailedAttempt($conn, $email, $ip_address);
                 echo json_encode(["status" => "error", "message" => "Invalid credentials (password mismatch)"]);
             }
         } else {
+            $recordFailedAttempt($conn, $email, $ip_address);
             echo json_encode(["status" => "error", "message" => "Invalid credentials (admin not found)"]);
         }
     } else {

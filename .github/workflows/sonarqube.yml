@@ -24,7 +24,7 @@ jobs:
           channel: 'stable'
 
       - name: Install Flutter Dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@e544b780808654ba8ceba5fb2fe2897103d92ff4

@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy dependency files first to leverage Docker cache
 COPY pubspec.yaml pubspec.lock ./
-RUN flutter pub get
+RUN flutter pub get --enforce-lockfile
 
 # Copy the rest of the application
 COPY . .

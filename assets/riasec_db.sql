@@ -103,10 +103,8 @@ CREATE TABLE `counselors` (
 
 --
 -- Dumping data for table `counselors`
---
+-- (Use backend/create_admin.php or environment variables to seed accounts securely)
 
-INSERT INTO `counselors` (`CounselorID`, `RoleID`, `FirstName`, `LastName`, `Email`, `Password`, `CreatedAt`) VALUES
-(1, 2, 'Maria', 'Santos', 'counselor@school.com', '$2y$10$3GQlCqHy4nNH6c/EF3bP0ecqMOVdMHyLpboVYckRZgnlTN1ufWTuu', '2026-03-12 01:18:11');
 
 -- --------------------------------------------------------
 
@@ -348,10 +346,8 @@ CREATE TABLE `students` (
 
 --
 -- Dumping data for table `students`
---
+-- (Students register via app or admin management)
 
-INSERT INTO `students` (`StudentID`, `RoleID`, `FirstName`, `LastName`, `Email`, `Password`, `CreatedAt`) VALUES
-(2024001, 1, 'Juan', 'Dela Cruz', 'juan@school.com', '$2y$10$vCzIKnJLe3k0DoRpYWCS8.IROhLfp8y.YQgyJvyBMikJfzvac2Hxq', '2026-03-12 01:18:11');
 
 --
 -- Constraints for dumped tables

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -26,6 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String _errorMessage = '';
+  Timer? _cooldownTimer;
+  int _cooldownRemaining = 0;
 
   final String apiUrl = ApiConfig.login;
 
@@ -45,12 +48,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
     _primaryController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  void _startCooldownTimer(int seconds) {
+    _cooldownTimer?.cancel();
+    setState(() {
+      _cooldownRemaining = seconds;
+      _errorMessage = 'Too many failed login attempts. Please wait $_cooldownRemaining seconds.';
+    });
+
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_cooldownRemaining <= 1) {
+        timer.cancel();
+        if (mounted) {
+          setState(() {
+            _cooldownRemaining = 0;
+            _errorMessage = '';
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _cooldownRemaining--;
+            _errorMessage = 'Too many failed login attempts. Please wait $_cooldownRemaining seconds.';
+          });
+        }
+      }
+    });
+  }
+
   Future<void> _handleLogin() async {
+    if (_cooldownRemaining > 0) return;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -78,7 +110,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final data = jsonDecode(response.body);
 
-      if (data['status'] == 'success') {
+      if (response.statusCode == 429 || data['remainingSeconds'] != null) {
+        final remaining = (data['remainingSeconds'] as num?)?.toInt() ?? 60;
+        _startCooldownTimer(remaining);
+      } else if (data['status'] == 'success') {
         if (!mounted) return;
 
         final session = SessionManager();
@@ -377,15 +412,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? const Center(
                                   child: CircularProgressIndicator())
                               : ElevatedButton(
-                                  onPressed: _handleLogin,
+                                  onPressed: _cooldownRemaining > 0 ? null : _handleLogin,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: _userType == 'admin' ? AppTheme.error : AppTheme.primaryPurple,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                   ),
-                                  child: const Text(
-                                    'Login',
-                                    style: TextStyle(
+                                  child: Text(
+                                    _cooldownRemaining > 0
+                                        ? 'Locked (Wait ${_cooldownRemaining}s)'
+                                        : 'Login',
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600),
                                   ),
