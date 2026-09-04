@@ -4,7 +4,8 @@ FROM php:8.2-apache
 # Install dependencies for PHPMailer (unzip and zip extension) and OPcache
 RUN apt-get update && apt-get install -y --no-install-recommends unzip libzip-dev \
     && docker-php-ext-install mysqli zip opcache \
-    && docker-php-ext-enable mysqli zip opcache
+    && docker-php-ext-enable mysqli zip opcache \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy OPcache configuration
 COPY opcache.ini $PHP_INI_DIR/conf.d/opcache.ini
@@ -18,11 +19,9 @@ WORKDIR /var/www/html
 # Copy the PHP files into the container
 COPY . /var/www/html/
 
-# Run the downloader to install PHPMailer in the vendor folder
-RUN php download_phpmailer.php
-
-# Ensure permissions
-RUN chown -R www-data:www-data /var/www/html
+# Run the downloader to install PHPMailer and ensure permissions
+RUN php download_phpmailer.php && \
+    chown -R www-data:www-data /var/www/html
 
 # Use unprivileged user www-data
 USER www-data

@@ -31,6 +31,65 @@ FEATURE_EXPLANATIONS = {
     'Strand': "Your senior high school academic strand provides a highly compatible foundation for this program."
 }
 
+CLASS_TO_COURSE_CODE = {
+    'BA Communication': 'BAComm',
+    'BS Accountancy': 'BSA-Acc',
+    'BS Agriculture': 'BSA',
+    'BS Architecture': 'BSArch',
+    'BS Biology': 'BSBio',
+    'BS Business Administration': 'BSBA',
+    'BS Civil Engineering': 'BSCE',
+    'BS Computer Science': 'BSCS',
+    'BS Criminology': 'BSCrim',
+    'BS Education': 'BSEd',
+    'BS Hospitality Management': 'BSHM',
+    'BS Industrial Technology': 'BSIT-Tech',
+    'BS Information Systems': 'BSIS',
+    'BS Information Technology': 'BSIT',
+    'BS Marketing Management': 'BSMktg',
+    'BS Mechanical Engineering': 'BSME',
+    'BS Nursing': 'BSN',
+    'BS Psychology': 'BSPsych',
+    'BS Tourism Management': 'BSTM',
+    'Bachelor of Fine Arts': 'BFA'
+}
+
+def normalize_strand(strand_str, valid_strands):
+    if strand_str in valid_strands:
+        return strand_str
+    if 'STEM' in strand_str or 'TECH' in strand_str or 'ICT' in strand_str:
+        return 'STEM'
+    if 'ABM' in strand_str or 'GAS' in strand_str or 'BPP' in strand_str:
+        return 'ABM'
+    return 'HUMSS'
+
+def generate_recommendations(top3_idx, probs, shap_values, feature_names):
+    recommendations = []
+    for rank, idx in enumerate(top3_idx, 1):
+        class_name = le.inverse_transform([idx])[0]
+        probability = float(probs[idx])
+        course_code = CLASS_TO_COURSE_CODE.get(class_name, 'BSCS')
+
+        class_shap = shap_values.values[0][:, idx]
+        sorted_feat_idx = np.argsort(class_shap)[::-1]
+        top_features = [feature_names[f_idx] for f_idx in sorted_feat_idx if class_shap[f_idx] > 0][:3]
+
+        explanations = [FEATURE_EXPLANATIONS[feat] for feat in top_features]
+        explanation_text = " ".join(explanations)
+        if not explanation_text:
+            explanation_text = "This course aligns with your general academic strand and interest profile."
+
+        shap_weights = {feature_names[i]: float(class_shap[i]) for i in range(len(feature_names))}
+
+        recommendations.append({
+            "rank": rank,
+            "course_code": course_code,
+            "probability": probability,
+            "explanation": explanation_text,
+            "shap_weights": shap_weights
+        })
+    return recommendations
+
 class RecommendationHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/recommend':
@@ -49,17 +108,9 @@ class RecommendationHandler(BaseHTTPRequestHandler):
                 c = float(input_data.get('C', 0))
                 rses = float(input_data.get('RSES', 0))
                 cdses = float(input_data.get('CDSES', 0))
-                strand_str = str(input_data.get('Strand', 'STEM')).strip().upper()
+                raw_strand = str(input_data.get('Strand', 'STEM')).strip().upper()
 
-                # Handle Strand encoding
-                valid_strands = list(se.classes_)
-                if strand_str not in valid_strands:
-                    if 'STEM' in strand_str or 'TECH' in strand_str or 'ICT' in strand_str:
-                        strand_str = 'STEM'
-                    elif 'ABM' in strand_str or 'GAS' in strand_str or 'BPP' in strand_str:
-                        strand_str = 'ABM'
-                    else:
-                        strand_str = 'HUMSS'
+                strand_str = normalize_strand(raw_strand, list(se.classes_))
                 strand_encoded = int(se.transform([strand_str])[0])
 
                 # Create input dataframe
@@ -72,56 +123,7 @@ class RecommendationHandler(BaseHTTPRequestHandler):
                 
                 # Compute SHAP
                 shap_values = explainer(input_df)
-
-                recommendations = []
-                for rank, idx in enumerate(top3_idx, 1):
-                    class_name = le.inverse_transform([idx])[0]
-                    probability = float(probs[idx])
-                    
-                    CLASS_TO_COURSE_CODE = {
-                        'BA Communication': 'BAComm',
-                        'BS Accountancy': 'BSA-Acc',
-                        'BS Agriculture': 'BSA',
-                        'BS Architecture': 'BSArch',
-                        'BS Biology': 'BSBio',
-                        'BS Business Administration': 'BSBA',
-                        'BS Civil Engineering': 'BSCE',
-                        'BS Computer Science': 'BSCS',
-                        'BS Criminology': 'BSCrim',
-                        'BS Education': 'BSEd',
-                        'BS Hospitality Management': 'BSHM',
-                        'BS Industrial Technology': 'BSIT-Tech',
-                        'BS Information Systems': 'BSIS',
-                        'BS Information Technology': 'BSIT',
-                        'BS Marketing Management': 'BSMktg',
-                        'BS Mechanical Engineering': 'BSME',
-                        'BS Nursing': 'BSN',
-                        'BS Psychology': 'BSPsych',
-                        'BS Tourism Management': 'BSTM',
-                        'Bachelor of Fine Arts': 'BFA'
-                    }
-                    course_code = CLASS_TO_COURSE_CODE.get(class_name, 'BSCS')
-
-                    # SHAP explanations
-                    class_shap = shap_values.values[0][:, idx]
-                    sorted_feat_idx = np.argsort(class_shap)[::-1]
-                    top_features = [feature_names[f_idx] for f_idx in sorted_feat_idx if class_shap[f_idx] > 0][:3]
-                    
-                    explanations = [FEATURE_EXPLANATIONS[feat] for feat in top_features]
-                    explanation_text = " ".join(explanations)
-                    if not explanation_text:
-                        explanation_text = f"This course aligns with your general academic strand and interest profile."
-
-                    # Exact SHAP feature contribution weights for counselor diagnostics
-                    shap_weights = {feature_names[i]: float(class_shap[i]) for i in range(len(feature_names))}
-
-                    recommendations.append({
-                        "rank": rank,
-                        "course_code": course_code,
-                        "probability": probability,
-                        "explanation": explanation_text,
-                        "shap_weights": shap_weights
-                    })
+                recommendations = generate_recommendations(top3_idx, probs, shap_values, feature_names)
 
                 response_body = json.dumps({
                     "status": "success",

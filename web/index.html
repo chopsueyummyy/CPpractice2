@@ -37,15 +37,14 @@
   <title>CourseAlign</title>
   <link rel="manifest" href="manifest.json">
   
-  <script>
+  <script type="module">
     // CACHE EXORCISM: Force old service workers to unregister
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
-          console.log("Old Service Worker Unregistered");
-        }
-      });
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        registration.unregister();
+        console.log("Old Service Worker Unregistered");
+      }
     }
   </script>
 </head>

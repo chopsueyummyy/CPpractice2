@@ -119,7 +119,7 @@ def main():
             explanations = [FEATURE_EXPLANATIONS[feat] for feat in top_features]
             explanation_text = " ".join(explanations)
             if not explanation_text:
-                explanation_text = f"This course aligns with your general academic strand and interest profile."
+                explanation_text = "This course aligns with your general academic strand and interest profile."
 
             recommendations.append({
                 "rank": rank,

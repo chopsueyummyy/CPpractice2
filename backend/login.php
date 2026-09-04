@@ -1,8 +1,3 @@
-<?php
-header("Content-Type: application/json");
-require_once 'cors.php';
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
 
 // Disable default PHP 8.1+ mysqli exceptions (prevent silent crashes)
 @mysqli_report(MYSQLI_REPORT_OFF);
@@ -130,10 +125,10 @@ try {
                 // --- CITADEL V2: 2-STEP AUTH FOR ADMINS ONLY ---
                 $otp = sprintf("%06d", random_int(100000, 999999));
                 $expiry = date("Y-m-d H:i:s", strtotime("+10 minutes"));
-                
+
                 $upd = $conn->prepare("UPDATE admins SET OTP_Code = ?, OTP_Expiry = ? WHERE AdminID = ?");
                 $upd->bind_param("ssi", $otp, $expiry, $user['AdminID']);
-                
+
                 if ($upd->execute()) {
                     require_once 'mailer.php';
                     error_log("OTP code generated for Admin {$email}: {$otp}");
