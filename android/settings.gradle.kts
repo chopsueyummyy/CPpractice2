@@ -24,3 +24,5 @@ plugins {
 }
 
 include(":app")
+
+rootProject.name = "riasec_app"
