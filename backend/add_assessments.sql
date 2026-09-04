@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS `admins` (
   CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`RoleID`) REFERENCES `roles` (`RoleID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Initial admin seed (Use backend/create_admin.php to create Super Admin securely)
-
+INSERT IGNORE INTO `admins` (`AdminID`, `RoleID`, `FirstName`, `LastName`, `Email`, `Password`) VALUES
+(1, 4, 'Super', 'Admin', 'admin@school.com', '$2y$10$ihpU8TArBKpkHGFLLVdv.OWqA54WMhQVeVbWwOm8fW8aCzu8KEzx.');
 
 CREATE TABLE IF NOT EXISTS `system_logs` (
   `LogID` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
