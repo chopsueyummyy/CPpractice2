@@ -1,4 +1,4 @@
-
+<?php
 // Disable default PHP 8.1+ mysqli exceptions (prevent silent crashes)
 @mysqli_report(MYSQLI_REPORT_OFF);
 
