@@ -136,7 +136,8 @@ try {
                 
                 if ($upd->execute()) {
                     require_once 'mailer.php';
-                    error_log("OTP code generated for Admin {$email}: {$otp}");
+                    $adminID = (int) $user['AdminID'];
+                    error_log("OTP code generated for Admin ID: {$adminID}");
                     if (sendOTPEmail($email, $user['FirstName'], $otp)) {
                         echo json_encode([
                             "status"   => "otp_pending",

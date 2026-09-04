@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT IGNORE INTO `admins` (`AdminID`, `RoleID`, `FirstName`, `LastName`, `Email`, `Password`) VALUES
-(1, 4, 'Super', 'Admin', 'admin@school.com', '$2y$10$ihpU8TArBKpkHGFLLVdv.OWqA54WMhQVeVbWwOm8fW8aCzu8KEzx.');
+(1, 4, 'Super', 'Admin', 'admin@school.com', 'CHANGE_ON_FIRST_LOGIN');
 
 CREATE TABLE IF NOT EXISTS `system_logs` (
   `LogID` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
