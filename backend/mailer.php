@@ -62,6 +62,11 @@ function sendAssessmentEmail($toEmail, $studentName, $status, $notes, $adminEmai
         ";
     }
 
+    $appUrl = getenv('APP_URL') ?: 'http://localhost:8080/#/login';
+
+    $ctaButtonText = $isApproved ? '📊 Access Student Portal' : '🔄 Start Retake Assessment';
+    $ctaButtonColor = $isApproved ? '#27AE60' : '#E74C3C';
+
     $body = "
         <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e1e1e1; border-radius: 10px; overflow: hidden; background-color: #ffffff;'>
             <!-- Header Banner -->
@@ -92,6 +97,16 @@ function sendAssessmentEmail($toEmail, $studentName, $status, $notes, $adminEmai
                 <div style='margin-top: 20px; padding: 16px; background-color: #f1f2f6; border-radius: 6px;'>
                     <div style='font-size: 14px; font-weight: bold; color: #2d3436; margin-bottom: 4px;'>📌 Next Steps:</div>
                     <div style='font-size: 14px; color: #4a4a4a;'>{$nextStepsText}</div>
+                </div>
+
+                <!-- Portal Access Link & Button -->
+                <div style='margin-top: 25px; text-align: center;'>
+                    <a href='{$appUrl}' target='_blank' style='display: inline-block; background-color: {$ctaButtonColor}; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 14px;'>
+                        {$ctaButtonText}
+                    </a>
+                    <div style='margin-top: 10px; font-size: 12px; color: #636e72;'>
+                        Link to System: <a href='{$appUrl}' style='color: #6c5ce7; word-break: break-all;'>{$appUrl}</a>
+                    </div>
                 </div>
 
                 <div style='margin-top: 30px; font-size: 14px; color: #2d3436;'>
