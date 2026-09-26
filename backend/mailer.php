@@ -25,15 +25,82 @@ function sendOTPEmail($toEmail, $firstName, $otpCode) {
 function sendAssessmentEmail($toEmail, $studentName, $status, $notes, $adminEmail = null) {
     if (!$adminEmail) $adminEmail = getenv('SMTP_USER');
 
-    $subject = 'Your RIASEC Assessment has been ' . ucfirst($status);
-    $body = "<h2>Hello $studentName,</h2>";
-    $body .= "<p>Your recent RIASEC Assessment has been marked as <strong>" . ucfirst($status) . "</strong> by the counselor.</p>";
+    $isApproved = (strtolower($status) === 'approved');
+    $subject = $isApproved 
+        ? 'Your RIASEC Assessment has been Approved' 
+        : 'Action Required: Your RIASEC Assessment Needs Revision';
+
+    $statusTitle = $isApproved ? '✅ Assessment Approved' : '⚠️ Action Required: Retake Permitted';
+    $statusBgColor = $isApproved ? '#E8F8F5' : '#FDEDEC';
+    $statusBorderColor = $isApproved ? '#27AE60' : '#E74C3C';
+    $statusTextColor = $isApproved ? '#1E8449' : '#C0392B';
+    $badgeText = $isApproved ? 'APPROVED' : 'RETURNED FOR REVISION';
+
+    $notesHeaderColor = $isApproved ? '#27AE60' : '#E74C3C';
+    $notesBgColor = '#f8f9fa';
+
+    $introMessage = $isApproved
+        ? 'Great news! Your recent RIASEC Career Assessment has been reviewed and officially <strong>APPROVED</strong> by your Guidance Counselor.'
+        : 'Your recent RIASEC Career Assessment has been reviewed by your Guidance Counselor and <strong>RETURNED FOR REVISION</strong>.';
+
+    $nextStepsText = $isApproved
+        ? 'Your personalized career recommendations, Holland Code breakdown, and course compatibility reports are now unlocked on your student dashboard.'
+        : 'The <strong>Retake Assessment</strong> button is now active on your Student Portal. Please log in, review the counselor guidance notes above, and submit a new assessment.';
+
+    $notesSection = '';
     if (!empty($notes)) {
-        $body .= "<div style='background-color:#f8f9fa; padding:15px; border-left:4px solid #6c5ce7; margin:20px 0;'>
-                    <strong>Counselor Notes:</strong><br>" . nl2br(htmlspecialchars($notes)) . "
-                  </div>";
+        $cleanNotes = nl2br(htmlspecialchars($notes));
+        $notesSection = "
+            <div style='margin-top: 20px; margin-bottom: 20px;'>
+                <div style='font-size: 13px; font-weight: bold; color: #2d3436; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;'>
+                    💬 Counselor Notes & Guidance:
+                </div>
+                <div style='background-color: {$notesBgColor}; padding: 16px; border-left: 4px solid {$notesHeaderColor}; border-radius: 4px; font-size: 14px; color: #2d3436; line-height: 1.5;'>
+                    {$cleanNotes}
+                </div>
+            </div>
+        ";
     }
-    $body .= "<br><p>Thank you,</p><p>Guidance Office</p>";
+
+    $body = "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e1e1e1; border-radius: 10px; overflow: hidden; background-color: #ffffff;'>
+            <!-- Header Banner -->
+            <div style='background-color: #6c5ce7; color: #ffffff; padding: 24px; text-align: center;'>
+                <div style='font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.9;'>Jose Maria College</div>
+                <h2 style='margin: 4px 0 0 0; font-size: 22px; font-weight: bold;'>Guidance & Counseling Office</h2>
+            </div>
+
+            <!-- Content Area -->
+            <div style='padding: 30px; color: #2d3436; line-height: 1.6;'>
+                <h3 style='margin-top: 0; font-size: 18px; color: #2d3436;'>Hello {$studentName},</h3>
+                
+                <p style='font-size: 15px; color: #4a4a4a;'>{$introMessage}</p>
+
+                <!-- Status Card -->
+                <div style='background-color: {$statusBgColor}; border: 1.5px solid {$statusBorderColor}; border-radius: 8px; padding: 16px; margin: 20px 0;'>
+                    <div style='font-size: 16px; font-weight: bold; color: {$statusTextColor};'>
+                        {$statusTitle}
+                    </div>
+                    <div style='font-size: 13px; color: #555555; margin-top: 4px;'>
+                        Status: <strong>{$badgeText}</strong>
+                    </div>
+                </div>
+
+                {$notesSection}
+
+                <!-- Next Steps -->
+                <div style='margin-top: 20px; padding: 16px; background-color: #f1f2f6; border-radius: 6px;'>
+                    <div style='font-size: 14px; font-weight: bold; color: #2d3436; margin-bottom: 4px;'>📌 Next Steps:</div>
+                    <div style='font-size: 14px; color: #4a4a4a;'>{$nextStepsText}</div>
+                </div>
+
+                <div style='margin-top: 30px; font-size: 14px; color: #2d3436;'>
+                    Thank you,<br>
+                    <strong>Guidance Office</strong>
+                </div>
+            </div>
+        </div>
+    ";
 
     return sendGenericEmail($toEmail, $studentName, $subject, $body);
 }
