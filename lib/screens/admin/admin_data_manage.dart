@@ -116,7 +116,7 @@ class _AdminDataManageState extends State<AdminDataManage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 16)),
-          Text('$score%', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textSecondary)),
+          Text('$score%', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textSecondary)),
         ],
       ),
     );

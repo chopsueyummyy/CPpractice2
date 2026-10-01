@@ -758,109 +758,13 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                                   ),
                                 ),
 
-                                // Options Cards Mapping
-                                ...options.map((option) {
-                                  final value = option['value'] as int;
-                                  final isSelected = selectedScore == value;
-                                  final subtitle = option['subtitle'] as String?;
-
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () => _selectScore(value),
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 180),
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                          decoration: BoxDecoration(
-                                            color: isSelected
-                                                ? AppTheme.primaryPurple.withOpacity(0.08)
-                                                : isDark ? const Color(0xFF1E1E2E) : Colors.white,
-                                            border: Border.all(
-                                              color: isSelected ? AppTheme.primaryPurple : isDark ? const Color(0xFF2E2E3E) : const Color(0xFFE2E8F0),
-                                              width: isSelected ? 2.5 : 1,
-                                            ),
-                                            borderRadius: BorderRadius.circular(16),
-                                            boxShadow: isSelected
-                                                ? [
-                                                    BoxShadow(
-                                                      color: AppTheme.primaryPurple.withOpacity(0.18),
-                                                      blurRadius: 12,
-                                                      offset: const Offset(0, 4),
-                                                    )
-                                                  ]
-                                                : [
-                                                    BoxShadow(
-                                                      color: Colors.black.withOpacity(0.02),
-                                                      blurRadius: 4,
-                                                      offset: const Offset(0, 2),
-                                                    )
-                                                  ],
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              AnimatedContainer(
-                                                duration: const Duration(milliseconds: 180),
-                                                width: 26,
-                                                height: 26,
-                                                decoration: BoxDecoration(
-                                                  color: isSelected ? AppTheme.primaryPurple : Colors.transparent,
-                                                  border: Border.all(
-                                                    color: isSelected ? AppTheme.primaryPurple : const Color(0xFF94A3B8),
-                                                    width: 2,
-                                                  ),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Center(
-                                                  child: isSelected
-                                                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                                                      : const SizedBox(),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      option['label'],
-                                                      style: GoogleFonts.plusJakartaSans(
-                                                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                                        color: isSelected ? AppTheme.primaryPurple : isDark ? Colors.white : const Color(0xFF1E293B),
-                                                        fontSize: 16,
-                                                      ),
-                                                    ),
-                                                    if (subtitle != null) ...[
-                                                      const SizedBox(height: 2),
-                                                      Text(
-                                                        subtitle,
-                                                        style: GoogleFonts.plusJakartaSans(
-                                                          fontSize: 12.5,
-                                                          color: isSelected
-                                                              ? AppTheme.primaryPurple.withOpacity(0.85)
-                                                              : const Color(0xFF64748B),
-                                                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ],
-                                                ),
-                                              ),
-                                              if (isSelected)
-                                                const Icon(
-                                                  Icons.arrow_forward_ios_rounded,
-                                                  size: 16,
-                                                  color: AppTheme.primaryPurple,
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }),
+                                // Options Cards Mapping - Horizontal & Grid for Mobile
+                                if (type == 'riasec')
+                                  _buildRiasecOptionsHorizontal(selectedScore, isDark)
+                                else if (type == 'rse')
+                                  _buildRseOptionsGrid(selectedScore, isDark)
+                                else if (type == 'cdses')
+                                  _buildCdsesOptionsGrid(selectedScore, isDark),
                               ],
                             ),
                           ],
@@ -994,6 +898,248 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
             child: const Text('Leave & Cancel'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRiasecOptionsHorizontal(int? selectedScore, bool isDark) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildOptionTileCard(
+            label: 'Agree',
+            subtitle: 'I like/prefer this',
+            value: 1,
+            isSelected: selectedScore == 1,
+            isDark: isDark,
+            activeColor: AppTheme.primaryPurple,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildOptionTileCard(
+            label: 'Disagree',
+            subtitle: 'I do not prefer this',
+            value: 0,
+            isSelected: selectedScore == 0,
+            isDark: isDark,
+            activeColor: const Color(0xFFEF4444),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRseOptionsGrid(int? selectedScore, bool isDark) {
+    final opts = [
+      {'label': 'Strongly Agree', 'sub': 'Completely true', 'val': 1, 'color': const Color(0xFF059669)},
+      {'label': 'Agree', 'sub': 'Mostly true', 'val': 2, 'color': const Color(0xFF0D9488)},
+      {'label': 'Disagree', 'sub': 'Mostly untrue', 'val': 3, 'color': const Color(0xFFF97316)},
+      {'label': 'Strongly Disagree', 'sub': 'Completely untrue', 'val': 4, 'color': const Color(0xFFEF4444)},
+    ];
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildOptionTileCard(
+                label: opts[0]['label'] as String,
+                subtitle: opts[0]['sub'] as String,
+                value: opts[0]['val'] as int,
+                isSelected: selectedScore == 1,
+                isDark: isDark,
+                activeColor: opts[0]['color'] as Color,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildOptionTileCard(
+                label: opts[1]['label'] as String,
+                subtitle: opts[1]['sub'] as String,
+                value: opts[1]['val'] as int,
+                isSelected: selectedScore == 2,
+                isDark: isDark,
+                activeColor: opts[1]['color'] as Color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildOptionTileCard(
+                label: opts[2]['label'] as String,
+                subtitle: opts[2]['sub'] as String,
+                value: opts[2]['val'] as int,
+                isSelected: selectedScore == 3,
+                isDark: isDark,
+                activeColor: opts[2]['color'] as Color,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildOptionTileCard(
+                label: opts[3]['label'] as String,
+                subtitle: opts[3]['sub'] as String,
+                value: opts[3]['val'] as int,
+                isSelected: selectedScore == 4,
+                isDark: isDark,
+                activeColor: opts[3]['color'] as Color,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCdsesOptionsGrid(int? selectedScore, bool isDark) {
+    final opts = [
+      {'num': '1', 'label': 'No Confidence', 'val': 1, 'color': const Color(0xFFDC2626)},
+      {'num': '2', 'label': 'Very Little', 'val': 2, 'color': const Color(0xFFEA580C)},
+      {'num': '3', 'label': 'Moderate', 'val': 3, 'color': const Color(0xFF4F46E5)},
+      {'num': '4', 'label': 'Much Confidence', 'val': 4, 'color': const Color(0xFF0D9488)},
+      {'num': '5', 'label': 'Complete Confidence', 'val': 5, 'color': const Color(0xFF059669)},
+    ];
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildCdsesTile(opts[0], selectedScore == 1, isDark, opts[0]['color'] as Color),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildCdsesTile(opts[1], selectedScore == 2, isDark, opts[1]['color'] as Color),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildCdsesTile(opts[2], selectedScore == 3, isDark, opts[2]['color'] as Color),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildCdsesTile(opts[3], selectedScore == 4, isDark, opts[3]['color'] as Color),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildCdsesTile(opts[4], selectedScore == 5, isDark, opts[4]['color'] as Color),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCdsesTile(Map<String, dynamic> opt, bool isSelected, bool isDark, Color activeColor) {
+    final val = opt['val'] as int;
+    return InkWell(
+      onTap: () => _selectScore(val),
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? activeColor
+              : isDark ? const Color(0xFF1E1E2E) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? activeColor : isDark ? const Color(0xFF2E2E3E) : const Color(0xFFE2E8F0),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: activeColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
+              : [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              opt['num'] as String,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                color: isSelected ? Colors.white : isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              opt['label'] as String,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+                color: isSelected ? Colors.white.withOpacity(0.95) : const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTileCard({
+    required String label,
+    required String subtitle,
+    required int value,
+    required bool isSelected,
+    required bool isDark,
+    required Color activeColor,
+  }) {
+    return InkWell(
+      onTap: () => _selectScore(value),
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? activeColor.withOpacity(0.12)
+              : isDark ? const Color(0xFF1E1E2E) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? activeColor : isDark ? const Color(0xFF2E2E3E) : const Color(0xFFE2E8F0),
+            width: isSelected ? 2.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: activeColor.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 3))]
+              : [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                color: isSelected ? activeColor : isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w500,
+                fontSize: 10.5,
+                color: isSelected ? activeColor.withOpacity(0.85) : const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

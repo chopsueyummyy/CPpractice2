@@ -1,21 +1,19 @@
 <?php
 function sendOTPEmail($toEmail, $firstName, $otpCode) {
-    $subject = "Your RIASEC Account Verification Code";
+    $subject = "Your CourseAlign Account Verification Code";
     $body = "
         <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e1e1e1; border-radius: 8px; overflow: hidden;'>
             <div style='background-color: #6c5ce7; color: white; padding: 20px; text-align: center;'>
-                <h1 style='margin:0;'>Project Citadel</h1>
+                <h1 style='margin:0;'>CourseAlign System</h1>
                 <p style='margin:0;'>Secure Admin Access</p>
             </div>
             <div style='padding: 30px; line-height: 1.6; color: #333;'>
                 <h2>Hello $firstName,</h2>
-                <p>You are attempting to log in to the RIASEC Admin System. Please use the following verification code to complete your login:</p>
+                <p>You are attempting to log in to the CourseAlign Admin System. Please use the following verification code to complete your login:</p>
                 <div style='background-color: #f8f9fa; border: 2px dashed #6c5ce7; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;'>
                     <span style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #6c5ce7;'>$otpCode</span>
                 </div>
                 <p>This code will expire in 10 minutes. If you did not request this code, please ignore this email or contact your system administrator.</p>
-                <br>
-                <p style='color: #636e72; font-size: 12px;'>Protected by RIASEC Security Suite • Project Citadel</p>
             </div>
         </div>
     ";
@@ -27,8 +25,8 @@ function sendAssessmentEmail($toEmail, $studentName, $status, $notes, $adminEmai
 
     $isApproved = (strtolower($status) === 'approved');
     $subject = $isApproved 
-        ? 'Your RIASEC Assessment has been Approved' 
-        : 'Action Required: Your RIASEC Assessment Needs Revision';
+        ? 'Your CourseAlign Assessment has been Approved' 
+        : 'Action Required: Your CourseAlign Assessment Needs Revision';
 
     $statusTitle = $isApproved ? '✅ Assessment Approved' : '⚠️ Action Required: Retake Permitted';
     $statusBgColor = $isApproved ? '#E8F8F5' : '#FDEDEC';
@@ -40,8 +38,8 @@ function sendAssessmentEmail($toEmail, $studentName, $status, $notes, $adminEmai
     $notesBgColor = '#f8f9fa';
 
     $introMessage = $isApproved
-        ? 'Great news! Your recent RIASEC Career Assessment has been reviewed and officially <strong>APPROVED</strong> by your Guidance Counselor.'
-        : 'Your recent RIASEC Career Assessment has been reviewed by your Guidance Counselor and <strong>RETURNED FOR REVISION</strong>.';
+        ? 'Great news! Your recent CourseAlign Assessment has been reviewed and officially <strong>APPROVED</strong> by your Guidance Counselor.'
+        : 'Your recent CourseAlign Assessment has been reviewed by your Guidance Counselor and <strong>RETURNED FOR REVISION</strong>.';
 
     $nextStepsText = $isApproved
         ? 'Your personalized career recommendations, Holland Code breakdown, and course compatibility reports are now unlocked on your student dashboard.'
@@ -146,13 +144,13 @@ function sendGenericEmail($toEmail, $recipientName, $subject, $htmlBody) {
         $mail->SMTPAuth   = true;
         $mail->Username   = getenv('SMTP_USER');
         $mail->Password   = getenv('SMTP_PASS');
-        $mail->SMTPSecure = (getenv('SMTP_SECURE') === 'tls' ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS);
+        $mail->SMTPSecure = (getenv('SMTP_SECURE') === 'ssl' ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS);
         $mail->Port       = (int)(getenv('SMTP_PORT') ?: 587);
         
         $mail->Timeout    = 7;
         $mail->SMTPConnectTimeout = 5;
 
-        $mail->setFrom($mail->Username, 'RIASEC Assessment System');
+        $mail->setFrom($mail->Username, 'CourseAlign System');
         $mail->addAddress($toEmail, $recipientName);
 
         $mail->isHTML(true);

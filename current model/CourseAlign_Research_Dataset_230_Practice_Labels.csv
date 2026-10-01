@@ -1,0 +1,231 @@
+SHS_Strand,Realistic_Score,Investigative_Score,Artistic_Score,Social_Score,Enterprising_Score,Conventional_Score,RSE_Score_Likert,CDSES_Total_Score,Course Cluster
+HUMSS,4,1,1,7,3,6,9,65,Education & Social Services
+STEM,5,4,5,5,5,2,17,100,"Arts, Media & Communication"
+ABM,6,6,4,6,5,5,17,103,Health & Medical Sciences
+STEM,4,3,4,7,4,6,18,81,Education & Social Services
+STEM,3,6,3,4,4,5,25,86,Information Technology & Computing
+HUMSS,6,2,4,6,3,7,15,67,Education & Social Services
+STEM,5,5,5,5,4,6,22,70,Information Technology & Computing
+ABM,4,4,2,6,2,5,16,77,Health & Medical Sciences
+ABM,4,7,5,4,3,5,20,96,Information Technology & Computing
+ABM,6,5,6,5,4,4,17,81,"Arts, Media & Communication"
+ABM,7,2,5,6,4,4,11,69,"Arts, Media & Communication"
+ABM,7,6,6,7,7,7,15,94,Business & Management
+STEM,5,3,4,7,5,7,18,100,Business & Management
+ABM,6,1,5,5,3,5,15,74,"Arts, Media & Communication"
+ABM,5,4,5,7,6,7,18,83,Business & Management
+HUMSS,6,7,7,7,7,7,15,74,Information Technology & Computing
+HUMSS,2,4,3,7,1,3,11,86,Education & Social Services
+STEM,4,7,3,7,5,3,9,97,Health & Medical Sciences
+STEM,6,6,7,7,5,5,20,92,Health & Medical Sciences
+HUMSS,7,3,5,6,6,5,18,78,"Arts, Media & Communication"
+ABM,5,5,1,6,3,6,9,55,Health & Medical Sciences
+STEM,6,7,7,7,6,6,18,85,Information Technology & Computing
+HUMSS,6,2,2,4,4,4,19,53,Engineering & Technology
+ABM,4,4,3,4,6,6,15,91,Business & Management
+STEM,6,2,6,5,6,3,10,74,"Arts, Media & Communication"
+STEM,7,6,6,5,6,5,13,83,Engineering & Technology
+HUMSS,4,5,4,5,5,5,17,71,Education & Social Services
+TVL,5,5,2,4,3,5,19,84,Information Technology & Computing
+STEM,7,7,7,6,7,6,27,100,Information Technology & Computing
+STEM,6,5,2,6,5,6,16,78,Information Technology & Computing
+STEM,6,3,7,4,6,7,17,76,Information Technology & Computing
+STEM,7,5,6,7,7,6,15,86,Information Technology & Computing
+HUMSS,4,3,3,5,4,5,18,75,Education & Social Services
+ABM,6,7,6,7,7,4,10,56,Health & Medical Sciences
+STEM,6,7,6,7,3,6,14,72,Health & Medical Sciences
+STEM,5,3,4,4,7,7,14,70,Business & Management
+STEM,4,6,6,5,2,5,26,82,Health & Medical Sciences
+STEM,3,3,3,6,4,7,11,95,Business & Management
+STEM,7,5,6,7,7,6,18,107,Information Technology & Computing
+STEM,5,6,1,5,4,4,18,74,Health & Medical Sciences
+STEM,5,4,3,7,6,3,18,85,Health & Medical Sciences
+TVL,6,5,6,7,2,6,16,100,Information Technology & Computing
+HUMSS,5,5,3,7,3,5,24,95,Education & Social Services
+STEM,7,7,5,6,3,5,17,77,Engineering & Technology
+TVL,6,4,6,4,6,2,16,93,"Arts, Media & Communication"
+STEM,4,3,3,5,2,5,19,97,Health & Medical Sciences
+STEM,3,5,6,6,3,7,18,105,Information Technology & Computing
+HUMSS,6,3,6,5,7,4,15,85,"Arts, Media & Communication"
+STEM,2,5,2,3,2,3,13,83,Health & Medical Sciences
+STEM,6,5,5,4,4,5,17,83,Engineering & Technology
+HUMSS,6,3,5,7,4,7,20,93,Education & Social Services
+ABM,5,5,2,7,4,6,15,77,Health & Medical Sciences
+STEM,5,7,4,5,3,5,13,77,Information Technology & Computing
+HUMSS,5,5,7,6,4,5,16,75,Social Sciences & Humanities
+HUMSS,3,1,4,3,4,2,9,95,"Arts, Media & Communication"
+STEM,3,2,5,2,1,5,17,71,"Arts, Media & Communication"
+ABM,5,4,4,6,5,6,14,83,Business & Management
+STEM,2,7,1,6,3,3,19,86,Health & Medical Sciences
+STEM,5,3,3,4,5,4,13,83,Engineering & Technology
+HUMSS,7,4,5,7,6,6,13,54,Education & Social Services
+HUMSS,7,7,7,7,7,7,15,73,Information Technology & Computing
+HUMSS,6,4,5,5,4,7,15,55,Information Technology & Computing
+HUMSS,5,1,2,4,5,6,14,73,Business & Management
+STEM,2,1,2,2,4,4,16,65,Business & Management
+HUMSS,7,7,7,6,7,7,15,96,Information Technology & Computing
+STEM,7,7,6,7,6,7,22,49,Information Technology & Computing
+HUMSS,6,6,7,5,7,7,15,52,Information Technology & Computing
+STEM,4,4,7,5,5,7,15,74,Business & Management
+HUMSS,5,5,7,6,5,7,15,102,Business & Management
+STEM,2,3,1,1,0,1,13,73,Health & Medical Sciences
+STEM,6,7,7,7,7,7,18,75,Information Technology & Computing
+HUMSS,5,5,5,7,5,5,20,98,Education & Social Services
+STEM,7,6,4,7,7,3,15,75,Health & Medical Sciences
+HUMSS,7,7,7,7,7,7,16,46,Information Technology & Computing
+STEM,4,3,3,6,2,3,11,59,Health & Medical Sciences
+HUMSS,2,5,5,4,4,5,17,75,Social Sciences & Humanities
+STEM,6,4,4,7,6,5,11,71,Health & Medical Sciences
+STEM,6,3,5,6,2,3,13,75,Health & Medical Sciences
+HUMSS,1,0,2,4,4,4,15,48,Education & Social Services
+STEM,7,6,5,7,6,7,13,31,Information Technology & Computing
+STEM,6,7,7,7,7,6,15,75,Information Technology & Computing
+HUMSS,7,6,4,7,7,6,15,75,Information Technology & Computing
+STEM,6,6,7,7,5,6,18,80,Information Technology & Computing
+HUMSS,5,3,5,6,5,5,12,85,Education & Social Services
+STEM,5,5,7,5,2,7,5,88,Information Technology & Computing
+STEM,6,5,7,7,6,4,17,93,"Arts, Media & Communication"
+STEM,6,5,7,7,5,5,17,77,Health & Medical Sciences
+STEM,6,4,5,6,4,6,14,75,Information Technology & Computing
+STEM,7,7,7,7,7,7,15,125,Information Technology & Computing
+STEM,5,4,7,7,3,4,12,98,"Arts, Media & Communication"
+TVL,7,6,7,7,6,7,18,74,Information Technology & Computing
+TVL,5,6,2,5,5,6,15,75,Information Technology & Computing
+STEM,5,6,7,4,7,5,15,54,Information Technology & Computing
+TVL,5,4,7,7,7,7,14,75,Business & Management
+TVL,7,7,7,5,4,5,5,121,Information Technology & Computing
+TVL,5,4,6,7,6,6,14,76,Business & Management
+TVL,6,4,5,3,1,5,14,71,Engineering & Technology
+HUMSS,7,6,5,6,7,5,11,89,Engineering & Technology
+HUMSS,5,4,5,6,2,3,14,56,Social Sciences & Humanities
+STEM,5,5,5,7,6,5,10,87,Health & Medical Sciences
+HUMSS,6,3,1,6,5,6,14,84,Education & Social Services
+ABM,5,4,5,6,5,2,18,60,"Arts, Media & Communication"
+HUMSS,4,3,3,7,6,6,17,81,Education & Social Services
+STEM,6,4,2,4,2,3,16,69,Engineering & Technology
+HUMSS,7,5,6,5,7,7,18,96,Information Technology & Computing
+STEM,7,5,7,4,2,5,9,79,Engineering & Technology
+ABM,5,3,4,7,7,7,25,113,Business & Management
+STEM,6,6,6,6,5,7,16,93,Information Technology & Computing
+HUMSS,5,5,5,6,3,4,12,84,Social Sciences & Humanities
+HUMSS,4,3,3,4,5,5,13,100,Business & Management
+STEM,6,4,4,5,6,5,16,77,Engineering & Technology
+STEM,4,2,7,1,2,5,9,81,"Arts, Media & Communication"
+HUMSS,7,4,6,6,7,5,22,88,"Arts, Media & Communication"
+ABM,7,4,5,5,6,5,15,44,Business & Management
+HUMSS,6,2,7,5,6,6,23,92,"Arts, Media & Communication"
+ABM,3,0,4,4,3,4,8,65,"Arts, Media & Communication"
+HUMSS,5,5,2,5,2,4,9,77,Health & Medical Sciences
+ABM,7,3,5,4,5,3,14,44,Engineering & Technology
+HUMSS,4,4,5,2,4,5,15,69,Information Technology & Computing
+HUMSS,6,1,5,4,1,4,11,70,"Arts, Media & Communication"
+HUMSS,6,3,4,7,5,6,16,67,Education & Social Services
+TVL,6,5,1,3,0,7,11,82,Engineering & Technology
+TVL,7,2,4,5,7,6,13,73,Business & Management
+HUMSS,5,2,3,7,5,7,9,50,Education & Social Services
+HUMSS,3,2,7,5,5,4,15,84,"Arts, Media & Communication"
+HUMSS,4,1,0,6,3,1,15,92,Education & Social Services
+HUMSS,6,5,4,5,7,4,16,55,Business & Management
+STEM,7,5,5,5,5,7,14,56,Information Technology & Computing
+STEM,3,5,4,5,2,5,12,69,Health & Medical Sciences
+STEM,6,5,6,6,5,4,11,93,Health & Medical Sciences
+HUMSS,2,4,2,6,2,2,12,76,Education & Social Services
+ABM,4,1,1,5,2,5,14,74,Education & Social Services
+HUMSS,7,4,4,7,5,7,13,88,Information Technology & Computing
+HUMSS,1,5,4,4,4,2,17,80,Social Sciences & Humanities
+ABM,6,5,6,4,5,2,28,87,"Arts, Media & Communication"
+HUMSS,4,2,6,4,1,3,27,101,"Arts, Media & Communication"
+HUMSS,4,7,4,6,5,6,24,76,Information Technology & Computing
+STEM,5,2,7,3,7,2,18,82,"Arts, Media & Communication"
+TVL,4,5,3,5,4,6,14,75,Information Technology & Computing
+STEM,6,4,6,5,3,7,12,94,Information Technology & Computing
+STEM,6,2,3,5,3,7,9,73,Engineering & Technology
+STEM,2,2,1,3,1,1,10,75,Health & Medical Sciences
+HUMSS,2,2,7,4,1,6,15,74,"Arts, Media & Communication"
+HUMSS,6,4,5,7,5,7,16,51,Education & Social Services
+STEM,2,3,7,3,3,5,0,65,"Arts, Media & Communication"
+ABM,6,4,7,3,6,6,21,72,Business & Management
+HUMSS,6,2,3,6,7,5,14,77,Education & Social Services
+HUMSS,6,5,4,6,5,5,14,73,Health & Medical Sciences
+STEM,5,3,3,4,2,6,9,79,Information Technology & Computing
+STEM,5,4,3,5,4,2,9,72,Health & Medical Sciences
+TVL,7,4,3,6,6,6,16,56,Engineering & Technology
+STEM,4,4,7,4,0,2,11,78,"Arts, Media & Communication"
+ABM,5,2,2,5,3,4,17,74,Education & Social Services
+STEM,6,5,3,5,4,7,13,95,Information Technology & Computing
+HUMSS,3,5,3,7,7,7,15,75,Business & Management
+ABM,5,6,5,4,4,4,13,83,Information Technology & Computing
+STEM,3,6,1,1,0,5,18,82,Information Technology & Computing
+STEM,5,3,1,5,4,6,15,84,Information Technology & Computing
+STEM,6,5,5,4,3,2,18,107,Health & Medical Sciences
+ABM,6,6,5,3,6,4,7,75,Engineering & Technology
+TVL,7,6,7,7,7,7,20,75,Information Technology & Computing
+HUMSS,2,1,1,2,3,2,17,75,Education & Social Services
+STEM,5,2,4,2,4,3,19,76,Engineering & Technology
+STEM,5,5,4,4,2,5,22,90,Information Technology & Computing
+STEM,3,5,3,1,4,3,12,78,Information Technology & Computing
+HUMSS,2,4,7,7,6,4,18,75,Social Sciences & Humanities
+STEM,4,3,5,2,2,4,14,94,Engineering & Technology
+ABM,6,4,5,5,2,0,10,67,"Arts, Media & Communication"
+STEM,7,7,6,4,4,4,23,101,Engineering & Technology
+STEM,5,2,4,6,4,4,14,51,Education & Social Services
+STEM,7,4,4,5,4,6,16,73,Engineering & Technology
+STEM,2,5,6,5,3,4,11,84,Social Sciences & Humanities
+STEM,3,5,6,7,4,4,18,75,Social Sciences & Humanities
+HUMSS,3,3,7,4,5,5,12,98,"Arts, Media & Communication"
+STEM,6,5,3,5,6,3,24,75,Health & Medical Sciences
+HUMSS,2,0,4,0,2,4,12,78,"Arts, Media & Communication"
+STEM,2,3,5,5,7,6,19,90,Business & Management
+ABM,5,7,3,5,4,6,15,89,Information Technology & Computing
+ABM,5,3,5,6,6,7,16,97,Business & Management
+TVL,6,4,5,4,5,4,19,91,Engineering & Technology
+ABM,7,4,3,6,5,3,18,75,Health & Medical Sciences
+TVL,6,6,7,6,5,7,14,75,Information Technology & Computing
+STEM,4,2,2,5,3,5,14,73,Health & Medical Sciences
+HUMSS,4,3,5,4,3,5,5,92,"Arts, Media & Communication"
+STEM,7,5,7,7,7,5,27,100,Health & Medical Sciences
+HUMSS,5,2,2,4,3,4,17,75,Education & Social Services
+ABM,6,4,6,6,5,5,15,56,Business & Management
+HUMSS,6,7,7,7,7,7,17,110,Information Technology & Computing
+HUMSS,4,5,3,6,5,6,19,79,Education & Social Services
+ABM,6,4,5,6,5,5,11,69,Business & Management
+STEM,4,5,5,6,3,5,29,99,Health & Medical Sciences
+STEM,5,1,5,4,1,4,12,91,"Arts, Media & Communication"
+HUMSS,4,5,3,2,4,5,14,42,Information Technology & Computing
+HUMSS,5,4,6,5,3,3,11,81,"Arts, Media & Communication"
+HUMSS,6,4,6,6,6,6,12,68,Business & Management
+ABM,7,7,7,5,7,5,18,75,Information Technology & Computing
+STEM,4,2,4,5,2,4,16,55,Education & Social Services
+ABM,6,5,5,4,4,3,13,55,Engineering & Technology
+HUMSS,5,4,4,7,4,6,22,76,Education & Social Services
+STEM,3,7,1,1,1,4,4,76,Information Technology & Computing
+HUMSS,5,3,6,4,1,5,15,70,"Arts, Media & Communication"
+HUMSS,6,7,7,6,4,5,15,64,Social Sciences & Humanities
+HUMSS,5,3,3,1,1,5,17,115,Engineering & Technology
+STEM,5,2,4,4,5,4,20,102,"Arts, Media & Communication"
+HUMSS,7,6,7,5,7,4,16,93,"Arts, Media & Communication"
+TVL,7,4,3,7,5,5,13,86,Health & Medical Sciences
+TVL,4,5,3,4,3,5,20,82,Information Technology & Computing
+TVL,7,3,4,5,4,4,20,94,Engineering & Technology
+HUMSS,4,3,5,6,1,7,10,82,Education & Social Services
+HUMSS,6,4,6,6,6,4,18,92,"Arts, Media & Communication"
+TVL,5,7,6,5,3,6,6,65,Information Technology & Computing
+HUMSS,6,7,5,6,4,6,17,79,Information Technology & Computing
+HUMSS,6,3,2,5,2,6,11,74,Engineering & Technology
+HUMSS,7,7,6,7,7,7,15,50,Information Technology & Computing
+HUMSS,7,4,3,7,7,7,15,89,Business & Management
+TVL,5,4,5,5,4,4,7,84,"Arts, Media & Communication"
+ABM,5,3,2,6,2,3,21,82,Health & Medical Sciences
+ABM,4,3,1,5,6,7,15,84,Business & Management
+ABM,5,3,5,3,2,6,16,78,Business & Management
+ABM,5,2,5,4,2,4,18,78,"Arts, Media & Communication"
+ABM,7,7,7,7,7,7,15,87,Business & Management
+ABM,6,4,6,5,5,5,16,105,Business & Management
+ABM,7,7,5,6,7,5,22,96,Information Technology & Computing
+ABM,6,3,5,7,5,4,6,67,Education & Social Services
+ABM,6,2,4,7,5,3,15,67,Education & Social Services
+ABM,7,4,3,5,3,3,16,68,Engineering & Technology
+ABM,7,7,6,7,7,7,12,40,Business & Management
+HUMSS,4,5,3,6,4,2,14,54,Social Sciences & Humanities
+ABM,4,2,2,2,2,4,11,69,Business & Management
+STEM,5,5,4,5,2,7,20,99,Information Technology & Computing

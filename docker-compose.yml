@@ -29,6 +29,11 @@ services:
       - DB_NAME=riasec_db
       - DB_USER=riasec_user
       - DB_PASS=riasec_password
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_USER=${SMTP_USER:-your_email@gmail.com}
+      - SMTP_PASS=${SMTP_PASS:-your_app_password}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-tls}
     restart: unless-stopped
 
   db:
