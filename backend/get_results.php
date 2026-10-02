@@ -113,6 +113,51 @@ $cfRow = $cf->get_result()->fetch_assoc();
 $cfNotes = $cfRow['FeedbackNotes'] ?? null;
 $cf->close();
 
+// Invoke XGBoost + SHAP recommendation engine
+$xgboostRecs = null;
+try {
+    $predictScript = __DIR__ . '/predict_shap.py';
+    if (file_exists($predictScript)) {
+        $inputPayload = json_encode([
+            'SHS_Strand'           => $result['Strand'] ?? 'STEM',
+            'Realistic_Score'     => (float)($result['R_Score'] ?? 0),
+            'Investigative_Score' => (float)($result['I_Score'] ?? 0),
+            'Artistic_Score'      => (float)($result['A_Score'] ?? 0),
+            'Social_Score'        => (float)($result['S_Score'] ?? 0),
+            'Enterprising_Score'  => (float)($result['E_Score'] ?? 0),
+            'Conventional_Score'  => (float)($result['C_Score'] ?? 0),
+            'RSE_Score_Likert'    => (float)($rseRow['Score'] ?? 25),
+            'CDSES_Total_Score'   => (float)($cdsesRow['TotalScore'] ?? 75),
+        ]);
+
+        $descriptors = [
+            0 => ["pipe", "r"],
+            1 => ["pipe", "w"],
+            2 => ["pipe", "w"]
+        ];
+
+        $cmd = "python3 " . escapeshellarg($predictScript);
+        $process = proc_open($cmd, $descriptors, $pipes);
+
+        if (is_resource($process)) {
+            fwrite($pipes[0], $inputPayload);
+            fclose($pipes[0]);
+
+            $output = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($process);
+
+            $parsed = json_decode($output, true);
+            if ($parsed && ($parsed['status'] ?? '') === 'success') {
+                $xgboostRecs = $parsed['recommendations'] ?? null;
+            }
+        }
+    }
+} catch (Exception $e) {
+    error_log("XGBoost prediction error: " . $e->getMessage());
+}
+
 echo json_encode([
     "status"           => "success",
     "assessmentStatus" => $result['Status'],
@@ -130,6 +175,7 @@ echo json_encode([
     "secondaryType"   => $result['SecondaryType'],
     "tertiaryType"    => $result['TertiaryType'],
     "recommendations" => $recommendations,
+    "clusterRecommendations" => $xgboostRecs,
     "rse" => $rseRow ? [
         "score" => (int)$rseRow['Score'],
         "level" => $rseRow['Level']

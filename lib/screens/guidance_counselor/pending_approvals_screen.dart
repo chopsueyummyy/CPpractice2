@@ -358,7 +358,139 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                         ],
 
                                         // Recommendations
-                                        if (recs.isNotEmpty) ...[
+                                        if ((a['clusterRecommendations'] as List?)?.isNotEmpty ?? false) ...[
+                                          const Divider(height: 24),
+                                          Text('Top Recommended Course Clusters',
+                                            style: Theme.of(context).textTheme.titleSmall
+                                                ?.copyWith(fontWeight: FontWeight.bold)),
+                                          const SizedBox(height: 8),
+                                          ...(a['clusterRecommendations'] as List).map((clusterItem) {
+                                            final cluster = clusterItem as Map<String, dynamic>;
+                                            final rank = cluster['rank'] as int? ?? 1;
+                                            final clusterName = (cluster['cluster_name'] ?? 'General Cluster').toString();
+                                            final matchPct = (cluster['match_percentage'] as num?)?.toDouble() ?? 0.0;
+                                            final shapExps = List<Map<String, dynamic>>.from(cluster['shap_explanations'] ?? []);
+                                            final exploreCourses = List<String>.from(cluster['explore_courses'] ?? []);
+
+                                            Color rankColor;
+                                            if (rank == 1) {
+                                              rankColor = const Color(0xFFD97706);
+                                            } else if (rank == 2) {
+                                              rankColor = const Color(0xFF7C3AED);
+                                            } else {
+                                              rankColor = const Color(0xFF059669);
+                                            }
+
+                                            return Card(
+                                              margin: const EdgeInsets.only(bottom: 12),
+                                              elevation: 0,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                side: BorderSide(color: rankColor.withOpacity(0.4), width: 1.5),
+                                              ),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(16),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Chip(
+                                                          label: Text(
+                                                            rank == 1 ? '🥇 Primary Recommendation' : rank == 2 ? '🥈 Alternative Recommendation' : '🥉 Additional Recommendation',
+                                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                                          ),
+                                                          backgroundColor: rankColor.withOpacity(0.12),
+                                                          labelStyle: TextStyle(color: rankColor),
+                                                        ),
+                                                        Text(
+                                                          '${matchPct.toStringAsFixed(1)}% Predicted Probability',
+                                                          style: TextStyle(fontWeight: FontWeight.bold, color: rankColor, fontSize: 13),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      clusterName,
+                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                    ),
+                                                    const SizedBox(height: 12),
+                                                    if (shapExps.isNotEmpty) ...[
+                                                      Container(
+                                                        padding: const EdgeInsets.all(10),
+                                                        decoration: BoxDecoration(
+                                                          color: AppTheme.primaryPurple.withOpacity(0.04),
+                                                          borderRadius: BorderRadius.circular(8),
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Icon(Icons.auto_awesome, size: 14, color: Colors.purple.shade700),
+                                                                const SizedBox(width: 6),
+                                                                Text(
+                                                                  'Why this cluster was recommended:',
+                                                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            const SizedBox(height: 8),
+                                                            ...shapExps.map((exp) {
+                                                              final feat = (exp['feature'] ?? '').toString();
+                                                              final impact = (exp['impact_score'] as num?)?.toDouble() ?? 0.0;
+                                                              return Padding(
+                                                                padding: const EdgeInsets.only(bottom: 4),
+                                                                child: Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        feat,
+                                                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                                                      ),
+                                                                    ),
+                                                                    Text(
+                                                                      '+% Impact',
+                                                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            }),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 12),
+                                                    ],
+                                                    if (exploreCourses.isNotEmpty) ...[
+                                                      Text(
+                                                        '📌 Recommended Courses under this Cluster:',
+                                                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      ...exploreCourses.map((crs) => Padding(
+                                                        padding: const EdgeInsets.only(bottom: 4),
+                                                        child: Row(
+                                                          children: [
+                                                            const Icon(Icons.arrow_right_rounded, size: 16, color: AppTheme.primaryPurple),
+                                                            const SizedBox(width: 4),
+                                                            Expanded(
+                                                              child: Text(
+                                                                crs,
+                                                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      )),
+                                                    ],
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ] else if (recs.isNotEmpty) ...[
                                           const Divider(height: 24),
                                           Text('Recommended Courses & AI Explanations',
                                             style: Theme.of(context).textTheme.titleSmall

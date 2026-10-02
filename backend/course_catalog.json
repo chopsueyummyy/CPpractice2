@@ -1,0 +1,89 @@
+{
+  "Health & Allied Sciences": [
+    "BS Nursing",
+    "BS Medical Technology / Medical Laboratory Science",
+    "BS Pharmacy",
+    "BS Physical Therapy",
+    "BS Occupational Therapy",
+    "BS Radiologic Technology",
+    "BS Respiratory Therapy",
+    "BS Speech-Language Pathology",
+    "Doctor of Dental Medicine",
+    "Doctor of Optometry"
+  ],
+  "Science, Mathematics & Research": [
+    "BS Biology",
+    "BS Chemistry",
+    "BS Physics",
+    "BS Mathematics",
+    "BS Statistics",
+    "BS Environmental Science",
+    "BS Forensic Science",
+    "BS Geology"
+  ],
+  "Engineering, Computing & Technology": [
+    "BS Civil Engineering",
+    "BS Mechanical Engineering",
+    "BS Electrical Engineering",
+    "BS Electronics Engineering",
+    "BS Computer Engineering",
+    "BS Computer Science",
+    "BS Information Technology",
+    "BS Information Systems",
+    "BS Architecture"
+  ],
+  "Education, Psychology & Human Services": [
+    "Bachelor of Elementary Education (BEEd)",
+    "Bachelor of Secondary Education (BSEd)",
+    "BS Psychology",
+    "BS Social Work",
+    "Special Education",
+    "Early Childhood Education",
+    "Physical Education",
+    "Community Development"
+  ],
+  "Business, Finance & Management": [
+    "BS Accountancy",
+    "BS Business Administration",
+    "BS Entrepreneurship",
+    "BS Management Accounting",
+    "BS Office Administration",
+    "BS Human Resource Management",
+    "BS Marketing Management",
+    "BS Finance",
+    "BS Economics"
+  ],
+  "Law, Government, Security & Public Service": [
+    "BA Political Science",
+    "Legal Management",
+    "Public Administration",
+    "BS Criminology",
+    "Customs Administration",
+    "International Studies",
+    "Public Safety-related programs"
+  ],
+  "Communication, Media & Creative Arts": [
+    "BA Communication",
+    "BA Journalism",
+    "Broadcasting",
+    "Multimedia Arts",
+    "Fine Arts",
+    "Interior Design",
+    "Fashion Design",
+    "Advertising Arts",
+    "Film / Media Studies",
+    "Music",
+    "Theater Arts"
+  ],
+  "Agriculture, Environment & Natural Resources": [
+    "BS Agriculture",
+    "Agricultural Engineering",
+    "Agricultural & Biosystems Engineering",
+    "Animal Science",
+    "Crop Science",
+    "Fisheries",
+    "Forestry",
+    "Environmental Management",
+    "Horticulture"
+  ]
+}

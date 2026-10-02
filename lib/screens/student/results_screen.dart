@@ -299,10 +299,18 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ),
         const SizedBox(height: 28),
 
-        // --- SECTION 3: RECOMMENDED COURSES ---
-        if (recs.isNotEmpty) ...[
-          _buildRecommendedCoursesSection(recs, isDark),
+        // --- SECTION 3: RECOMMENDED COURSE CLUSTERS (XGBoost + SHAP) ---
+        if (_resultsData!['clusterRecommendations'] != null && (_resultsData!['clusterRecommendations'] as List).isNotEmpty) ...[
+          _buildClusterRecommendationsSection(_resultsData!['clusterRecommendations'] as List<dynamic>, isDark),
           const SizedBox(height: 28),
+        ],
+
+        // --- SECTION 3.5: SPECIFIC RECOMMENDED COURSES (Fallback if no cluster recommendations) ---
+        if ((_resultsData!['clusterRecommendations'] as List?)?.isEmpty ?? true) ...[
+          if (recs.isNotEmpty) ...[
+            _buildRecommendedCoursesSection(recs, isDark),
+            const SizedBox(height: 28),
+          ],
         ],
 
         // --- SECTION 4: COUNSELOR NOTES & WHY RECOMMENDED ---
@@ -887,7 +895,255 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  // --- SECTION 3: RECOMMENDED COURSES ---
+  // --- SECTION 3: RECOMMENDED COURSE CLUSTERS (XGBoost + SHAP) ---
+  Widget _buildClusterRecommendationsSection(List<dynamic> clusters, bool isDark) {
+    return Container(
+      decoration: _cardDecoration(isDark),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCardHeader(
+            icon: Icons.hub_rounded,
+            title: 'Top Recommended Course Clusters',
+            subtitle: 'Based on your assessment profile, these course clusters received the highest model predictions.',
+            badgeLabel: 'Top Recommendations',
+            isDark: isDark,
+          ),
+          const SizedBox(height: 24),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 900) {
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: clusters.asMap().entries.map((entry) {
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: entry.key == clusters.length - 1 ? 0 : 16),
+                          child: _buildSingleClusterCard(entry.key + 1, entry.value as Map<String, dynamic>, isDark),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              } else {
+                return Column(
+                  children: clusters.asMap().entries.map((entry) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _buildSingleClusterCard(entry.key + 1, entry.value as Map<String, dynamic>, isDark),
+                    );
+                  }).toList(),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSingleClusterCard(int rank, Map<String, dynamic> clusterData, bool isDark) {
+    final clusterName = clusterData['cluster_name'] as String? ?? 'General Cluster';
+    final matchPct = (clusterData['match_percentage'] as num?)?.toDouble() ?? 0.0;
+    final explanations = (clusterData['shap_explanations'] as List<dynamic>?) ?? [];
+    final exploreCourses = (clusterData['explore_courses'] as List<dynamic>?) ?? [];
+
+    String medalEmoji;
+    String rankTitle;
+    Color rankColor;
+    Color bgBadgeColor;
+
+    if (rank == 1) {
+      medalEmoji = '🥇';
+      rankTitle = 'Primary Recommendation';
+      rankColor = const Color(0xFFD97706);
+      bgBadgeColor = const Color(0xFFFEF3C7);
+    } else if (rank == 2) {
+      medalEmoji = '🥈';
+      rankTitle = 'Alternative Recommendation';
+      rankColor = const Color(0xFF7C3AED);
+      bgBadgeColor = const Color(0xFFF3E8FF);
+    } else {
+      medalEmoji = '🥉';
+      rankTitle = 'Additional Recommendation';
+      rankColor = const Color(0xFF059669);
+      bgBadgeColor = const Color(0xFFD1FAE5);
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: rankColor.withOpacity(0.4), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: rankColor.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: bgBadgeColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$medalEmoji $rankTitle',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: rankColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${matchPct.toStringAsFixed(1)}% Predicted Probability',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: rankColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                clusterName,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2E2E3E) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isDark ? const Color(0xFF3E3E50) : const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: AppTheme.primaryPurple, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Why this cluster was recommended',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ...explanations.map((exp) {
+                  final feat = exp['feature'] as String? ?? '';
+                  final impact = (exp['impact_score'] as num?)?.toDouble() ?? 0.0;
+                  final normalizedVal = (impact.abs()).clamp(0.1, 1.0);
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                feat,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white70 : const Color(0xFF334155),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '+${(impact * 100).toInt()}% Impact',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF10B981),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: normalizedVal,
+                            minHeight: 6,
+                            backgroundColor: isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF1F5F9),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '📌 Courses you might want to explore:',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white70 : const Color(0xFF475569),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...exploreCourses.map((crs) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.arrow_right_rounded, color: AppTheme.primaryPurple, size: 18),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      crs.toString(),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // --- SECTION 3.5: RECOMMENDED COURSES ---
   Widget _buildRecommendedCoursesSection(List<dynamic> recs, bool isDark) {
     return Container(
       decoration: _cardDecoration(isDark),
