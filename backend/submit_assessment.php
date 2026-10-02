@@ -257,71 +257,47 @@ $piRow = $pi->get_result()->fetch_assoc();
 $strand = $piRow['Strand'] ?? 'STEM';
 
 // Map RIASEC raw scores to the model's expected range (2 to 7)
-$payload = [
-    "R" => 2.0 + ($rawScores['R'] / 9.0) * 5.0,
-    "I" => 2.0 + ($rawScores['I'] / 7.0) * 5.0,
-    "A" => 2.0 + ($rawScores['A'] / 6.0) * 5.0,
-    "S" => 2.0 + ($rawScores['S'] / 6.0) * 5.0,
-    "E" => 2.0 + ($rawScores['E'] / 7.0) * 5.0,
-    "C" => 2.0 + ($rawScores['C'] / 7.0) * 5.0,
-    "RSES" => max(18.0, min(40.0, (double)$rseSum)),
-    "CDSES" => max(45.0, min(125.0, (double)$cdsesTotal)),
-    "Strand" => $strand
+// 4. GENERATING & CACHING RECOMMENDATIONS VIA XGBOOST & SHAP MODEL
+$inputPayload = json_encode([
+    'SHS_Strand' => $strand,
+    'Realistic_Score' => (float)$rPct,
+    'Investigative_Score' => (float)$iPct,
+    'Artistic_Score' => (float)$aPct,
+    'Social_Score' => (float)$sPct,
+    'Enterprising_Score' => (float)$ePct,
+    'Conventional_Score' => (float)$cPct,
+    'RSE_Score_Likert' => (float)$rseSum,
+    'CDSES_Total_Score' => (float)$cdsesTotal
+]);
+
+$predictScript = __DIR__ . '/predict_shap.py';
+$descriptors = [
+    0 => ["pipe", "r"],
+    1 => ["pipe", "w"],
+    2 => ["pipe", "w"]
 ];
 
-// Clear previous recommendations for this ResultID if any
-$delRec = $conn->prepare("DELETE FROM riasec_recommendations WHERE ResultID = ?");
-if ($delRec) {
-    $delRec->bind_param("i", $resultId);
-    $delRec->execute();
-    $delRec->close();
-}
+$cmd = "python3 " . escapeshellarg($predictScript);
+$process = proc_open($cmd, $descriptors, $pipes);
 
-$recommendationsSaved = false;
+if (is_resource($process)) {
+    fwrite($pipes[0], $inputPayload);
+    fclose($pipes[0]);
 
-try {
-    $url = 'http://host.docker.internal:8001/recommend';
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // 5 second timeout
-    $output = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    $output = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    proc_close($process);
 
-    if ($httpCode === 200 && $output) {
-        $response = json_decode($output, true);
-        if (isset($response['status']) && $response['status'] === 'success') {
-            foreach ($response['recommendations'] as $rec) {
-                $cCode = $rec['course_code'];
-                $mScore = (float)($rec['probability'] * 100);
-                $explanation = $rec['explanation'];
-                $rank = (int)$rec['rank'];
-                $shapWeights = isset($rec['shap_weights']) ? json_encode($rec['shap_weights']) : null;
-                
-                // Find CourseID from the CourseCode
-                $cStmt = $conn->prepare("SELECT CourseID FROM riasec_courses WHERE CourseCode = ? LIMIT 1");
-                $cStmt->bind_param("s", $cCode);
-                $cStmt->execute();
-                $cRow = $cStmt->get_result()->fetch_assoc();
-                
-                if ($cRow) {
-                    $courseId = (int)$cRow['CourseID'];
-                    $recStmt = $conn->prepare("
-                        INSERT INTO riasec_recommendations (ResultID, CourseID, MatchScore, Explanation, `Rank`, ShapWeights)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ");
-                    $recStmt->bind_param("iidsis", $resultId, $courseId, $mScore, $explanation, $rank, $shapWeights);
-                    $recStmt->execute();
-                }
-            }
-            $recommendationsSaved = true;
-        }
+    $mlData = json_decode($output, true);
+    if (isset($mlData['status']) && $mlData['status'] === 'success') {
+        $clusterRecsJson = json_encode($mlData['recommendations']);
+        
+        $updCache = $conn->prepare("UPDATE assessment_results SET ClusterRecommendations = ? WHERE AssessmentID = ?");
+        $updCache->bind_param("si", $clusterRecsJson, $assessmentId);
+        $updCache->execute();
+        $updCache->close();
     }
-} catch (Exception $e) {
-    // Suppress and fallback
 }
 
 // Fallback: If recommendation microservice fails, generate safe default recommendations using RIASEC top categories

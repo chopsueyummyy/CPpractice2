@@ -100,6 +100,7 @@ $query = "
         ar.E_Percentage,
         ar.C_Percentage,
         ar.ResultID,
+        ar.ClusterRecommendations,
         cf.Action AS CounselorAction,
         cf.FeedbackNotes,
         cf.ReviewedAt
@@ -157,44 +158,8 @@ while ($row = $result->fetch_assoc()) {
     $cdsesRow = $cdses->get_result()->fetch_assoc();
     $cdses->close();
 
-    // Generate XGBoost + SHAP cluster recommendations
-    $clusterRecommendations = null;
-    $inputPayload = json_encode([
-        'SHS_Strand' => $row['Strand'] ?? 'STEM',
-        'Realistic_Score' => (float)$row['R_Percentage'],
-        'Investigative_Score' => (float)$row['I_Percentage'],
-        'Artistic_Score' => (float)$row['A_Percentage'],
-        'Social_Score' => (float)$row['S_Percentage'],
-        'Enterprising_Score' => (float)$row['E_Percentage'],
-        'Conventional_Score' => (float)$row['C_Percentage'],
-        'RSE_Score_Likert' => $rseRow ? (float)$rseRow['Score'] : 25.0,
-        'CDSES_Total_Score' => $cdsesRow ? (float)$cdsesRow['TotalScore'] : 75.0
-    ]);
-
-    $predictScript = __DIR__ . '/predict_shap.py';
-    $descriptors = [
-        0 => ["pipe", "r"],
-        1 => ["pipe", "w"],
-        2 => ["pipe", "w"]
-    ];
-
-    $cmd = "python3 " . escapeshellarg($predictScript);
-    $process = proc_open($cmd, $descriptors, $pipes);
-
-    if (is_resource($process)) {
-        fwrite($pipes[0], $inputPayload);
-        fclose($pipes[0]);
-
-        $output = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-
-        $mlData = json_decode($output, true);
-        if (isset($mlData['status']) && $mlData['status'] === 'success') {
-            $clusterRecommendations = $mlData['recommendations'];
-        }
-    }
+    // Read pre-computed XGBoost + SHAP cluster recommendations from MySQL cache
+    $clusterRecommendations = !empty($row['ClusterRecommendations']) ? json_decode($row['ClusterRecommendations'], true) : null;
 
     $records[] = [
         "assessmentId"   => $row['AssessmentID'],
