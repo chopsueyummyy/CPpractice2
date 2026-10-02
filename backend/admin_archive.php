@@ -128,11 +128,7 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
                a.AgreedToDisclaimer,
                a.Status, 
                DATE_FORMAT(a.SubmittedAt, '%Y-%m-%d %H:%i:%s') as DateSubmitted,
-               (SELECT GROUP_CONCAT(c.CourseName SEPARATOR '; ') 
-                FROM riasec_recommendations rec 
-                JOIN riasec_courses c ON c.CourseID = rec.CourseID 
-                WHERE rec.ResultID = r.ResultID 
-                ORDER BY rec.Rank ASC) as RecommendedCourses
+               r.ClusterRecommendations
         FROM assessments a
         JOIN students s ON s.StudentID = a.StudentID
         LEFT JOIN personal_information pi ON pi.PI_ID = a.PI_ID
@@ -170,7 +166,7 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
         'Last Name', 
         'Strand', 
         'Grade Level', 
-        'Recommended Courses', 
+        'Recommended Course Cluster', 
         'Primary Type', 
         'Secondary Type', 
         'Tertiary Type', 
@@ -198,6 +194,24 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
         $disclaimerAgreed = ($row['AgreedToDisclaimer'] == 1 || $row['AgreedToDisclaimer'] === '1' || $row['AgreedToDisclaimer'] === true)
             ? 'Yes (Agreed)'
             : 'No';
+
+        $recommendedClusters = 'N/A';
+        if (!empty($row['ClusterRecommendations'])) {
+            $clusters = json_decode($row['ClusterRecommendations'], true);
+            if (is_array($clusters) && !empty($clusters)) {
+                $clusterList = [];
+                foreach ($clusters as $c) {
+                    $cName = $c['cluster_name'] ?? ($c['cluster'] ?? '');
+                    $pct = isset($c['match_percentage']) ? ' (' . round($c['match_percentage'], 1) . '%)' : '';
+                    if (!empty($cName)) {
+                        $clusterList[] = $cName . $pct;
+                    }
+                }
+                if (!empty($clusterList)) {
+                    $recommendedClusters = implode('; ', $clusterList);
+                }
+            }
+        }
         
         fputcsv($output, [
             $row['AssessmentID'],
@@ -206,7 +220,7 @@ if ($method === 'GET' && isset($_GET['exportCsv'])) {
             $row['LastName'],
             $strand,
             $row['GradeLevel'],
-            $row['RecommendedCourses'] ?? 'N/A',
+            $recommendedClusters,
             $row['PrimaryType'] ?? 'N/A',
             $row['SecondaryType'] ?? 'N/A',
             $row['TertiaryType'] ?? 'N/A',
