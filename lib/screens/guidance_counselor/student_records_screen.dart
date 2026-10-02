@@ -178,6 +178,31 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
     }
   }
 
+  Future<void> _downloadIndividualPdf(int assessmentId) async {
+    try {
+      final Uri uri = Uri.parse('${ApiService.baseUrl}/export_student_pdf.php?assessmentId=$assessmentId');
+      
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        throw 'Could not launch $uri';
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Downloading Individual Student PDF Report...'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Individual PDF Export failed: $e'), backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
   Future<void> _downloadCsv() async {
     try {
       final String adminId = _session.counselorId?.toString() ?? '0';
@@ -603,13 +628,26 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                 'ID: ${r['studentId']} • ${r['gradeLevel']} • ${r['strand']}',
                                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                               ),
-                              trailing: Chip(
-                                label: Text(
-                                  _statusLabel(r['status']),
-                                  style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600),
-                                ),
-                                backgroundColor: statusColor.withOpacity(0.1),
-                                side: BorderSide(color: statusColor.withOpacity(0.3)),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (r['status'] == 'approved') ...[
+                                    IconButton(
+                                      icon: const Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primaryPurple, size: 20),
+                                      tooltip: 'Download Student PDF Report',
+                                      onPressed: () => _downloadIndividualPdf(r['assessmentId']),
+                                    ),
+                                    const SizedBox(width: 4),
+                                  ],
+                                  Chip(
+                                    label: Text(
+                                      _statusLabel(r['status']),
+                                      style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600),
+                                    ),
+                                    backgroundColor: statusColor.withOpacity(0.1),
+                                    side: BorderSide(color: statusColor.withOpacity(0.3)),
+                                  ),
+                                ],
                               ),
                               children: [
                                 Padding(
