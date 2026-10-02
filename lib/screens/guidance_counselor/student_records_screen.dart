@@ -657,14 +657,37 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> {
                                     children: [
                                       const Divider(),
                                       const SizedBox(height: 8),
-                                      // Student details chips
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 6,
+                                      // Student details chips + Prominent PDF Button
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          _infoChip(Icons.person_outline, r['gender'] ?? '-'),
-                                          _infoChip(Icons.cake_outlined, '${r['age'] ?? '-'} yrs old'),
-                                          _infoChip(Icons.calendar_month_outlined, r['submittedAt'] ?? '-'),
+                                          Expanded(
+                                            child: Wrap(
+                                              spacing: 8,
+                                              runSpacing: 6,
+                                              children: [
+                                                _infoChip(Icons.person_outline, r['gender'] ?? '-'),
+                                                _infoChip(Icons.cake_outlined, '${r['age'] ?? '-'} yrs old'),
+                                                _infoChip(Icons.calendar_month_outlined, r['submittedAt'] ?? '-'),
+                                              ],
+                                            ),
+                                          ),
+                                          if (r['status'] == 'approved') ...[
+                                            const SizedBox(width: 8),
+                                            ElevatedButton.icon(
+                                              icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
+                                              label: const Text('Download Individual PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppTheme.primaryPurple,
+                                                foregroundColor: Colors.white,
+                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                                elevation: 1,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                              onPressed: () => _downloadIndividualPdf(r['assessmentId']),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                       const SizedBox(height: 16),
