@@ -38,6 +38,10 @@ COPY --from=build /app/build/web /var/www/html
 # Copy PHP backend files to /var/www/html/api
 COPY backend /var/www/html/api
 
+# Copy database schema assets
+COPY assets /var/www/html/assets
+COPY assets/riasec_db.sql /var/www/html/api/riasec_db.sql
+
 # Install PHPMailer inside backend/vendor
 WORKDIR /var/www/html/api
 RUN php download_phpmailer.php
