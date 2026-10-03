@@ -10,21 +10,20 @@ import pandas as pd
 import joblib
 import shap
 
-# Feature Name Humanizer Dictionary
+# Feature Name Humanizer Dictionary (Pure RIASEC Interests)
 FEATURE_MAP = {
-    'strand_ohe__SHS_Strand_ABM': 'ABM Strand Background',
-    'strand_ohe__SHS_Strand_HUMSS': 'HUMSS Strand Background',
-    'strand_ohe__SHS_Strand_STEM': 'STEM Strand Background',
-    'strand_ohe__SHS_Strand_TVL': 'TVL Strand Background',
-    'strand_ohe__SHS_Strand_GAS': 'GAS Strand Background',
+    'Realistic_Score': 'Realistic Practical Interest',
+    'Investigative_Score': 'Investigative Analytical Interest',
+    'Artistic_Score': 'Artistic Creative Interest',
+    'Social_Score': 'Social Helping Interest',
+    'Enterprising_Score': 'Enterprising Leadership Interest',
+    'Conventional_Score': 'Conventional Detail Interest',
     'remainder__Realistic_Score': 'Realistic Practical Interest',
     'remainder__Investigative_Score': 'Investigative Analytical Interest',
     'remainder__Artistic_Score': 'Artistic Creative Interest',
     'remainder__Social_Score': 'Social Helping Interest',
     'remainder__Enterprising_Score': 'Enterprising Leadership Interest',
-    'remainder__Conventional_Score': 'Conventional Detail Interest',
-    'remainder__RSE_Score_Likert': 'Self-Esteem Level',
-    'remainder__CDSES_Total_Score': 'Career Decision Self-Efficacy'
+    'remainder__Conventional_Score': 'Conventional Detail Interest'
 }
 
 def main():
@@ -34,12 +33,15 @@ def main():
         possible_dirs = [
             os.path.join(base_dir, 'current_model'),
             os.path.join(base_dir, 'current model'),
-            os.path.join(base_dir, '..', 'current model'),
-            os.path.join(base_dir, '..', 'current_model')
+            os.path.join(base_dir, '..', 'couldbethefinalmodel'),
+            os.path.join(base_dir, 'couldbethefinalmodel')
         ]
         model_dir = None
         for d in possible_dirs:
             if os.path.exists(os.path.join(d, 'current_coursealign_model.joblib')):
+                model_dir = d
+                break
+            elif os.path.exists(os.path.join(d, 'final1_d_coursealign_model.joblib')):
                 model_dir = d
                 break
 
@@ -48,14 +50,18 @@ def main():
             sys.exit(1)
 
         model_path = os.path.join(model_dir, 'current_coursealign_model.joblib')
+        if not os.path.exists(model_path):
+            model_path = os.path.join(model_dir, 'final1_d_coursealign_model.joblib')
+
         label_enc_path = os.path.join(model_dir, 'current_label_encoder.joblib')
-        strand_enc_path = os.path.join(model_dir, 'current_strand_encoder.joblib')
+        if not os.path.exists(label_enc_path):
+            label_enc_path = os.path.join(model_dir, 'final1_d_label_encoder.joblib')
+
         catalog_path = os.path.join(base_dir, 'course_catalog.json')
 
-        # Load models and encoders
+        # Load model and label encoder
         model = joblib.load(model_path)
         label_encoder = joblib.load(label_enc_path)
-        strand_encoder = joblib.load(strand_enc_path)
 
         catalog = {}
         if os.path.exists(catalog_path):
@@ -70,38 +76,31 @@ def main():
 
         data = json.loads(raw_input)
 
-        # Build DataFrame with expected 9 feature columns
+        # Build DataFrame with expected 6 RIASEC feature columns
         df_input = pd.DataFrame([{
-            'SHS_Strand': str(data.get('SHS_Strand', 'STEM')).upper(),
             'Realistic_Score': float(data.get('Realistic_Score', 0)),
             'Investigative_Score': float(data.get('Investigative_Score', 0)),
             'Artistic_Score': float(data.get('Artistic_Score', 0)),
             'Social_Score': float(data.get('Social_Score', 0)),
             'Enterprising_Score': float(data.get('Enterprising_Score', 0)),
-            'Conventional_Score': float(data.get('Conventional_Score', 0)),
-            'RSE_Score_Likert': float(data.get('RSE_Score_Likert', 25)),
-            'CDSES_Total_Score': float(data.get('CDSES_Total_Score', 75))
+            'Conventional_Score': float(data.get('Conventional_Score', 0))
         }])
 
-        # Transform using strand encoder
-        X_trans = strand_encoder.transform(df_input)
-        feature_names = strand_encoder.get_feature_names_out()
+        feature_names = model.feature_names_in_.tolist() if hasattr(model, 'feature_names_in_') else ['Realistic_Score', 'Investigative_Score', 'Artistic_Score', 'Social_Score', 'Enterprising_Score', 'Conventional_Score']
 
         # Predict Probabilities
-        probs = model.predict_proba(X_trans)[0]
+        probs = model.predict_proba(df_input)[0]
         top3_indices = np.argsort(probs)[::-1][:3]
 
         # Calculate SHAP values
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_trans)
+        shap_values = explainer.shap_values(df_input)
 
         recommendations = []
         for rank, class_idx in enumerate(top3_indices, 1):
             cluster_name = label_encoder.inverse_transform([class_idx])[0]
             probability = float(probs[class_idx] * 100)
 
-            # Extract SHAP explanations for this cluster
-            # shap_values shape: (1, num_features, num_classes) or list per class
             if isinstance(shap_values, list):
                 cluster_shap = shap_values[class_idx][0]
             elif len(shap_values.shape) == 3:
@@ -140,7 +139,7 @@ def main():
 
         output = {
             "status": "success",
-            "student_strand": df_input['SHS_Strand'].iloc[0],
+            "student_strand": str(data.get('SHS_Strand', 'STEM')).upper(),
             "recommendations": recommendations
         }
 
