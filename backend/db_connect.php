@@ -36,6 +36,22 @@ $user = get_env_var('DB_USER', "riasec_user");
 $pass = get_env_var('DB_PASS', "riasec_password");
 $port = get_env_var('DB_PORT', "3306");
 
+// Support DigitalOcean App Platform DATABASE_URL string format
+$db_url = get_env_var('DATABASE_URL', '');
+if (!empty($db_url)) {
+    $parsed = parse_url($db_url);
+    if ($parsed) {
+        if (!empty($parsed['host'])) $host = $parsed['host'];
+        if (!empty($parsed['port'])) $port = (string)$parsed['port'];
+        if (!empty($parsed['user'])) $user = $parsed['user'];
+        if (!empty($parsed['pass'])) $pass = $parsed['pass'];
+        if (!empty($parsed['path'])) {
+            $path_db = ltrim($parsed['path'], '/');
+            if (!empty($path_db)) $db = $path_db;
+        }
+    }
+}
+
 $conn = mysqli_init();
 if (!$conn) {
     die(json_encode(["status" => "error", "message" => "mysqli_init failed"]));
