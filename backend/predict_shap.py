@@ -108,22 +108,35 @@ def main():
             else:
                 cluster_shap = shap_values[0]
 
-            # Pair features with SHAP scores
-            feat_impacts = []
+            # Pair features with raw SHAP scores
+            raw_impacts = []
             for fname, val in zip(feature_names, cluster_shap):
                 human_name = FEATURE_MAP.get(fname, fname)
-                feat_impacts.append({
+                raw_impacts.append({
                     "feature": human_name,
                     "raw_feature": fname,
-                    "impact_score": float(val)
+                    "val": float(val)
                 })
 
             # Sort by highest positive contribution first
-            feat_impacts = sorted(feat_impacts, key=lambda x: x['impact_score'], reverse=True)
-            top_explanations = [f for f in feat_impacts if f['impact_score'] > 0][:3]
+            pos_impacts = [item for item in raw_impacts if item['val'] > 0]
+            pos_impacts = sorted(pos_impacts, key=lambda x: x['val'], reverse=True)[:3]
 
-            if not top_explanations:
-                top_explanations = feat_impacts[:3]
+            if not pos_impacts:
+                pos_impacts = sorted(raw_impacts, key=lambda x: x['val'], reverse=True)[:3]
+
+            total_pos_val = sum(item['val'] for item in pos_impacts) if pos_impacts else 1.0
+            if total_pos_val <= 0:
+                total_pos_val = 1.0
+
+            top_explanations = []
+            for item in pos_impacts:
+                norm_score = item['val'] / total_pos_val
+                top_explanations.append({
+                    "feature": item['feature'],
+                    "raw_feature": item['raw_feature'],
+                    "impact_score": float(norm_score)
+                })
 
             # Get sub-courses from catalog
             sub_courses = catalog.get(cluster_name, [])
