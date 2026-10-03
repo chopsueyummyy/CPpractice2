@@ -22,9 +22,11 @@ class _AssessmentInstructionsScreenState extends State<AssessmentInstructionsScr
   Future<void> _startAssessment() async {
     setState(() => _isStarting = true);
     try {
+      final studentId = _session.studentId ?? '';
+      final piId = _session.currentPiId ?? 0;
       final data = await ApiService.startAssessment(
-        _session.studentId!,
-        _session.currentPiId!,
+        studentId,
+        piId,
         agreed: true,
       );
 
