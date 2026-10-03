@@ -25,6 +25,9 @@ foreach ($filesToImport as $sqlFile) {
     }
 }
 
+// 0. Ensure AgreedToDisclaimer column exists on assessments table
+$conn->query("ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 1;");
+
 // 1. Ensure admins table exists
 $conn->query("CREATE TABLE IF NOT EXISTS `admins` (
   `AdminID` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,

@@ -35,6 +35,7 @@ CREATE TABLE `assessments` (
   `Status` enum('in_progress','pending_review','approved','declined') NOT NULL DEFAULT 'in_progress',
   `StartedAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `SubmittedAt` timestamp NULL DEFAULT NULL,
+  `AgreedToDisclaimer` tinyint(1) NOT NULL DEFAULT 1,
   KEY `StudentID` (`StudentID`),
   KEY `PI_ID` (`PI_ID`),
   KEY `idx_assessment_status` (`Status`)

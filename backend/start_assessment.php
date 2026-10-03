@@ -81,12 +81,19 @@ try {
         }
     }
 
-    $stmt = $conn->prepare("INSERT INTO assessments (StudentID, PI_ID, Status) VALUES (?, ?, 'in_progress')");
+    $agreedVal = (!empty($agreed) && $agreed !== false && $agreed !== 'false') ? 1 : 0;
+
+    $stmt = $conn->prepare("INSERT INTO assessments (StudentID, PI_ID, Status, AgreedToDisclaimer) VALUES (?, ?, 'in_progress', ?)");
     if (!$stmt) {
-        echo json_encode(["status" => "error", "message" => "SQL Prepare Error: " . $conn->error]);
-        exit();
+        $stmt = $conn->prepare("INSERT INTO assessments (StudentID, PI_ID, Status) VALUES (?, ?, 'in_progress')");
+        if (!$stmt) {
+            echo json_encode(["status" => "error", "message" => "SQL Prepare Error: " . $conn->error]);
+            exit();
+        }
+        $stmt->bind_param("si", $studentId, $piId);
+    } else {
+        $stmt->bind_param("sii", $studentId, $piId, $agreedVal);
     }
-    $stmt->bind_param("si", $studentId, $piId);
 
     if ($stmt->execute()) {
         $assessmentId = $conn->insert_id;
