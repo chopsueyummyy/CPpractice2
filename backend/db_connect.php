@@ -52,6 +52,14 @@ if (!empty($db_url)) {
     }
 }
 
+// Production Fallback: If 'db' hostname is unresolved in production cloud container, route to DO Managed MySQL
+if ($host === 'db' && gethostbyname('db') === 'db') {
+    $host = 'db-mysql-sgp1-76727-do-user-35284699-0.i.db.ondigitalocean.com';
+    $port = '25060';
+    $user = get_env_var('DB_USER', 'doadmin');
+    $db   = get_env_var('DB_NAME', 'defaultdb');
+}
+
 $conn = mysqli_init();
 if (!$conn) {
     die(json_encode(["status" => "error", "message" => "mysqli_init failed"]));
