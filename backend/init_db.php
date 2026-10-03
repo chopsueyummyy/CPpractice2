@@ -6,20 +6,20 @@ header("Content-Type: application/json");
 // Disable strict key check for dump importing
 mysqli_query($conn, "SET SESSION sql_require_primary_key = 0");
 
-// 0. Schema Parity Auto-Migrations (Run first before any file imports)
-$migrations = [
-    "ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 1",
-    "ALTER TABLE admins ADD COLUMN IF NOT EXISTS CreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
-    "ALTER TABLE assessment_results ADD COLUMN IF NOT EXISTS ClusterRecommendations text DEFAULT NULL",
-    "ALTER TABLE riasec_recommendations ADD COLUMN IF NOT EXISTS ShapWeights text DEFAULT NULL"
-];
-
-$migrationLogs = [];
-foreach ($migrations as $query) {
-    if (!$conn->query($query)) {
-        $migrationLogs[] = $conn->error;
+// Helper function to safely add columns across all MySQL / MariaDB versions
+function addColumnIfNotExists($conn, $table, $column, $definition) {
+    $check = $conn->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
+    if ($check && $check->num_rows === 0) {
+        $conn->query("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
     }
 }
+
+// 0. Schema Parity Auto-Migrations
+addColumnIfNotExists($conn, 'assessments', 'AgreedToDisclaimer', 'tinyint(1) NOT NULL DEFAULT 1');
+addColumnIfNotExists($conn, 'admins', 'CreatedAt', 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP');
+addColumnIfNotExists($conn, 'assessment_results', 'ClusterRecommendations', 'text DEFAULT NULL');
+addColumnIfNotExists($conn, 'riasec_recommendations', 'ShapWeights', 'text DEFAULT NULL');
+
 
 $filesToImport = [
     __DIR__ . '/../assets/riasec_db.sql',
