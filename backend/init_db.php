@@ -6,6 +6,21 @@ header("Content-Type: application/json");
 // Disable strict key check for dump importing
 mysqli_query($conn, "SET SESSION sql_require_primary_key = 0");
 
+// 0. Schema Parity Auto-Migrations (Run first before any file imports)
+$migrations = [
+    "ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 1",
+    "ALTER TABLE admins ADD COLUMN IF NOT EXISTS CreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
+    "ALTER TABLE assessment_results ADD COLUMN IF NOT EXISTS ClusterRecommendations text DEFAULT NULL",
+    "ALTER TABLE riasec_recommendations ADD COLUMN IF NOT EXISTS ShapWeights text DEFAULT NULL"
+];
+
+$migrationLogs = [];
+foreach ($migrations as $query) {
+    if (!$conn->query($query)) {
+        $migrationLogs[] = $conn->error;
+    }
+}
+
 $filesToImport = [
     __DIR__ . '/../assets/riasec_db.sql',
     __DIR__ . '/riasec_db.sql',
@@ -24,12 +39,6 @@ foreach ($filesToImport as $sqlFile) {
         }
     }
 }
-
-// 0. Schema Parity Auto-Migrations
-$conn->query("ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 1;");
-$conn->query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS CreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;");
-$conn->query("ALTER TABLE assessment_results ADD COLUMN IF NOT EXISTS ClusterRecommendations text DEFAULT NULL;");
-$conn->query("ALTER TABLE riasec_recommendations ADD COLUMN IF NOT EXISTS ShapWeights text DEFAULT NULL;");
 
 // 1. Ensure admins table exists
 $conn->query("CREATE TABLE IF NOT EXISTS `admins` (
