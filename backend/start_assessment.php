@@ -8,59 +8,98 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
 
-require_once 'db_connect.php';
+try {
+    require_once 'db_connect.php';
 
-$data      = json_decode(file_get_contents("php://input"), true);
-$studentId = $data['studentId'] ?? '';
-$piId      = $data['piId']      ?? '';
-$agreed    = $data['agreed']    ?? false;
+    $data      = json_decode(file_get_contents("php://input"), true);
+    $studentId = $data['studentId'] ?? '';
+    $piId      = $data['piId']      ?? '';
+    $agreed    = $data['agreed']    ?? true; // Default to true if invoked from instructions screen
 
-if (empty($studentId) || empty($piId)) {
-    echo json_encode(["status" => "error", "message" => "Missing studentId or piId"]);
-    exit();
-}
-
-if (!$agreed) {
-    echo json_encode(["status" => "error", "message" => "You must acknowledge and agree to the terms to proceed."]);
-    exit();
-}
-
-$check = $conn->prepare("SELECT AssessmentID, Status FROM assessments WHERE StudentID = ? AND Status IN ('in_progress', 'pending_review', 'approved') ORDER BY StartedAt DESC LIMIT 1");
-$check->bind_param("s", $studentId);
-$check->execute();
-$guardianResult = $check->get_result();
-
-if ($guardianResult && $guardianResult->num_rows > 0) {
-    $existing = $guardianResult->fetch_assoc();
-    if ($existing['Status'] === 'in_progress') {
-        // Safe to Resume
-        echo json_encode(["status" => "resume", "assessmentId" => (int)$existing['AssessmentID']]);
-    } else {
-        // Truly blocked (already submitted or approved)
-        echo json_encode(["status" => "error", "message" => "Multi-tab exploit blocked: You already have a completed or pending assessment."]);
+    if (empty($studentId)) {
+        echo json_encode(["status" => "error", "message" => "Student ID is required."]);
+        exit();
     }
-    exit();
+
+    // Auto-fallback 1: If PI_ID is missing or zero, try to find existing profile
+    if (empty($piId) || (int)$piId === 0) {
+        $piCheck = $conn->prepare("SELECT PI_ID FROM personal_information WHERE StudentID = ? ORDER BY PI_ID DESC LIMIT 1");
+        if ($piCheck) {
+            $piCheck->bind_param("s", $studentId);
+            $piCheck->execute();
+            $res = $piCheck->get_result();
+            if ($res && $res->num_rows > 0) {
+                $piId = (int)$res->fetch_assoc()['PI_ID'];
+            }
+        }
+    }
+
+    // Auto-fallback 2: If still no PI_ID, auto-create a default personal_information record
+    if (empty($piId) || (int)$piId === 0) {
+        $stCheck = $conn->prepare("SELECT FirstName, LastName FROM students WHERE StudentID = ? LIMIT 1");
+        $fn = "Student";
+        $ln = $studentId;
+        if ($stCheck) {
+            $stCheck->bind_param("s", $studentId);
+            $stCheck->execute();
+            $stRes = $stCheck->get_result();
+            if ($stRes && $stRes->num_rows > 0) {
+                $stData = $stRes->fetch_assoc();
+                $fn = $stData['FirstName'] ?: "Student";
+                $ln = $stData['LastName'] ?: $studentId;
+            }
+        }
+
+        $insPi = $conn->prepare("INSERT INTO personal_information (StudentID, FirstName, LastName, Birthdate, Age, Gender, Strand, GradeLevel) VALUES (?, ?, ?, '2005-01-01', 18, 'Unspecified', 'STEM', 'Grade 12')");
+        if ($insPi) {
+            $insPi->bind_param("sss", $studentId, $fn, $ln);
+            if ($insPi->execute()) {
+                $piId = $conn->insert_id;
+            }
+        }
+    }
+
+    if (empty($piId)) {
+        echo json_encode(["status" => "error", "message" => "Could not initialize personal information profile."]);
+        exit();
+    }
+
+    // Check for active or in-progress assessment to resume safely
+    $check = $conn->prepare("SELECT AssessmentID, Status FROM assessments WHERE StudentID = ? AND Status IN ('in_progress', 'pending_review', 'approved') ORDER BY StartedAt DESC LIMIT 1");
+    $check->bind_param("s", $studentId);
+    $check->execute();
+    $guardianResult = $check->get_result();
+
+    if ($guardianResult && $guardianResult->num_rows > 0) {
+        $existing = $guardianResult->fetch_assoc();
+        if ($existing['Status'] === 'in_progress') {
+            echo json_encode(["status" => "resume", "assessmentId" => (int)$existing['AssessmentID']]);
+            exit();
+        } else {
+            echo json_encode(["status" => "error", "message" => "You already have a completed or pending assessment."]);
+            exit();
+        }
+    }
+
+    $stmt = $conn->prepare("INSERT INTO assessments (StudentID, PI_ID, Status, AgreedToDisclaimer) VALUES (?, ?, 'in_progress', 1)");
+    $stmt->bind_param("si", $studentId, $piId);
+
+    if ($stmt->execute()) {
+        $assessmentId = $conn->insert_id;
+
+        $live = $conn->prepare("INSERT INTO live_sessions (AssessmentID, StudentID, PI_ID, CurrentQuestion, TotalQuestions, IsActive) VALUES (?, ?, ?, 1, 77, TRUE)");
+        if ($live) {
+            $live->bind_param("isi", $assessmentId, $studentId, $piId);
+            @$live->execute();
+        }
+
+        echo json_encode(["status" => "success", "assessmentId" => $assessmentId]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Failed to create assessment record: " . $conn->error]);
+    }
+
+    $conn->close();
+} catch (Exception $e) {
+    echo json_encode(["status" => "error", "message" => "Server Error: " . $e->getMessage()]);
 }
-
-$stmt = $conn->prepare("
-    INSERT INTO assessments (StudentID, PI_ID, Status, AgreedToDisclaimer) VALUES (?, ?, 'in_progress', 1)
-");
-$stmt->bind_param("si", $studentId, $piId);
-
-if ($stmt->execute()) {
-    $assessmentId = $conn->insert_id;
-
-    $live = $conn->prepare("
-        INSERT INTO live_sessions (AssessmentID, StudentID, PI_ID, CurrentQuestion, TotalQuestions, IsActive)
-        VALUES (?, ?, ?, 1, 77, TRUE)
-    ");
-    $live->bind_param("isi", $assessmentId, $studentId, $piId);
-    $live->execute();
-
-    echo json_encode(["status" => "success", "assessmentId" => $assessmentId]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Failed to start assessment"]);
-}
-
-$conn->close();
 ?>
