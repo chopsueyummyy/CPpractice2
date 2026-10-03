@@ -322,7 +322,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 children: [
                   Expanded(child: _buildCounselorNoteCard(isDark)),
                   const SizedBox(width: 24),
-                  Expanded(child: _buildWhyRecommendedCard(primary, rseData, cdsesData, strand, isDark)),
+                  Expanded(child: _buildWhyRecommendedCard(primary, secondary, tertiary, isDark)),
                 ],
               );
             } else {
@@ -330,7 +330,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 children: [
                   _buildCounselorNoteCard(isDark),
                   const SizedBox(height: 24),
-                  _buildWhyRecommendedCard(primary, rseData, cdsesData, strand, isDark),
+                  _buildWhyRecommendedCard(primary, secondary, tertiary, isDark),
                 ],
               );
             }
@@ -1427,39 +1427,50 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _buildWhyRecommendedCard(String primary, Map<String, dynamic>? rse, Map<String, dynamic>? cdses, String strand, bool isDark) {
-    final interestName = AppTheme.riasecName(primary);
-    final riasecText = 'Strong $interestName Interest';
-
-    String rseText = 'High Self-Esteem';
-    if (rse != null) {
-      final level = rse['level'].toString().toLowerCase();
-      if (level.contains('low')) {
-        rseText = 'Low Self-Esteem Profile';
-      } else {
-        rseText = 'High Self-Esteem';
+  Widget _buildWhyRecommendedCard(String primary, String secondary, String tertiary, bool isDark) {
+    Map<String, String> getRiasecDescription(String type) {
+      switch (type.toUpperCase()) {
+        case 'REALISTIC':
+        case 'R':
+          return {
+            'title': 'Strong Realistic Interest',
+            'desc': 'Your results indicate an interest in practical, hands-on activities, technical skills, and problem-solving.'
+          };
+        case 'INVESTIGATIVE':
+        case 'I':
+          return {
+            'title': 'Strong Investigative Interest',
+            'desc': 'Your results show a strong interest in exploring, analyzing, researching, and understanding complex problems.'
+          };
+        case 'ARTISTIC':
+        case 'A':
+          return {
+            'title': 'Strong Artistic Interest',
+            'desc': 'Your profile highlights a high degree of creativity, intuition, design, and expressive communication.'
+          };
+        case 'SOCIAL':
+        case 'S':
+          return {
+            'title': 'Strong Social Interest',
+            'desc': 'Your profile indicates an interest in helping, supporting, teaching, and working closely with people.'
+          };
+        case 'ENTERPRISING':
+        case 'E':
+          return {
+            'title': 'Strong Enterprising Interest',
+            'desc': 'Your scores demonstrate leadership potential, persuasive communication, decision-making, and business initiative.'
+          };
+        case 'CONVENTIONAL':
+        case 'C':
+        default:
+          return {
+            'title': 'Strong Conventional Interest',
+            'desc': 'Your results reflect an appreciation for organization, structured data, accuracy, and detail-oriented workflows.'
+          };
       }
     }
 
-    String cdsesText = 'High Career Decision Self-Efficacy';
-    if (cdses != null) {
-      final level = cdses['selfEfficacyLevel'].toString().toLowerCase();
-      if (level.contains('low')) {
-        cdsesText = 'Low Career Decision Self-Efficacy';
-      } else if (level.contains('mod')) {
-        cdsesText = 'Moderate Career Decision Self-Efficacy';
-      }
-    }
-
-    String strandShort = 'HUMSS';
-    if (strand.contains('STEM')) strandShort = 'STEM';
-    else if (strand.contains('ABM')) strandShort = 'ABM';
-    else if (strand.contains('HUMSS')) strandShort = 'HUMSS';
-    else if (strand.contains('GAS')) strandShort = 'GAS';
-    else if (strand.contains('TVL')) strandShort = 'TVL';
-    else if (strand.contains('ICT')) strandShort = 'ICT';
-
-    final strandText = 'Strong compatibility with $strandShort-related programs';
+    final top3Types = [primary, secondary, tertiary];
 
     return Container(
       decoration: _cardDecoration(isDark),
@@ -1475,37 +1486,72 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 child: const Icon(Icons.help_outline_rounded, color: AppTheme.primaryPurple, size: 20),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Why were these courses recommended?',
-                style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF1E293B)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Why These Course Clusters Were Recommended?',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 15.5, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF1E293B)),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Based on your RIASEC assessment, these course clusters showed the strongest alignment with your interest profile.',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: isDark ? Colors.white70 : const Color(0xFF64748B), height: 1.35),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _whyCheckItem(riasecText, isDark),
-          _whyCheckItem(rseText, isDark),
-          _whyCheckItem(cdsesText, isDark),
-          _whyCheckItem(strandText, isDark),
+          const SizedBox(height: 20),
+          ...top3Types.map((type) {
+            final info = getRiasecDescription(type);
+            return _whyCheckItemWithDesc(info['title']!, info['desc']!, isDark);
+          }),
+          _whyCheckItemWithDesc(
+            'RIASEC Profile Alignment',
+            'Your combination of RIASEC interests aligns directly with the recommended Course Clusters shown above.',
+            isDark,
+          ),
         ],
       ),
     );
   }
 
-  Widget _whyCheckItem(String text, bool isDark) {
+  Widget _whyCheckItemWithDesc(String title, String desc, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : const Color(0xFF1E293B),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  desc,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    height: 1.4,
+                    color: isDark ? Colors.white70 : const Color(0xFF475569),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
