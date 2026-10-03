@@ -47,6 +47,17 @@ $conn->query("CREATE TABLE IF NOT EXISTS login_attempts (
     INDEX idx_time (attempt_time)
 );");
 
+// 3. Ensure system_logs table exists
+$conn->query("CREATE TABLE IF NOT EXISTS system_logs (
+    LogID bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    AdminID bigint(20) DEFAULT NULL,
+    Action varchar(100) NOT NULL,
+    TargetType varchar(50) NOT NULL,
+    TargetID varchar(100) DEFAULT NULL,
+    Details text DEFAULT NULL,
+    CreatedAt timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
 // 3. Seed Super Admin Account
 $email = "sam.bandayanon@jmc.edu.ph";
 $passwordHash = password_hash("C0U10R5123", PASSWORD_BCRYPT);

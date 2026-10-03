@@ -13,9 +13,21 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // helper for logging
 function logActivity($conn, $adminId, $action, $targetType, $targetId = null, $details = null) {
+    @$conn->query("CREATE TABLE IF NOT EXISTS system_logs (
+        LogID bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        AdminID bigint(20) DEFAULT NULL,
+        Action varchar(100) NOT NULL,
+        TargetType varchar(50) NOT NULL,
+        TargetID varchar(100) DEFAULT NULL,
+        Details text DEFAULT NULL,
+        CreatedAt timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
     $stmt = $conn->prepare("INSERT INTO system_logs (AdminID, Action, TargetType, TargetID, Details) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("issis", $adminId, $action, $targetType, $targetId, $details);
-    $stmt->execute();
+    if ($stmt) {
+        $stmt->bind_param("issis", $adminId, $action, $targetType, $targetId, $details);
+        @$stmt->execute();
+    }
 }
 
 // Fetch All Users
