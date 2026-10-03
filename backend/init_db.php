@@ -11,27 +11,68 @@ if (!file_exists($sqlFile)) {
     $sqlFile = __DIR__ . '/riasec_db.sql';
 }
 
-if (!file_exists($sqlFile)) {
-    die(json_encode(["status" => "error", "message" => "riasec_db.sql file not found."]));
+if (file_exists($sqlFile)) {
+    $sql = file_get_contents($sqlFile);
+    if ($conn->multi_query($sql)) {
+        do {
+            if ($result = $conn->store_result()) {
+                $result->free();
+            }
+        } while ($conn->next_result());
+    }
 }
 
-$sql = file_get_contents($sqlFile);
+// 1. Ensure admins table exists
+$conn->query("CREATE TABLE IF NOT EXISTS `admins` (
+  `AdminID` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `RoleID` bigint(20) NOT NULL DEFAULT 3,
+  `FirstName` varchar(100) NOT NULL,
+  `LastName` varchar(100) NOT NULL,
+  `Email` varchar(150) NOT NULL UNIQUE,
+  `Password` varchar(255) NOT NULL,
+  `OTP_Code` varchar(20) DEFAULT NULL,
+  `OTP_Expiry` datetime DEFAULT NULL,
+  `IsBlocked` tinyint(1) NOT NULL DEFAULT 0,
+  `LastLogin` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-if ($conn->multi_query($sql)) {
-    do {
-        if ($result = $conn->store_result()) {
-            $result->free();
-        }
-    } while ($conn->next_result());
-    
-    echo json_encode([
-        "status" => "success",
-        "message" => "Database tables and catalog initialized successfully!"
-    ]);
+// 2. Ensure login_attempts table exists
+$conn->query("CREATE TABLE IF NOT EXISTS login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    identifier VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    attempt_time DATETIME NOT NULL,
+    INDEX idx_ident (identifier),
+    INDEX idx_ip (ip_address),
+    INDEX idx_time (attempt_time)
+);");
+
+// 3. Seed Super Admin Account
+$email = "sam.bandayanon@jmc.edu.ph";
+$passwordHash = password_hash("C0U10R5123", PASSWORD_BCRYPT);
+$firstName = "Sam";
+$lastName = "Bandayanon";
+$roleID = 4; // Super Admin
+
+$stmt = $conn->prepare("SELECT AdminID FROM admins WHERE Email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$res = $stmt->get_result();
+
+if ($res->num_rows > 0) {
+    $upd = $conn->prepare("UPDATE admins SET Password = ?, RoleID = ?, FirstName = ?, LastName = ? WHERE Email = ?");
+    $upd->bind_param("sisss", $passwordHash, $roleID, $firstName, $lastName, $email);
+    $upd->execute();
+    $adminMsg = "Super Admin account updated successfully!";
 } else {
-    echo json_encode([
-        "status" => "error",
-        "message" => "Error executing schema: " . $conn->error
-    ]);
+    $ins = $conn->prepare("INSERT INTO admins (RoleID, FirstName, LastName, Email, Password) VALUES (?, ?, ?, ?, ?)");
+    $ins->bind_param("issss", $roleID, $firstName, $lastName, $email, $passwordHash);
+    $ins->execute();
+    $adminMsg = "Super Admin account created successfully!";
 }
+
+echo json_encode([
+    "status" => "success",
+    "message" => "Database tables initialized & " . $adminMsg
+]);
 ?>
