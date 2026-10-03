@@ -6,19 +6,32 @@ header("Content-Type: application/json");
 // Disable strict key check for dump importing
 mysqli_query($conn, "SET SESSION sql_require_primary_key = 0");
 
+$migrationLogs = [];
+
 // Helper function to safely add columns across all MySQL / MariaDB versions
-function addColumnIfNotExists($conn, $table, $column, $definition) {
+function addColumnIfNotExists($conn, $table, $column, $definition, &$logs) {
     $check = $conn->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
-    if ($check && $check->num_rows === 0) {
-        $conn->query("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
+    if ($check) {
+        if ($check->num_rows === 0) {
+            $alter = $conn->query("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
+            if ($alter) {
+                $logs[] = "ADDED `$column` to `$table` successfully.";
+            } else {
+                $logs[] = "FAILED adding `$column` to `$table`: " . $conn->error;
+            }
+        } else {
+            $logs[] = "`$column` already exists in `$table`.";
+        }
+    } else {
+        $logs[] = "SHOW COLUMNS failed for `$table`: " . $conn->error;
     }
 }
 
 // 0. Schema Parity Auto-Migrations
-addColumnIfNotExists($conn, 'assessments', 'AgreedToDisclaimer', 'tinyint(1) NOT NULL DEFAULT 1');
-addColumnIfNotExists($conn, 'admins', 'CreatedAt', 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP');
-addColumnIfNotExists($conn, 'assessment_results', 'ClusterRecommendations', 'text DEFAULT NULL');
-addColumnIfNotExists($conn, 'riasec_recommendations', 'ShapWeights', 'text DEFAULT NULL');
+addColumnIfNotExists($conn, 'assessments', 'AgreedToDisclaimer', 'tinyint(1) NOT NULL DEFAULT 1', $migrationLogs);
+addColumnIfNotExists($conn, 'admins', 'CreatedAt', 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP', $migrationLogs);
+addColumnIfNotExists($conn, 'assessment_results', 'ClusterRecommendations', 'text DEFAULT NULL', $migrationLogs);
+addColumnIfNotExists($conn, 'riasec_recommendations', 'ShapWeights', 'text DEFAULT NULL', $migrationLogs);
 
 
 $filesToImport = [
@@ -102,6 +115,7 @@ if ($res->num_rows > 0) {
 
 echo json_encode([
     "status" => "success",
-    "message" => "All 21 database tables initialized & " . $adminMsg
+    "message" => "All 21 database tables initialized & " . $adminMsg,
+    "migration_logs" => $migrationLogs
 ]);
 ?>
