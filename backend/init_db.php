@@ -6,19 +6,22 @@ header("Content-Type: application/json");
 // Disable strict key check for dump importing
 mysqli_query($conn, "SET SESSION sql_require_primary_key = 0");
 
-$sqlFile = __DIR__ . '/../assets/riasec_db.sql';
-if (!file_exists($sqlFile)) {
-    $sqlFile = __DIR__ . '/riasec_db.sql';
-}
+$filesToImport = [
+    __DIR__ . '/../assets/riasec_db.sql',
+    __DIR__ . '/riasec_db.sql',
+    __DIR__ . '/add_assessments.sql'
+];
 
-if (file_exists($sqlFile)) {
-    $sql = file_get_contents($sqlFile);
-    if ($conn->multi_query($sql)) {
-        do {
-            if ($result = $conn->store_result()) {
-                $result->free();
-            }
-        } while ($conn->next_result());
+foreach ($filesToImport as $sqlFile) {
+    if (file_exists($sqlFile)) {
+        $sql = file_get_contents($sqlFile);
+        if ($conn->multi_query($sql)) {
+            do {
+                if ($result = $conn->store_result()) {
+                    $result->free();
+                }
+            } while ($conn->next_result());
+        }
     }
 }
 
@@ -58,7 +61,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS system_logs (
     CreatedAt timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-// 3. Seed Super Admin Account
+// 4. Seed Super Admin Account
 $email = "sam.bandayanon@jmc.edu.ph";
 $passwordHash = password_hash("C0U10R5123", PASSWORD_BCRYPT);
 $firstName = "Sam";
@@ -84,6 +87,6 @@ if ($res->num_rows > 0) {
 
 echo json_encode([
     "status" => "success",
-    "message" => "Database tables initialized & " . $adminMsg
+    "message" => "All 21 database tables initialized & " . $adminMsg
 ]);
 ?>
