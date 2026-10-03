@@ -80,7 +80,8 @@ CREATE TABLE `assessment_results` (
   `PrimaryType` char(1) DEFAULT NULL,
   `SecondaryType` char(1) DEFAULT NULL,
   `TertiaryType` char(1) DEFAULT NULL,
-  `CalculatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+  `CalculatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ClusterRecommendations` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -303,6 +304,7 @@ CREATE TABLE `riasec_recommendations` (
   `Explanation` text DEFAULT NULL,
   `Rank` int(11) NOT NULL,
   `GeneratedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ShapWeights` text DEFAULT NULL,
   KEY `ResultID` (`ResultID`),
   KEY `CourseID` (`CourseID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

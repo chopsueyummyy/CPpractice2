@@ -25,8 +25,11 @@ foreach ($filesToImport as $sqlFile) {
     }
 }
 
-// 0. Ensure AgreedToDisclaimer column exists on assessments table
+// 0. Schema Parity Auto-Migrations
 $conn->query("ALTER TABLE assessments ADD COLUMN IF NOT EXISTS AgreedToDisclaimer tinyint(1) NOT NULL DEFAULT 1;");
+$conn->query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS CreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP;");
+$conn->query("ALTER TABLE assessment_results ADD COLUMN IF NOT EXISTS ClusterRecommendations text DEFAULT NULL;");
+$conn->query("ALTER TABLE riasec_recommendations ADD COLUMN IF NOT EXISTS ShapWeights text DEFAULT NULL;");
 
 // 1. Ensure admins table exists
 $conn->query("CREATE TABLE IF NOT EXISTS `admins` (
