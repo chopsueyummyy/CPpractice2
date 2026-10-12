@@ -141,9 +141,10 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
 
     setState(() => _isSubmitting = true);
     try {
+      final submitAction = _action == 'rejected' ? 'declined' : _action;
       final data = await ApiService.submitFeedback(
         assessmentId: assessmentId,
-        action: _action,
+        action: submitAction,
         counselorId: _session.counselorId ?? 1,
         feedbackNotes: _notesController.text.trim(),
         curatedRecommendations: _editableClusterRecs,

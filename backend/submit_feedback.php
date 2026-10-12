@@ -24,6 +24,10 @@ if (empty($assessmentId) || empty($counselorId) || empty($action)) {
     exit();
 }
 
+if ($action === 'rejected') {
+    $action = 'declined';
+}
+
 if (!in_array($action, ['approved', 'declined', 'modified'])) {
     echo json_encode(["status" => "error", "message" => "Invalid action"]);
     exit();
