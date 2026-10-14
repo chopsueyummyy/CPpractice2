@@ -55,14 +55,18 @@ $descriptors = [
 while ($row = $res->fetch_assoc()) {
     $assessmentId = (int)$row['AssessmentID'];
     
+    $scaleToModel = function($pct) {
+        return round(((float)$pct / 100.0) * 7.0, 3);
+    };
+
     $inputPayload = json_encode([
         'SHS_Strand' => $row['Strand'] ?? 'STEM',
-        'Realistic_Score' => (float)($row['R_Percentage'] ?? 0),
-        'Investigative_Score' => (float)($row['I_Percentage'] ?? 0),
-        'Artistic_Score' => (float)($row['A_Percentage'] ?? 0),
-        'Social_Score' => (float)($row['S_Percentage'] ?? 0),
-        'Enterprising_Score' => (float)($row['E_Percentage'] ?? 0),
-        'Conventional_Score' => (float)($row['C_Percentage'] ?? 0),
+        'Realistic_Score' => $scaleToModel($row['R_Percentage'] ?? 0),
+        'Investigative_Score' => $scaleToModel($row['I_Percentage'] ?? 0),
+        'Artistic_Score' => $scaleToModel($row['A_Percentage'] ?? 0),
+        'Social_Score' => $scaleToModel($row['S_Percentage'] ?? 0),
+        'Enterprising_Score' => $scaleToModel($row['E_Percentage'] ?? 0),
+        'Conventional_Score' => $scaleToModel($row['C_Percentage'] ?? 0),
         'RSE_Score_Likert' => isset($row['RSE_Score']) ? (float)$row['RSE_Score'] : 25.0,
         'CDSES_Total_Score' => isset($row['CDSES_TotalScore']) ? (float)$row['CDSES_TotalScore'] : 75.0
     ]);

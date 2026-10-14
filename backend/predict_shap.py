@@ -26,6 +26,16 @@ FEATURE_MAP = {
     'remainder__Conventional_Score': 'Conventional Detail Interest'
 }
 
+def normalize_feature(val):
+    try:
+        f = float(val)
+        # If score is on 0-100 percentage scale, map to 0-7.0 training scale
+        if f > 7.0:
+            return round((f / 100.0) * 7.0, 3)
+        return max(0.0, min(7.0, f))
+    except (ValueError, TypeError):
+        return 0.0
+
 def main():
     try:
         # Determine model directory base path
@@ -76,14 +86,14 @@ def main():
 
         data = json.loads(raw_input)
 
-        # Build DataFrame with expected 6 RIASEC feature columns
+        # Build DataFrame with expected 6 RIASEC feature columns (normalized to 0-7.0 scale)
         df_input = pd.DataFrame([{
-            'Realistic_Score': float(data.get('Realistic_Score', 0)),
-            'Investigative_Score': float(data.get('Investigative_Score', 0)),
-            'Artistic_Score': float(data.get('Artistic_Score', 0)),
-            'Social_Score': float(data.get('Social_Score', 0)),
-            'Enterprising_Score': float(data.get('Enterprising_Score', 0)),
-            'Conventional_Score': float(data.get('Conventional_Score', 0))
+            'Realistic_Score': normalize_feature(data.get('Realistic_Score', 0)),
+            'Investigative_Score': normalize_feature(data.get('Investigative_Score', 0)),
+            'Artistic_Score': normalize_feature(data.get('Artistic_Score', 0)),
+            'Social_Score': normalize_feature(data.get('Social_Score', 0)),
+            'Enterprising_Score': normalize_feature(data.get('Enterprising_Score', 0)),
+            'Conventional_Score': normalize_feature(data.get('Conventional_Score', 0))
         }])
 
         feature_names = model.feature_names_in_.tolist() if hasattr(model, 'feature_names_in_') else ['Realistic_Score', 'Investigative_Score', 'Artistic_Score', 'Social_Score', 'Enterprising_Score', 'Conventional_Score']

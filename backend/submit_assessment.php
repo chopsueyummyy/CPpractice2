@@ -256,16 +256,20 @@ $pi->execute();
 $piRow = $pi->get_result()->fetch_assoc();
 $strand = $piRow['Strand'] ?? 'STEM';
 
-// Map RIASEC raw scores to the model's expected range (2 to 7)
+// Map RIASEC percentage scores (0-100%) to the model's expected 0-7.0 scale
+$scaleToModel = function($pct) {
+    return round(((float)$pct / 100.0) * 7.0, 3);
+};
+
 // 4. GENERATING & CACHING RECOMMENDATIONS VIA XGBOOST & SHAP MODEL
 $inputPayload = json_encode([
     'SHS_Strand' => $strand,
-    'Realistic_Score' => (float)$rPct,
-    'Investigative_Score' => (float)$iPct,
-    'Artistic_Score' => (float)$aPct,
-    'Social_Score' => (float)$sPct,
-    'Enterprising_Score' => (float)$ePct,
-    'Conventional_Score' => (float)$cPct,
+    'Realistic_Score' => $scaleToModel($rPct),
+    'Investigative_Score' => $scaleToModel($iPct),
+    'Artistic_Score' => $scaleToModel($aPct),
+    'Social_Score' => $scaleToModel($sPct),
+    'Enterprising_Score' => $scaleToModel($ePct),
+    'Conventional_Score' => $scaleToModel($cPct),
     'RSE_Score_Likert' => (float)$rseSum,
     'CDSES_Total_Score' => (float)$cdsesTotal
 ]);
