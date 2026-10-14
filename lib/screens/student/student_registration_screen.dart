@@ -25,17 +25,62 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String _errorMessage = '';
 
   final String registerUrl = ApiConfig.register;
 
   @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_onPasswordChanged);
+  }
+
+  void _onPasswordChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _passwordController.removeListener(_onPasswordChanged);
     _idController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  bool get _hasMinLength => _passwordController.text.length >= 8;
+  bool get _hasCapitalLetter => RegExp(r'[A-Z]').hasMatch(_passwordController.text);
+  bool get _hasDigit => RegExp(r'[0-9]').hasMatch(_passwordController.text);
+
+  Widget _buildRequirementItem(String text, bool isMet) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color itemColor = isMet
+        ? AppTheme.success
+        : (isDark ? Colors.white70 : Colors.black54);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+            size: 15,
+            color: isMet ? AppTheme.success : (isDark ? Colors.white38 : Colors.black38),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isMet ? FontWeight.w600 : FontWeight.w400,
+              color: itemColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleRegister() async {
@@ -265,19 +310,80 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                   ),
                                 ),
-                                validator: (value) => (value == null || value.length < 6) ? 'Password must be at least 6 characters' : null,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  if (value.length < 8) {
+                                    return 'Password must be at least 8 characters long';
+                                  }
+                                  if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                                    return 'Password must contain at least 1 capital letter (A-Z)';
+                                  }
+                                  if (!RegExp(r'[0-9]').hasMatch(value)) {
+                                    return 'Password must contain at least 1 number (0-9)';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Live Requirement Checklist
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white.withOpacity(0.05)
+                                      : Colors.black.withOpacity(0.03),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white.withOpacity(0.08)
+                                        : Colors.black.withOpacity(0.06),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Password Requirements:',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textSecondary,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    _buildRequirementItem('At least 8 characters', _hasMinLength),
+                                    _buildRequirementItem('At least 1 capital letter (A-Z)', _hasCapitalLetter),
+                                    _buildRequirementItem('At least 1 number (0-9)', _hasDigit),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 16),
 
                               // Confirm Password
                               TextFormField(
                                 controller: _confirmPasswordController,
-                                obscureText: _obscurePassword,
-                                decoration: const InputDecoration(
+                                obscureText: _obscureConfirmPassword,
+                                decoration: InputDecoration(
                                   labelText: 'Confirm Password',
-                                  prefixIcon: Icon(Icons.lock_outline),
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                                  ),
                                 ),
-                                validator: (value) => (value == null || value.isEmpty) ? 'Please confirm your password' : null,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please confirm your password';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
                               ),
 
                               if (_errorMessage.isNotEmpty) ...[

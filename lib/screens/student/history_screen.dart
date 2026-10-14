@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/student_sidebar.dart';
+import '../../widgets/jmcfi_badge.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -767,20 +768,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         spacing: 8,
                         runSpacing: 6,
                         children: exploreCourses.map((c) {
+                          final raw = c.toString();
+                          final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
+                          final cleanName = JmcfiBadge.cleanCourseTitle(raw);
+
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryPurple.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.15)),
-                            ),
-                            child: Text(
-                              c,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryPurple,
+                              color: isDark ? const Color(0xFF1E293B) : AppTheme.primaryPurple.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark ? Colors.white12 : AppTheme.primaryPurple.withOpacity(0.15),
                               ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  cleanName,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : AppTheme.primaryPurple,
+                                  ),
+                                ),
+                                if (isJmcfi) ...[
+                                  const SizedBox(width: 6),
+                                  const JmcfiBadge(),
+                                ],
+                              ],
                             ),
                           );
                         }).toList(),
@@ -796,20 +812,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
             spacing: 10,
             runSpacing: 8,
             children: courses.map((course) {
+              final raw = course.toString();
+              final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
+              final cleanName = JmcfiBadge.cleanCourseTitle(raw);
+
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryPurple.withOpacity(0.08),
+                  color: isDark ? const Color(0xFF1E293B) : AppTheme.primaryPurple.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.15)),
-                ),
-                child: Text(
-                  course,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primaryPurple,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : AppTheme.primaryPurple.withOpacity(0.15),
                   ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cleanName,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : AppTheme.primaryPurple,
+                      ),
+                    ),
+                    if (isJmcfi) ...[
+                      const SizedBox(width: 6),
+                      const JmcfiBadge(),
+                    ],
+                  ],
                 ),
               );
             }).toList(),

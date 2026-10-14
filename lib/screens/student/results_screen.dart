@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/student_sidebar.dart';
+import '../../widgets/jmcfi_badge.dart';
 
 class ResultsScreen extends StatefulWidget {
   const ResultsScreen({super.key});
@@ -1154,6 +1155,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
+            constraints: const BoxConstraints(minHeight: 168),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF2E2E3E) : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -1239,24 +1241,51 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          ...exploreCourses.map((crs) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+          ...exploreCourses.take(4).map((crs) {
+            final raw = crs.toString();
+            final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
+            final cleanName = JmcfiBadge.cleanCourseTitle(raw);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B).withOpacity(0.5) : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                  width: 1.0,
+                ),
+              ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.arrow_right_rounded, color: AppTheme.primaryPurple, size: 18),
-                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.arrow_right_rounded,
+                    color: AppTheme.primaryPurple,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      crs.toString(),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                    child: Tooltip(
+                      message: cleanName,
+                      child: Text(
+                        cleanName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
+                        ),
                       ),
                     ),
                   ),
+                  if (isJmcfi) ...[
+                    const SizedBox(width: 8),
+                    const JmcfiBadge(),
+                  ],
                 ],
               ),
             );
@@ -1316,7 +1345,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget _buildSingleCourseCard(int rank, Map<String, dynamic> rec, bool isDark) {
     final type = rec['RIASECCategory'] as String;
     final color = AppTheme.riasecColor(type);
-    final courseName = rec['CourseName'] as String;
+    final rawCourseName = (rec['CourseName'] as String?) ?? '';
+    final isJmcfi = JmcfiBadge.isJmcfiCourse(rawCourseName);
+    final courseName = JmcfiBadge.cleanCourseTitle(rawCourseName);
     final courseCode = rec['CourseCode'] as String;
 
     String matchLabel;
@@ -1388,9 +1419,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
           Wrap(
             spacing: 6,
             runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _buildSmallTag(courseCode, isDark ? const Color(0xFF2E2E3E) : const Color(0xFFE2E8F0), isDark ? Colors.white70 : const Color(0xFF64748B)),
               _buildSmallTag(AppTheme.riasecName(type), color.withOpacity(0.15), color),
+              if (isJmcfi) const JmcfiBadge(),
             ],
           ),
           const SizedBox(height: 16),

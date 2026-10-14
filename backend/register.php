@@ -42,6 +42,19 @@ try {
         throw new Exception("Please provide a valid email address.");
     }
 
+    // Password Complexity Validation
+    if (strlen($password) < 8) {
+        throw new Exception("Password must be at least 8 characters long.");
+    }
+
+    if (!preg_match('/[A-Z]/', $password)) {
+        throw new Exception("Password must contain at least one capital letter (A-Z).");
+    }
+
+    if (!preg_match('/[0-9]/', $password)) {
+        throw new Exception("Password must contain at least one digit (0-9).");
+    }
+
     // Hash Password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
