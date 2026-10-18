@@ -713,7 +713,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 rankColor = const Color(0xFF7C3AED);
                 badgeTitle = '🥈 Alternative Recommendation';
               } else {
-                rankColor = const Color(0xFF0D9488);
+                rankColor = const Color(0xFF0284C7);
                 badgeTitle = '🥉 Additional Recommendation';
               }
 

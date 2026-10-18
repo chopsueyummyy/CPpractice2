@@ -585,45 +585,20 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ),
             );
           }),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryPurple.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.15)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.info_outline, color: AppTheme.primaryPurple, size: 18),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'What does this mean?',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: AppTheme.primaryPurple,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Your top interest areas show the types of work activities and environments you are most likely to enjoy. These results can help guide you toward courses and careers that match your interests.',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          height: 1.4,
-                          color: isDark ? Colors.white70 : const Color(0xFF475569),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          _buildScaleAccordion(
+            context: context,
+            title: "What is Holland's RIASEC Model?",
+            whatItIs: "Developed by psychologist Dr. John Holland, the RIASEC model categorizes career interests into 6 personality dimensions: Realistic, Investigative, Artistic, Social, Enterprising, and Conventional.",
+            keyPoints: [
+              {'term': 'R - Realistic', 'def': 'Hands-on practical and technical activities.'},
+              {'term': 'I - Investigative', 'def': 'Analytical, scientific, and research inquiry.'},
+              {'term': 'A - Artistic', 'def': 'Creative self-expression, design, and innovation.'},
+              {'term': 'S - Social', 'def': 'Empathetic teaching, counseling, and teamwork.'},
+              {'term': 'E - Enterprising', 'def': 'Leadership, business initiative, and persuasiveness.'},
+              {'term': 'C - Conventional', 'def': 'Organized systems, accounting, and data management.'},
+            ],
+            color: AppTheme.primaryPurple,
+            isDark: isDark,
           ),
         ],
       ),
@@ -710,6 +685,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ),
               ],
             ),
+          ),
+          _buildScaleAccordion(
+            context: context,
+            title: 'What is the RSE (Self-Esteem) Scale?',
+            whatItIs: 'The Rosenberg Self-Esteem Scale (RSE) is a globally validated 10-item psychometric assessment developed by Dr. Morris Rosenberg that measures your overall self-worth and self-acceptance.',
+            color: const Color(0xFF2E7D32),
+            isDark: isDark,
           ),
         ],
       ),
@@ -832,11 +814,25 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildCdsesSubscaleRow('SA', 'Self-Appraisal', saScore, const Color(0xFF6A0DAD), isDark),
-          _buildCdsesSubscaleRow('OI', 'Occupational Information', oiScore, const Color(0xFF10B981), isDark),
-          _buildCdsesSubscaleRow('GS', 'Goal Selection', gsScore, const Color(0xFF3B82F6), isDark),
-          _buildCdsesSubscaleRow('PL', 'Planning', plScore, const Color(0xFFF59E0B), isDark),
-          _buildCdsesSubscaleRow('PS', 'Problem Solving', psScore, const Color(0xFF10B981), isDark),
+          _buildCdsesSubscaleRow('SA', 'Self-Appraisal', saScore, AppTheme.cdsesColor('SA'), isDark),
+          _buildCdsesSubscaleRow('OI', 'Occupational Information', oiScore, AppTheme.cdsesColor('OI'), isDark),
+          _buildCdsesSubscaleRow('GS', 'Goal Selection', gsScore, AppTheme.cdsesColor('GS'), isDark),
+          _buildCdsesSubscaleRow('PL', 'Planning', plScore, AppTheme.cdsesColor('PL'), isDark),
+          _buildCdsesSubscaleRow('PS', 'Problem Solving', psScore, AppTheme.cdsesColor('PS'), isDark),
+          _buildScaleAccordion(
+            context: context,
+            title: 'What is the CDSES-SF Scale?',
+            whatItIs: 'Developed by Dr. Nancy Betz and Karen Taylor, the Career Decision Self-Efficacy Scale - Short Form (CDSES-SF) measures your confidence in making informed educational and vocational decisions.',
+            keyPoints: [
+              {'term': 'Self-Appraisal (SA)', 'def': 'Accurately assessing your personal abilities, interests, and values.'},
+              {'term': 'Occupational Info (OI)', 'def': 'Researching career paths, degree requirements, and industry outlooks.'},
+              {'term': 'Goal Selection (GS)', 'def': 'Selecting specific educational tracks and career goals with clarity.'},
+              {'term': 'Planning (PL)', 'def': 'Setting actionable milestones, academic roadmaps, and college preparation.'},
+              {'term': 'Problem Solving (PS)', 'def': 'Coping with academic hurdles, curriculum changes, or setbacks.'},
+            ],
+            color: const Color(0xFF10B981),
+            isDark: isDark,
+          ),
         ],
       ),
     );
@@ -892,6 +888,105 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper Widget for Expandable Scale Definitions
+  Widget _buildScaleAccordion({
+    required BuildContext context,
+    required String title,
+    required String whatItIs,
+    required Color color,
+    required bool isDark,
+    List<Map<String, String>>? keyPoints,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(isDark ? 0.08 : 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(isDark ? 0.25 : 0.18)),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          collapsedShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          leading: Icon(Icons.info_outline_rounded, color: color, size: 18),
+          title: Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : color,
+            ),
+          ),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  'What is this scale?',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  whatItIs,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    height: 1.45,
+                    color: isDark ? Colors.white70 : const Color(0xFF475569),
+                  ),
+                ),
+                if (keyPoints != null && keyPoints.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  ...keyPoints.map((pt) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('• ', style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                height: 1.4,
+                                color: isDark ? Colors.white70 : const Color(0xFF475569),
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: '${pt['term']}: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                TextSpan(text: pt['def']),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1006,7 +1101,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             title: 'Additional Recommendation',
             description: 'This is the Course Cluster that the system ranked third. It gives you another option to explore based on your assessment results.',
             isDark: isDark,
-            accentColor: const Color(0xFF0D9488),
+            accentColor: const Color(0xFF0284C7),
           ),
           const SizedBox(height: 12),
           _buildHowToReadItem(
@@ -1066,6 +1161,61 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
+  String _generateShapSynthesis(List<dynamic> explanations) {
+    if (explanations.isEmpty) return '';
+
+    final validExps = explanations.where((e) => e is Map && (e['feature'] != null || e['raw_feature'] != null)).toList();
+    if (validExps.isEmpty) return '';
+
+    final sorted = List<Map<String, dynamic>>.from(validExps)
+      ..sort((a, b) => ((b['impact_score'] as num?)?.toDouble() ?? 0.0)
+          .compareTo((a['impact_score'] as num?)?.toDouble() ?? 0.0));
+
+    String getDescriptor(String name) {
+      final l = name.toLowerCase();
+      if (l.contains('investigative')) return 'analytical problem-solving';
+      if (l.contains('social')) return 'passion for helping and mentoring others';
+      if (l.contains('realistic')) return 'practical, hands-on focus';
+      if (l.contains('artistic')) return 'creative and innovative expression';
+      if (l.contains('enterprising')) return 'leadership drive and initiative';
+      if (l.contains('conventional')) return 'structured precision and organization';
+      return 'strengths';
+    }
+
+    String getTraitName(String name) {
+      final l = name.toLowerCase();
+      if (l.contains('investigative')) return 'Investigative';
+      if (l.contains('social')) return 'Social';
+      if (l.contains('realistic')) return 'Realistic';
+      if (l.contains('artistic')) return 'Artistic';
+      if (l.contains('enterprising')) return 'Enterprising';
+      if (l.contains('conventional')) return 'Conventional';
+      return name.replaceAll(' Interest', '').replaceAll(' Score', '');
+    }
+
+    final top1 = sorted[0];
+    final feat1 = (top1['feature'] ?? top1['raw_feature'] ?? '').toString();
+    final impact1 = (top1['impact_score'] as num?)?.toDouble() ?? 0.0;
+    final desc1 = getDescriptor(feat1);
+    final name1 = getTraitName(feat1);
+
+    if (sorted.length > 1) {
+      final top2 = sorted[1];
+      final feat2 = (top2['feature'] ?? top2['raw_feature'] ?? '').toString();
+      final impact2 = (top2['impact_score'] as num?)?.toDouble() ?? 0.0;
+      final desc2 = getDescriptor(feat2);
+      final name2 = getTraitName(feat2);
+
+      if (impact1 >= 0.65 || impact2 < 0.12) {
+        return 'Primarily driven by your $name1 mindset ($desc1).';
+      }
+
+      return 'Driven by your $name1 mindset ($desc1) paired with $name2 strengths ($desc2).';
+    }
+
+    return 'Driven primarily by your $name1 mindset ($desc1).';
+  }
+
   Widget _buildSingleClusterCard(int rank, Map<String, dynamic> clusterData, bool isDark) {
     final clusterName = clusterData['cluster_name'] as String? ?? 'General Cluster';
     final matchPct = (clusterData['match_percentage'] as num?)?.toDouble() ?? 0.0;
@@ -1090,8 +1240,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
     } else {
       medalEmoji = '🥉';
       rankTitle = 'Additional Recommendation';
-      rankColor = const Color(0xFF059669);
-      bgBadgeColor = const Color(0xFFD1FAE5);
+      rankColor = const Color(0xFF0284C7);
+      bgBadgeColor = isDark ? const Color(0xFF0284C7).withOpacity(0.2) : const Color(0xFFE0F2FE);
     }
 
     return Container(
@@ -1155,7 +1305,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
-            constraints: const BoxConstraints(minHeight: 168),
+            constraints: const BoxConstraints(minHeight: 205),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF2E2E3E) : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -1228,6 +1378,46 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                   );
                 }),
+                if (explanations.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppTheme.primaryPurple.withOpacity(0.12)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? AppTheme.primaryPurple.withOpacity(0.25)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 1.5),
+                          child: Icon(Icons.lightbulb_outline_rounded, size: 14, color: Color(0xFFD97706)),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _generateShapSynthesis(explanations),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontStyle: FontStyle.italic,
+                              height: 1.35,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? Colors.white70 : const Color(0xFF475569),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1241,7 +1431,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          ...exploreCourses.take(4).map((crs) {
+          ...exploreCourses.take(3).map((crs) {
             final raw = crs.toString();
             final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
             final cleanName = JmcfiBadge.cleanCourseTitle(raw);
@@ -1723,26 +1913,34 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget _buildDisclaimerCard(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: isDark ? const Color(0xFF78350F).withOpacity(0.2) : const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFDE68A)),
+        border: Border.all(
+          color: isDark ? const Color(0xFFD97706).withOpacity(0.3) : const Color(0xFFFDE68A),
+        ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, color: Color(0xFFD97706), size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'These recommendations are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                height: 1.45,
-                color: const Color(0xFF92400E),
-                fontWeight: FontWeight.w500,
-              ),
+          Text(
+            'Disclaimer',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isDark ? const Color(0xFFFCD34D) : const Color(0xFF92400E),
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'These recommendations are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              height: 1.5,
+              color: isDark ? const Color(0xFFFDE68A).withOpacity(0.9) : const Color(0xFF92400E),
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],

@@ -10,11 +10,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit();
 
 require_once 'db_connect.php';
 
+$role = strtolower($_GET['role'] ?? 'psychometrician');
+if ($role === 'guidance_counselor' || $role === 'counselor') {
+    $whereStatus = "a.Status = 'pending_counselor'";
+} else {
+    $whereStatus = "a.Status IN ('pending_psychometrician', 'pending_review')";
+}
+
 $result = $conn->query("
     SELECT
         a.AssessmentID,
         a.SubmittedAt,
         a.Status,
+        GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds,
         pi.FirstName,
         pi.LastName,
         pi.Strand,
@@ -31,12 +39,13 @@ $result = $conn->query("
         ar.E_Percentage,
         ar.C_Percentage,
         ar.ResultID,
-        ar.ClusterRecommendations
+        ar.ClusterRecommendations,
+        ar.GeneralInsights
     FROM assessments a
     JOIN personal_information pi ON pi.PI_ID = a.PI_ID
     JOIN students s ON s.StudentID = a.StudentID
     LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
-    WHERE a.Status = 'pending_review'
+    WHERE $whereStatus
     ORDER BY a.SubmittedAt DESC
 ");
 
@@ -72,6 +81,19 @@ while ($row = $result->fetch_assoc()) {
     $cdsesRow = $cdses->get_result()->fetch_assoc();
     $cdses->close();
 
+    // Fetch psychometrician diagnostic briefing note (if available)
+    $pm = $conn->prepare("
+        SELECT cf.FeedbackNotes, cf.ReviewedAt, cf.AiRating, c.FirstName, c.LastName
+        FROM counselor_feedback cf
+        LEFT JOIN counselors c ON c.CounselorID = cf.CounselorID
+        WHERE cf.AssessmentID = ? AND cf.ReviewerRole = 'psychometrician'
+        ORDER BY cf.FeedbackID DESC LIMIT 1
+    ");
+    $pm->bind_param("i", $row['AssessmentID']);
+    $pm->execute();
+    $pmRow = $pm->get_result()->fetch_assoc();
+    $pm->close();
+
     // Read pre-computed XGBoost + SHAP cluster recommendations from MySQL cache
     $clusterRecommendations = !empty($row['ClusterRecommendations']) ? json_decode($row['ClusterRecommendations'], true) : null;
 
@@ -83,6 +105,7 @@ while ($row = $result->fetch_assoc()) {
         "gradeLevel"    => $row['GradeLevel'],
         "gender"        => $row['Gender'],
         "submittedAt"   => $row['SubmittedAt'],
+        "durationSeconds" => (int)($row['DurationSeconds'] ?? 0),
         "status"        => $row['Status'],
         "primaryType"   => $row['PrimaryType'],
         "secondaryType" => $row['SecondaryType'],
@@ -97,6 +120,13 @@ while ($row = $result->fetch_assoc()) {
         ],
         "recommendations" => $recommendations,
         "clusterRecommendations" => $clusterRecommendations,
+        "generalInsights" => !empty($row['GeneralInsights']) ? json_decode($row['GeneralInsights'], true) : null,
+        "psychometricianNote" => $pmRow ? [
+            "notes"        => $pmRow['FeedbackNotes'],
+            "reviewedAt"   => $pmRow['ReviewedAt'],
+            "aiRating"     => $pmRow['AiRating'] !== null ? (int)$pmRow['AiRating'] : null,
+            "endorserName" => $pmRow['FirstName'] ? ($pmRow['FirstName'] . ' ' . $pmRow['LastName']) : 'Registered Psychometrician'
+        ] : null,
         "rse" => $rseRow ? [
             "score" => (int)$rseRow['Score'],
             "level" => $rseRow['Level']

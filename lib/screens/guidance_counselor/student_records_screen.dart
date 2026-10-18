@@ -24,9 +24,18 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   Timer? _autoRefreshTimer;
   final _scrollController = ScrollController();
 
-  // Pagination (5 students per page)
+  // Pagination (6 students per page for balanced grid)
   int _currentPage = 0;
-  static const int _pageSize = 5;
+  static const int _pageSize = 6;
+
+  // View Mode: Grid (boxes) vs List
+  bool _isGridView = true;
+
+  // Cached Cohort Counts for KPI Cards
+  int _totalCohort = 0;
+  int _totalPending = 0;
+  int _totalApproved = 0;
+  int _totalDeclined = 0;
 
   int get _totalPages => (_records.isEmpty) ? 1 : ((_records.length - 1) ~/ _pageSize) + 1;
 
@@ -55,7 +64,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     'all': 'All Statuses',
     'approved': 'Approved',
     'pending_review': 'Pending Review',
-    'declined': 'Declined',
+    'declined': 'Declined / Retake',
   };
 
   final _gradeLevelOptions = {
@@ -165,6 +174,28 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           if (_currentPage >= _totalPages) {
             _currentPage = 0;
           }
+
+          final allPending = _records.where((r) {
+            final s = (r['status'] ?? '').toString();
+            return s == 'pending_review' || s == 'pending_psychometrician' || s == 'pending_counselor';
+          }).length;
+          final allApproved = _records.where((r) => r['status'] == 'approved').length;
+          final allDeclined = _records.where((r) {
+            final s = (r['status'] ?? '').toString();
+            return s == 'declined' || s == 'rejected';
+          }).length;
+
+          if (_status == 'all' && _gradeLevel == 'all' && _strand == 'all' && _dominantType == 'all' && _rseLevel == 'all' && _cdsesLevel == 'all' && _dateFrom.isEmpty && _dateTo.isEmpty && _search.isEmpty) {
+            _totalCohort = _records.length;
+            _totalPending = allPending;
+            _totalApproved = allApproved;
+            _totalDeclined = allDeclined;
+          } else if (_totalCohort == 0) {
+            _totalCohort = _records.length;
+            _totalPending = allPending;
+            _totalApproved = allApproved;
+            _totalDeclined = allDeclined;
+          }
         });
       }
     } catch (_) {}
@@ -252,7 +283,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       
       final visibleIds = _records
           .map((r) => r['assessmentId']?.toString())
-          .where((id) => id != null && id!.isNotEmpty)
+          .where((id) => id != null && id.isNotEmpty)
           .join(',');
 
       final String queryParams = [
@@ -294,34 +325,134 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     }
   }
 
+  String _getInitials(String? name) {
+    if (name == null || name.trim().isEmpty) return '?';
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length == 1) {
+      return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+    }
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+
+  // ignore: unused_element
   Color _statusColor(String? status) {
     switch (status) {
-      case 'approved':      return AppTheme.success;
-      case 'pending_review': return AppTheme.warning;
-      case 'declined':      return AppTheme.error;
-      default:              return AppTheme.textSecondary;
+      case 'approved':               return const Color(0xFF16A34A);
+      case 'pending_psychometrician':
+      case 'pending_review':         return const Color(0xFFD97706);
+      case 'pending_counselor':      return const Color(0xFF0284C7);
+      case 'declined':
+      case 'rejected':               return const Color(0xFFDC2626);
+      case 'in_progress':            return AppTheme.primaryPurple;
+      default:                       return AppTheme.textSecondary;
     }
   }
 
+  // ignore: unused_element
   String _statusLabel(String? status) {
     switch (status) {
-      case 'approved':      return 'Approved';
-      case 'pending_review': return 'Pending Review';
-      case 'declined':      return 'Declined';
-      case 'in_progress':   return 'In Progress';
-      default:              return status ?? 'Unknown';
+      case 'approved':               return 'Approved';
+      case 'pending_psychometrician': return 'Pending Psychometrician';
+      case 'pending_counselor':      return 'Pending Counselor';
+      case 'pending_review':         return 'Pending Review';
+      case 'declined':
+      case 'rejected':               return 'Declined / Retake';
+      case 'in_progress':            return 'In Progress';
+      default:
+        final s = (status ?? 'Unknown').replaceAll('_', ' ');
+        return s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : 'Unknown';
     }
+  }
+
+  Widget _buildStatusBadge(String? status) {
+    String label;
+    Color color;
+    Color bgColor;
+    IconData icon;
+
+    switch (status) {
+      case 'pending_psychometrician':
+        label = 'Pending Psychometrician';
+        color = const Color(0xFFD97706);
+        bgColor = const Color(0xFFFEF3C7);
+        icon = Icons.psychology_outlined;
+        break;
+      case 'pending_counselor':
+        label = 'Pending Counselor';
+        color = const Color(0xFF0284C7);
+        bgColor = const Color(0xFFE0F2FE);
+        icon = Icons.rate_review_outlined;
+        break;
+      case 'pending_review':
+        label = 'Pending Review';
+        color = const Color(0xFFD97706);
+        bgColor = const Color(0xFFFEF3C7);
+        icon = Icons.schedule_rounded;
+        break;
+      case 'approved':
+        label = 'Approved';
+        color = const Color(0xFF16A34A);
+        bgColor = const Color(0xFFDCFCE7);
+        icon = Icons.verified_rounded;
+        break;
+      case 'declined':
+      case 'rejected':
+        label = 'Declined / Retake';
+        color = const Color(0xFFDC2626);
+        bgColor = const Color(0xFFFEE2E2);
+        icon = Icons.restart_alt_rounded;
+        break;
+      case 'in_progress':
+        label = 'In Progress';
+        color = AppTheme.primaryPurple;
+        bgColor = Colors.purple.shade50;
+        icon = Icons.edit_note_rounded;
+        break;
+      default:
+        label = (status ?? 'Unknown').replaceAll('_', ' ');
+        label = label.isNotEmpty ? label[0].toUpperCase() + label.substring(1) : 'Unknown';
+        color = AppTheme.textSecondary;
+        bgColor = Colors.grey.shade100;
+        icon = Icons.info_outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isPsych = SessionManager().isPsychometrician;
+    final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
     final approvedCount = _records.where((r) => r['status'] == 'approved').length;
-    final pendingCount = _records.where((r) => r['status'] == 'pending_review').length;
+    final pendingCount = _records.where((r) => r['status'] == 'pending_review' || r['status'] == 'pending_psychometrician' || r['status'] == 'pending_counselor').length;
 
     return Scaffold(
-      drawer: CounselorSidebar(currentRoute: '/guidance-counselor/student-records'),
+      drawer: CounselorSidebar(currentRoute: '$prefix/student-records'),
       appBar: AppBar(
-        title: const Text('Student Records'),
+        title: Text(isPsych ? 'Test Records Archive' : 'Student Records'),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu),
@@ -695,22 +826,198 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-          // Summary Metrics Banner
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _metricBadge(Icons.folder_shared_rounded, '${_records.length} Total Records', Colors.purple.shade700),
-                const SizedBox(width: 10),
-                _metricBadge(Icons.hourglass_top_rounded, '$pendingCount Pending', AppTheme.warning),
-                const SizedBox(width: 10),
-                _metricBadge(Icons.check_circle_rounded, '$approvedCount Approved', AppTheme.success),
-              ],
-            ),
-          ),
+          // Interactive KPI Filter Cards
+          _buildKpiSection(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildKpiSection() {
+    final isTotalActive = _status == 'all';
+    final isPendingActive = _status == 'pending_review' || _status == 'pending_psychometrician' || _status == 'pending_counselor';
+    final isApprovedActive = _status == 'approved';
+    final isDeclinedActive = _status == 'declined' || _status == 'rejected';
+
+    final totalCount = _totalCohort > 0 ? _totalCohort : _records.length;
+    final pendingCount = _totalCohort > 0 ? _totalPending : _records.where((r) => r['status'] == 'pending_review' || r['status'] == 'pending_psychometrician' || r['status'] == 'pending_counselor').length;
+    final approvedCount = _totalCohort > 0 ? _totalApproved : _records.where((r) => r['status'] == 'approved').length;
+    final declinedCount = _totalCohort > 0 ? _totalDeclined : _records.where((r) => r['status'] == 'declined' || r['status'] == 'rejected').length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 650;
+        final cards = [
+          _buildKpiCard(
+            icon: Icons.folder_shared_rounded,
+            title: 'Total Records',
+            count: totalCount,
+            accentColor: AppTheme.primaryPurple,
+            bgColor: AppTheme.primaryPurple.withOpacity(0.1),
+            isSelected: isTotalActive && _activeFilterCount == 0 && _search.isEmpty,
+            onTap: () {
+              setState(() {
+                _status = 'all';
+                _currentPage = 0;
+              });
+              _loadRecords();
+            },
+          ),
+          _buildKpiCard(
+            icon: Icons.hourglass_top_rounded,
+            title: 'Pending Review',
+            count: pendingCount,
+            accentColor: const Color(0xFFD97706),
+            bgColor: const Color(0xFFFEF3C7),
+            isSelected: isPendingActive,
+            onTap: () {
+              setState(() {
+                _status = isPendingActive ? 'all' : 'pending_review';
+                _currentPage = 0;
+              });
+              _loadRecords();
+            },
+          ),
+          _buildKpiCard(
+            icon: Icons.check_circle_rounded,
+            title: 'Approved',
+            count: approvedCount,
+            accentColor: const Color(0xFF16A34A),
+            bgColor: const Color(0xFFDCFCE7),
+            isSelected: isApprovedActive,
+            onTap: () {
+              setState(() {
+                _status = isApprovedActive ? 'all' : 'approved';
+                _currentPage = 0;
+              });
+              _loadRecords();
+            },
+          ),
+          _buildKpiCard(
+            icon: Icons.restart_alt_rounded,
+            title: 'Declined / Retake',
+            count: declinedCount,
+            accentColor: const Color(0xFFDC2626),
+            bgColor: const Color(0xFFFEE2E2),
+            isSelected: isDeclinedActive,
+            onTap: () {
+              setState(() {
+                _status = isDeclinedActive ? 'all' : 'declined';
+                _currentPage = 0;
+              });
+              _loadRecords();
+            },
+          ),
+        ];
+
+        if (isMobile) {
+          return Column(
+            children: [
+              Row(children: [cards[0], const SizedBox(width: 8), cards[1]]),
+              const SizedBox(height: 8),
+              Row(children: [cards[2], const SizedBox(width: 8), cards[3]]),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            cards[0],
+            const SizedBox(width: 10),
+            cards[1],
+            const SizedBox(width: 10),
+            cards[2],
+            const SizedBox(width: 10),
+            cards[3],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildKpiCard({
+    required IconData icon,
+    required String title,
+    required int count,
+    required Color accentColor,
+    required Color bgColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? accentColor : Colors.grey.shade200,
+              width: isSelected ? 2.0 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: accentColor.withOpacity(0.18),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: accentColor, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? accentColor : AppTheme.textPrimary,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        color: isSelected ? accentColor : AppTheme.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -745,21 +1052,22 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       );
     }
 
-    final startIdx = (_currentPage * _pageSize) + 1;
-    final endIdx = math.min((_currentPage + 1) * _pageSize, _records.length);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Section header with pagination counter
+          // Section header with pagination counter & View Switcher
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
@@ -774,32 +1082,113 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       'Student Records Directory',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.purple.shade100),
-                      ),
-                      child: Text(
-                        'Showing $startIdx–$endIdx of ${_records.length}',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple),
-                      ),
-                    ),
                   ],
                 ),
-                Text(
-                  'Page ${_currentPage + 1} of $_totalPages',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Grid / List Toggle
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () => setState(() => _isGridView = true),
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(7)),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _isGridView ? AppTheme.primaryPurple : Colors.transparent,
+                                borderRadius: const BorderRadius.horizontal(left: Radius.circular(7)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.grid_view_rounded, size: 14, color: _isGridView ? Colors.white : AppTheme.textSecondary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Grid',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: _isGridView ? Colors.white : AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setState(() => _isGridView = false),
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(7)),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: !_isGridView ? AppTheme.primaryPurple : Colors.transparent,
+                                borderRadius: const BorderRadius.horizontal(right: Radius.circular(7)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.view_agenda_rounded, size: 14, color: !_isGridView ? Colors.white : AppTheme.textSecondary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'List',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: !_isGridView ? Colors.white : AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Text(
+                      'Page ${_currentPage + 1} of $_totalPages',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
 
-          // Paged Student Cards (7 to 8 items)
-          ..._pagedRecords.map((r) => _buildStudentCard(r)).toList(),
+          // Paged Student Cards: Responsive Grid or List
+          if (_isGridView)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final int crossAxisCount = constraints.maxWidth >= 1050 ? 3 : (constraints.maxWidth >= 650 ? 2 : 1);
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _pagedRecords.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                    mainAxisExtent: 220,
+                  ),
+                  itemBuilder: (context, index) {
+                    return _buildStudentGridCard(_pagedRecords[index]);
+                  },
+                );
+              },
+            )
+          else
+            Column(
+              children: _pagedRecords.map((r) => _buildStudentListCard(r)).toList(),
+            ),
 
           // Bottom Pagination Bar
           _buildPaginationBar(),
@@ -912,531 +1301,1076 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     );
   }
 
-  Widget _buildStudentCard(Map<String, dynamic> r) {
-    final scores = (r['scores'] as Map<String, dynamic>?) ?? {};
-    final statusColor = _statusColor(r['status']);
-    final rse = r['rse'] as Map<String, dynamic>?;
-    final cdses = r['cdses'] as Map<String, dynamic>?;
-    final clusterRecs = List<Map<String, dynamic>>.from(r['clusterRecommendations'] ?? []);
-    final recs = List<Map<String, dynamic>>.from(r['recommendations'] ?? []);
+  // -------------------------------------------------------------
+  // STUDENT GRID CARD (Modern Box View)
+  // -------------------------------------------------------------
+  Widget _buildStudentGridCard(Map<String, dynamic> r) {
+    final initials = _getInitials(r['studentName']);
+    final primaryType = (r['primaryType'] ?? '').toString();
+    final primaryColor = primaryType.isNotEmpty ? AppTheme.riasecColor(primaryType) : AppTheme.primaryPurple;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
-          child: Text(
-            r['primaryType'] ?? '?',
-            style: TextStyle(
-              color: AppTheme.riasecColor(r['primaryType'] ?? 'R'),
-              fontWeight: FontWeight.bold,
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-        ),
-        title: Text(
-          r['studentName'] ?? 'Unknown Student',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          'ID: ${r['studentId']} • ${r['gradeLevel']} • ${r['strand']}',
-          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (r['status'] == 'approved') ...[
-              IconButton(
-                icon: const Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primaryPurple, size: 20),
-                tooltip: 'Download Student PDF Report',
-                onPressed: () => _downloadIndividualPdf(r['assessmentId']),
-              ),
-              const SizedBox(width: 4),
-            ],
-            Chip(
-              label: Text(
-                _statusLabel(r['status']),
-                style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w600),
-              ),
-              backgroundColor: statusColor.withOpacity(0.1),
-              side: BorderSide(color: statusColor.withOpacity(0.3)),
-            ),
-          ],
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showStudentDossierModal(context, r),
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Divider(),
-                const SizedBox(height: 8),
-                // Student details chips + Prominent PDF Button
+                // Top Row: Initials Avatar + Student Name + ID
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppTheme.primaryPurple.withOpacity(0.12),
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          color: AppTheme.primaryPurple,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          _infoChip(Icons.person_outline, r['gender'] ?? '-'),
-                          _infoChip(Icons.cake_outlined, '${r['age'] ?? '-'} yrs old'),
-                          _infoChip(Icons.calendar_month_outlined, r['submittedAt'] ?? '-'),
-                        ],
-                      ),
-                    ),
-                    if (r['status'] == 'approved') ...[
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
-                        label: const Text('Download Individual PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryPurple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        onPressed: () => _downloadIndividualPdf(r['assessmentId']),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // RIASEC profile progress bars
-                Text(
-                  'RIASEC Profile Scores',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
-                ),
-                const SizedBox(height: 10),
-                ...['R', 'I', 'A', 'S', 'E', 'C'].map((t) {
-                  final pct = double.tryParse((scores[t] ?? "0").toString()) ?? 0.0;
-                  final color = AppTheme.riasecColor(t);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 110,
-                          child: Text(
-                            '$t - ${AppTheme.riasecName(t)}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: pct / 100,
-                              backgroundColor: AppTheme.dividerColor.withOpacity(0.3),
-                              valueColor: AlwaysStoppedAnimation<Color>(color),
-                              minHeight: 6,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${pct.toStringAsFixed(0)}%',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                const SizedBox(height: 8),
-                // Top 3 Badge indicators
-                Row(
-                  children: [
-                    if (r['primaryType'] != null)
-                      _typeBadge(r['primaryType'], '1st'),
-                    if (r['secondaryType'] != null) ...[
-                      const SizedBox(width: 6),
-                      _typeBadge(r['secondaryType'], '2nd'),
-                    ],
-                    if (r['tertiaryType'] != null) ...[
-                      const SizedBox(width: 6),
-                      _typeBadge(r['tertiaryType'], '3rd'),
-                    ],
-                  ],
-                ),
-
-                // Self-Esteem Profile (RSE)
-                if (rse != null) ...[
-                  const Divider(height: 24),
-                  Text(
-                    'Self-Esteem Profile (RSE)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        rse['level'].toString().toLowerCase().contains('low')
-                            ? Icons.sentiment_very_dissatisfied
-                            : Icons.sentiment_satisfied_alt,
-                        color: rse['level'].toString().toLowerCase().contains('low')
-                            ? const Color(0xFFE53E3E)
-                            : AppTheme.success,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Score: ${rse['score']} / 30 (${rse['level']})',
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ],
-
-                // Career Decision Self-Efficacy (CDSES-SF)
-                if (cdses != null) ...[
-                  const Divider(height: 24),
-                  Text(
-                    'Career Decision Self-Efficacy Profile (CDSES-SF)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Self-Efficacy Level: ${cdses['selfEfficacyLevel']}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: cdses['selfEfficacyLevel'].toString().toLowerCase().contains('high')
-                          ? AppTheme.success
-                          : cdses['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
-                              ? AppTheme.warning
-                              : const Color(0xFFE53E3E),
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '• Total Score: ${cdses['totalScore']?.toInt() ?? 0} / 125\n'
-                    '• SA: ${cdses['saScore']} | OI: ${cdses['oiScore']} | '
-                    'GS: ${cdses['gsScore']} | PL: ${cdses['plScore']} | '
-                    'PS: ${cdses['psScore']}',
-                    style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
-                  ),
-                ],
-
-                // Recommended Courses & AI Explanations
-                if (clusterRecs.isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text(
-                    'Top Recommended Course Clusters',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
-                  ),
-                  const SizedBox(height: 10),
-                  ...clusterRecs.map((cluster) {
-                    final rank = cluster['rank'] as int? ?? 1;
-                    final clusterName = (cluster['cluster_name'] ?? 'General Cluster').toString();
-                    final shapExps = List<Map<String, dynamic>>.from(cluster['shap_explanations'] ?? []);
-                    final exploreCourses = List<String>.from(cluster['explore_courses'] ?? []);
-
-                    Color rankColor;
-                    if (rank == 1) {
-                      rankColor = const Color(0xFFD97706);
-                    } else if (rank == 2) {
-                      rankColor = const Color(0xFF7C3AED);
-                    } else {
-                      rankColor = const Color(0xFF059669);
-                    }
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: rankColor.withOpacity(0.4), width: 1.5),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Chip(
-                                  label: Text(
-                                    rank == 1 ? '🥇 Primary Recommendation' : rank == 2 ? '🥈 Alternative Recommendation' : '🥉 Additional Recommendation',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                                  ),
-                                  backgroundColor: rankColor.withOpacity(0.12),
-                                  labelStyle: TextStyle(color: rankColor),
-                                ),
-                                Text(
-                                  '% Predicted Probability',
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: rankColor, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              clusterName,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 12),
-                            if (shapExps.isNotEmpty) ...[
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primaryPurple.withOpacity(0.04),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.auto_awesome, size: 14, color: Colors.purple.shade700),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Why this cluster was recommended:',
-                                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    ...shapExps.map((exp) {
-                                      final feat = (exp['feature'] ?? '').toString();
-                                      final impact = (exp['impact_score'] as num?)?.toDouble() ?? 0.0;
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 4),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                feat,
-                                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-                                              ),
-                                            ),
-                                            Text(
-                                              '+${(impact * 100).toStringAsFixed(0)}% Impact',
-                                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                            if (exploreCourses.isNotEmpty) ...[
-                              Text(
-                                '📌 Recommended Courses under this Cluster:',
-                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
-                              ),
-                              const SizedBox(height: 6),
-                              ...exploreCourses.map((crs) {
-                                final raw = crs.toString();
-                                final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
-                                final cleanName = JmcfiBadge.cleanCourseTitle(raw);
-
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  height: 48,
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: const Color(0xFFE2E8F0),
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.arrow_right_rounded,
-                                        size: 15,
-                                        color: AppTheme.primaryPurple,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Tooltip(
-                                          message: cleanName,
-                                          child: Text(
-                                            cleanName,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.w500,
-                                              height: 1.25,
-                                              color: Color(0xFF1E293B),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      if (isJmcfi) ...[
-                                        const SizedBox(width: 6),
-                                        const JmcfiBadge(),
-                                      ],
-                                    ],
-                                  ),
-                                );
-                              }),
-                            ],
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ] else if (recs.isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text(
-                    'Recommended Courses & AI Explanations',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
-                  ),
-                  const SizedBox(height: 10),
-                  ...recs.map((rec) {
-                    final explanation = rec['Explanation'] ?? '';
-                    final rank = rec['Rank'] ?? 1;
-                    final cType = rec['RIASECCategory'] ?? 'R';
-
-                    Color rankBgColor;
-                    Color rankTxtColor;
-                    String rankLabel;
-                    IconData rankIcon;
-
-                    if (rank == 1) {
-                      rankBgColor = const Color(0xFFFFD700).withOpacity(0.15);
-                      rankTxtColor = const Color(0xFFB8860B);
-                      rankLabel = 'Top Match';
-                      rankIcon = Icons.emoji_events_rounded;
-                    } else if (rank == 2) {
-                      rankBgColor = AppTheme.primaryPurple.withOpacity(0.1);
-                      rankTxtColor = AppTheme.primaryPurple;
-                      rankLabel = 'Strong Match';
-                      rankIcon = Icons.verified_rounded;
-                    } else {
-                      rankBgColor = Colors.teal.withOpacity(0.1);
-                      rankTxtColor = Colors.teal.shade800;
-                      rankLabel = 'Suitable Match';
-                      rankIcon = Icons.thumb_up_rounded;
-                    }
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.5)),
-                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
-                              child: const Icon(Icons.school, color: AppTheme.primaryPurple, size: 20),
+                          Text(
+                            r['studentName'] ?? 'Unknown Student',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF1E293B),
                             ),
-                            title: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    JmcfiBadge.cleanCourseTitle(rec['CourseName'] ?? ''),
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  ),
-                                ),
-                                if (JmcfiBadge.isJmcfiCourse(rec['CourseName'] ?? '')) ...[
-                                  const SizedBox(width: 8),
-                                  const JmcfiBadge(),
-                                ],
-                              ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'ID: ${r['studentId']}${r['gradeLevel'] != null ? ' • ${r['gradeLevel']}' : ''}',
+                            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Status Badge & Strand
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatusBadge(r['status']),
+                    if (r['strand'] != null && r['strand'].toString().isNotEmpty)
+                      Flexible(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.blueGrey.shade100),
+                          ),
+                          child: Text(
+                            r['strand'].toString(),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey.shade700,
                             ),
-                            subtitle: Text(
-                              '${rec['CourseCode']} • ${AppTheme.riasecName(cType)} • ✦ Match: ${(double.tryParse((rec['MatchScore'] ?? '0').toString()) ?? 0.0).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 11),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Assessment Meta Pills: Holland Code, Duration, Submitted Date
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (primaryType.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: primaryColor.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          'Code: $primaryType${r['secondaryType'] ?? ''}${r['tertiaryType'] ?? ''}',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    if (r['durationSeconds'] != null && (int.tryParse(r['durationSeconds'].toString()) ?? 0) > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.timer_outlined, size: 11, color: AppTheme.primaryPurple),
+                            const SizedBox(width: 3),
+                            Text(
+                              _formatDuration(r['durationSeconds']),
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
                             ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: rankBgColor,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: rankTxtColor.withOpacity(0.3)),
+                          ],
+                        ),
+                      ),
+                    if (r['submittedAt'] != null && r['submittedAt'].toString().isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.calendar_today_outlined, size: 10, color: Colors.grey.shade600),
+                            const SizedBox(width: 3),
+                            Text(
+                              r['submittedAt'].toString().split(' ')[0],
+                              style: TextStyle(fontSize: 10.5, color: Colors.grey.shade700),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+
+                const Spacer(),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                const SizedBox(height: 8),
+
+                // Bottom Action Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 32,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showStudentDossierModal(context, r),
+                          icon: const Icon(Icons.badge_outlined, size: 14),
+                          label: const Text('View Dossier', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primaryPurple,
+                            side: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.4)),
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (r['status'] == 'approved') ...[
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        height: 32,
+                        width: 34,
+                        child: IconButton(
+                          icon: const Icon(Icons.picture_as_pdf_rounded, size: 17, color: AppTheme.primaryPurple),
+                          padding: EdgeInsets.zero,
+                          tooltip: 'Download Student PDF Report',
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppTheme.primaryPurple.withOpacity(0.08),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () => _downloadIndividualPdf(r['assessmentId']),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // STUDENT LIST CARD (Horizontal Row View)
+  // -------------------------------------------------------------
+  Widget _buildStudentListCard(Map<String, dynamic> r) {
+    final initials = _getInitials(r['studentName']);
+    final primaryType = (r['primaryType'] ?? '').toString();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showStudentDossierModal(context, r),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppTheme.primaryPurple.withOpacity(0.12),
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      color: AppTheme.primaryPurple,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              r['studentName'] ?? 'Unknown Student',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Color(0xFF1E293B),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(rankIcon, color: rankTxtColor, size: 10),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    rankLabel,
-                                    style: TextStyle(color: rankTxtColor, fontWeight: FontWeight.bold, fontSize: 9),
-                                  ),
-                                ],
-                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (explanation.isNotEmpty)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryPurple.withOpacity(0.03),
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
-                                ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ID: ${r['studentId']}',
+                            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            '${r['gradeLevel'] ?? ''} • ${r['strand'] ?? ''}',
+                            style: TextStyle(fontSize: 11.5, color: Colors.grey.shade700),
+                          ),
+                          if (primaryType.isNotEmpty)
+                            Text(
+                              '• Code: $primaryType${r['secondaryType'] ?? ''}${r['tertiaryType'] ?? ''}',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.riasecColor(primaryType),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    explanation,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      height: 1.4,
-                                      color: Colors.purple.shade900,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  _buildShapChart(rec['shapWeights'] as Map<String, dynamic>?, Colors.purple.shade700),
-                                ],
-                              ),
+                            ),
+                          if (r['durationSeconds'] != null && (int.tryParse(r['durationSeconds'].toString()) ?? 0) > 0)
+                            Text(
+                              '• Time: ${_formatDuration(r['durationSeconds'])}',
+                              style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
+                            ),
+                          if (r['submittedAt'] != null && r['submittedAt'].toString().isNotEmpty)
+                            Text(
+                              '• Submitted: ${r['submittedAt'].toString().split(' ')[0]}',
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500),
                             ),
                         ],
                       ),
-                    );
-                  }).toList(),
-                ],
-
-                const SizedBox(height: 16),
-
-                // General Assessment Insights & Summary
-                _buildGeneralInsightsBox(r),
-
-                // Counselor notes
-                if (r['feedbackNotes'] != null && (r['feedbackNotes'] as String).isNotEmpty) ...[
-                  const Divider(height: 24),
-                  Text(
-                    'Counselor\'s Note',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.warning.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
-                    ),
-                    child: Text(
-                      r['feedbackNotes'],
-                      style: const TextStyle(fontSize: 12, height: 1.4),
-                    ),
+                ),
+                const SizedBox(width: 10),
+                _buildStatusBadge(r['status']),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  onPressed: () => _showStudentDossierModal(context, r),
+                  icon: const Icon(Icons.badge_outlined, size: 14),
+                  label: const Text('View Dossier', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primaryPurple,
+                    side: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.4)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                if (r['status'] == 'approved') ...[
+                  const SizedBox(width: 6),
+                  IconButton(
+                    icon: const Icon(Icons.picture_as_pdf_rounded, size: 18, color: AppTheme.primaryPurple),
+                    tooltip: 'Download Student PDF Report',
+                    onPressed: () => _downloadIndividualPdf(r['assessmentId']),
                   ),
                 ],
               ],
             ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // OPTION A: CENTERED FLOATING DOSSIER MODAL
+  // -------------------------------------------------------------
+  void _showStudentDossierModal(BuildContext context, Map<String, dynamic> r) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 900,
+              maxHeight: MediaQuery.of(context).size.height * 0.90,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Sticky Header
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryPurple.withOpacity(0.06),
+                      border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: AppTheme.primaryPurple.withOpacity(0.15),
+                          child: Text(
+                            _getInitials(r['studentName']),
+                            style: const TextStyle(
+                              color: AppTheme.primaryPurple,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      r['studentName'] ?? 'Unknown Student',
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E293B),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  _buildStatusBadge(r['status']),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'ID: ${r['studentId']} • ${r['gradeLevel'] ?? ''} • ${r['strand'] ?? ''}',
+                                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (r['status'] == 'approved') ...[
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.picture_as_pdf_rounded, size: 15),
+                            label: const Text('Download PDF', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryPurple,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => _downloadIndividualPdf(r['assessmentId']),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 22),
+                          splashRadius: 20,
+                          tooltip: 'Close Dossier',
+                          onPressed: () => Navigator.of(ctx).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Scrollable Body
+                  Expanded(
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: _buildDossierBody(r),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _generateShapSynthesis(List<dynamic> explanations) {
+    if (explanations.isEmpty) return '';
+
+    final validExps = explanations.where((e) => e is Map && (e['feature'] != null || e['raw_feature'] != null)).toList();
+    if (validExps.isEmpty) return '';
+
+    final sorted = List<Map<String, dynamic>>.from(validExps)
+      ..sort((a, b) => ((b['impact_score'] as num?)?.toDouble() ?? 0.0)
+          .compareTo((a['impact_score'] as num?)?.toDouble() ?? 0.0));
+
+    String getDescriptor(String name) {
+      final l = name.toLowerCase();
+      if (l.contains('investigative')) return 'analytical problem-solving';
+      if (l.contains('social')) return 'passion for helping and mentoring others';
+      if (l.contains('realistic')) return 'practical, hands-on focus';
+      if (l.contains('artistic')) return 'creative and innovative expression';
+      if (l.contains('enterprising')) return 'leadership drive and initiative';
+      if (l.contains('conventional')) return 'structured precision and organization';
+      return 'strengths';
+    }
+
+    String getTraitName(String name) {
+      final l = name.toLowerCase();
+      if (l.contains('investigative')) return 'Investigative';
+      if (l.contains('social')) return 'Social';
+      if (l.contains('realistic')) return 'Realistic';
+      if (l.contains('artistic')) return 'Artistic';
+      if (l.contains('enterprising')) return 'Enterprising';
+      if (l.contains('conventional')) return 'Conventional';
+      return name.replaceAll(' Interest', '').replaceAll(' Score', '');
+    }
+
+    final top1 = sorted[0];
+    final feat1 = (top1['feature'] ?? top1['raw_feature'] ?? '').toString();
+    final impact1 = (top1['impact_score'] as num?)?.toDouble() ?? 0.0;
+    final desc1 = getDescriptor(feat1);
+    final name1 = getTraitName(feat1);
+
+    if (sorted.length > 1) {
+      final top2 = sorted[1];
+      final feat2 = (top2['feature'] ?? top2['raw_feature'] ?? '').toString();
+      final impact2 = (top2['impact_score'] as num?)?.toDouble() ?? 0.0;
+      final desc2 = getDescriptor(feat2);
+      final name2 = getTraitName(feat2);
+
+      if (impact1 >= 0.65 || impact2 < 0.12) {
+        return 'Primarily driven by the student\'s $name1 mindset ($desc1).';
+      }
+
+      return 'Driven by the student\'s $name1 mindset ($desc1) paired with $name2 strengths ($desc2).';
+    }
+
+    return 'Driven primarily by the student\'s $name1 mindset ($desc1).';
+  }
+
+  // -------------------------------------------------------------
+  // DOSSIER BODY (Detailed Student & Assessment Records)
+  // -------------------------------------------------------------
+  Widget _buildDossierBody(Map<String, dynamic> r) {
+    final scores = (r['scores'] as Map<String, dynamic>?) ?? {};
+    final rse = r['rse'] as Map<String, dynamic>?;
+    final cdses = r['cdses'] as Map<String, dynamic>?;
+    final clusterRecs = List<Map<String, dynamic>>.from(r['clusterRecommendations'] ?? []);
+    final recs = List<Map<String, dynamic>>.from(r['recommendations'] ?? []);
+    final psychNotes = (r['psychometricianNotes'] ?? '').toString();
+    final counselorNotes = (r['feedbackNotes'] ?? r['counselorNotes'] ?? '').toString();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Demographic chips & timer
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  _infoChip(Icons.person_outline, r['gender'] ?? '-'),
+                  _infoChip(Icons.cake_outlined, '${r['age'] ?? '-'} yrs old'),
+                  _infoChip(Icons.calendar_month_outlined, r['submittedAt'] ?? '-'),
+                  if (r['durationSeconds'] != null && (int.tryParse(r['durationSeconds'].toString()) ?? 0) > 0)
+                    _infoChip(
+                      Icons.timer_outlined,
+                      _formatDuration(r['durationSeconds']),
+                      iconColor: AppTheme.primaryPurple,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // RIASEC profile progress bars
+        Text(
+          'RIASEC Profile Scores',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+        ),
+        const SizedBox(height: 10),
+        ...['R', 'I', 'A', 'S', 'E', 'C'].map((t) {
+          final pct = double.tryParse((scores[t] ?? "0").toString()) ?? 0.0;
+          final color = AppTheme.riasecColor(t);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 110,
+                  child: Text(
+                    '$t - ${AppTheme.riasecName(t)}',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: pct / 100,
+                      backgroundColor: AppTheme.dividerColor.withOpacity(0.3),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                      minHeight: 6,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '${pct.toStringAsFixed(0)}%',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        const SizedBox(height: 8),
+
+        // Top 3 Badge indicators
+        Row(
+          children: [
+            if (r['primaryType'] != null)
+              _typeBadge(r['primaryType'], '1st'),
+            if (r['secondaryType'] != null) ...[
+              const SizedBox(width: 6),
+              _typeBadge(r['secondaryType'], '2nd'),
+            ],
+            if (r['tertiaryType'] != null) ...[
+              const SizedBox(width: 6),
+              _typeBadge(r['tertiaryType'], '3rd'),
+            ],
+          ],
+        ),
+
+        // Self-Esteem Profile (RSE)
+        if (rse != null) ...[
+          const Divider(height: 24),
+          Text(
+            'Self-Esteem Profile (RSE)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                rse['level'].toString().toLowerCase().contains('low')
+                    ? Icons.sentiment_very_dissatisfied
+                    : Icons.sentiment_satisfied_alt,
+                color: rse['level'].toString().toLowerCase().contains('low')
+                    ? const Color(0xFFE53E3E)
+                    : AppTheme.success,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Score: ${rse['score']} / 30 (${rse['level']})',
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+            ],
+          ),
+        ],
+
+        // Career Decision Self-Efficacy (CDSES-SF)
+        if (cdses != null) ...[
+          const Divider(height: 24),
+          Text(
+            'Career Decision Self-Efficacy Profile (CDSES-SF)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Self-Efficacy Level: ${cdses['selfEfficacyLevel']}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: cdses['selfEfficacyLevel'].toString().toLowerCase().contains('high')
+                  ? AppTheme.success
+                  : cdses['selfEfficacyLevel'].toString().toLowerCase().contains('mod')
+                      ? AppTheme.warning
+                      : const Color(0xFFE53E3E),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '• Total Score: ${cdses['totalScore']?.toInt() ?? 0} / 125\n'
+            '• SA: ${cdses['saScore']} | OI: ${cdses['oiScore']} | '
+            'GS: ${cdses['gsScore']} | PL: ${cdses['plScore']} | '
+            'PS: ${cdses['psScore']}',
+            style: TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textSecondary),
+          ),
+        ],
+
+        // Recommended Courses & AI Explanations
+        if (clusterRecs.isNotEmpty) ...[
+          const Divider(height: 24),
+          Text(
+            'Top Recommended Course Clusters',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(height: 10),
+          ...clusterRecs.map((cluster) {
+            final rank = cluster['rank'] as int? ?? 1;
+            final clusterName = (cluster['cluster_name'] ?? 'General Cluster').toString();
+            final matchPctRaw = (cluster['match_percentage'] ?? cluster['probability'] ?? cluster['match_score'] as num?)?.toDouble() ?? 0.0;
+            final matchPct = matchPctRaw <= 1.0 && matchPctRaw > 0.0 ? matchPctRaw * 100.0 : matchPctRaw;
+            final shapExps = List<Map<String, dynamic>>.from(cluster['shap_explanations'] ?? []);
+            final exploreCourses = List<String>.from(cluster['explore_courses'] ?? []);
+
+            Color rankColor;
+            if (rank == 1) {
+              rankColor = const Color(0xFFD97706);
+            } else if (rank == 2) {
+              rankColor = const Color(0xFF7C3AED);
+            } else {
+              rankColor = const Color(0xFF0284C7);
+            }
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: rankColor.withOpacity(0.4), width: 1.5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Chip(
+                          label: Text(
+                            rank == 1 ? '🥇 Primary Recommendation' : rank == 2 ? '🥈 Alternative Recommendation' : '🥉 Additional Recommendation',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                          backgroundColor: rankColor.withOpacity(0.12),
+                          labelStyle: TextStyle(color: rankColor),
+                        ),
+                        Text(
+                          '${matchPct.toStringAsFixed(1)}% Predicted Probability',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: rankColor, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      clusterName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 12),
+                    if (shapExps.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryPurple.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.auto_awesome, size: 14, color: Colors.purple.shade700),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Why this cluster was recommended:',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ...shapExps.map((exp) {
+                              final feat = (exp['feature'] ?? '').toString();
+                              final impact = (exp['impact_score'] as num?)?.toDouble() ?? 0.0;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        feat,
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                    Text(
+                                      '+${(impact * 100).toStringAsFixed(0)}% Impact',
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            if (shapExps.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.purple.shade100),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 1.5),
+                                      child: Icon(Icons.lightbulb_outline_rounded, size: 14, color: Color(0xFFD97706)),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        _generateShapSynthesis(shapExps),
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontStyle: FontStyle.italic,
+                                          height: 1.35,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (exploreCourses.isNotEmpty) ...[
+                      Text(
+                        '📌 Recommended Courses under this Cluster:',
+                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                      ),
+                      const SizedBox(height: 6),
+                      ...exploreCourses.take(3).map((crs) {
+                        final raw = crs.toString();
+                        final isJmcfi = JmcfiBadge.isJmcfiCourse(raw);
+                        final cleanName = JmcfiBadge.cleanCourseTitle(raw);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 6),
+                          height: 48,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.arrow_right_rounded,
+                                size: 15,
+                                color: AppTheme.primaryPurple,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Tooltip(
+                                  message: cleanName,
+                                  child: Text(
+                                    cleanName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.25,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (isJmcfi) ...[
+                                const SizedBox(width: 6),
+                                const JmcfiBadge(),
+                              ],
+                            ],
+                          ),
+                        );
+                      }),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ] else if (recs.isNotEmpty) ...[
+          const Divider(height: 24),
+          Text(
+            'Recommended Courses & AI Explanations',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+          ),
+          const SizedBox(height: 10),
+          ...recs.map((rec) {
+            final explanation = rec['Explanation'] ?? '';
+            final rank = rec['Rank'] ?? 1;
+            final cType = rec['RIASECCategory'] ?? 'R';
+
+            Color rankBgColor;
+            Color rankTxtColor;
+            String rankLabel;
+            IconData rankIcon;
+
+            if (rank == 1) {
+              rankBgColor = const Color(0xFFFFD700).withOpacity(0.15);
+              rankTxtColor = const Color(0xFFB8860B);
+              rankLabel = 'Top Match';
+              rankIcon = Icons.emoji_events_rounded;
+            } else if (rank == 2) {
+              rankBgColor = AppTheme.primaryPurple.withOpacity(0.1);
+              rankTxtColor = AppTheme.primaryPurple;
+              rankLabel = 'Strong Match';
+              rankIcon = Icons.verified_rounded;
+            } else {
+              rankBgColor = Colors.teal.withOpacity(0.1);
+              rankTxtColor = Colors.teal.shade800;
+              rankLabel = 'Suitable Match';
+              rankIcon = Icons.thumb_up_rounded;
+            }
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.5)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppTheme.primaryPurple.withOpacity(0.1),
+                      child: const Icon(Icons.school, color: AppTheme.primaryPurple, size: 20),
+                    ),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            JmcfiBadge.cleanCourseTitle(rec['CourseName'] ?? ''),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                        ),
+                        if (JmcfiBadge.isJmcfiCourse(rec['CourseName'] ?? '')) ...[
+                          const SizedBox(width: 8),
+                          const JmcfiBadge(),
+                        ],
+                      ],
+                    ),
+                    subtitle: Text(
+                      '${rec['CourseCode']} • ${AppTheme.riasecName(cType)} • ✦ Match: ${(double.tryParse((rec['MatchScore'] ?? '0').toString()) ?? 0.0).toStringAsFixed(1)}%',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: rankBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: rankTxtColor.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(rankIcon, color: rankTxtColor, size: 10),
+                          const SizedBox(width: 4),
+                          Text(
+                            rankLabel,
+                            style: TextStyle(color: rankTxtColor, fontWeight: FontWeight.bold, fontSize: 9),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (explanation.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryPurple.withOpacity(0.03),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            explanation,
+                            style: TextStyle(
+                              fontSize: 12,
+                              height: 1.4,
+                              color: Colors.purple.shade900,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          _buildShapChart(rec['shapWeights'] as Map<String, dynamic>?, Colors.purple.shade700),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+
+        const SizedBox(height: 16),
+
+        // General Assessment Insights & Summary
+        _buildGeneralInsightsBox(r),
+
+        // Psychometrician's Briefing / Observations (if present)
+        if (psychNotes.trim().isNotEmpty) ...[
+          const Divider(height: 24),
+          Row(
+            children: [
+              const Icon(Icons.psychology_outlined, size: 18, color: Color(0xFFD97706)),
+              const SizedBox(width: 6),
+              const Text(
+                'Psychometrician\'s Briefing & Observations',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFB45309)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7).withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+            ),
+            child: Text(
+              psychNotes,
+              style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF78350F)),
+            ),
+          ),
+        ],
+
+        // Counselor's Note (if present)
+        if (counselorNotes.trim().isNotEmpty) ...[
+          const Divider(height: 24),
+          Row(
+            children: [
+              const Icon(Icons.rate_review_outlined, size: 18, color: AppTheme.primaryPurple),
+              const SizedBox(width: 6),
+              Text(
+                'Counselor\'s Note',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryPurple.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.25)),
+            ),
+            child: Text(
+              counselorNotes,
+              style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF1E293B)),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -2061,6 +2995,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     );
   }
 
+  // ignore: unused_element
   Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -2089,7 +3024,22 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     );
   }
 
-  Widget _infoChip(IconData icon, String label) {
+  String _formatDuration(dynamic rawSeconds) {
+    final seconds = int.tryParse(rawSeconds.toString()) ?? 0;
+    if (seconds <= 0) return 'N/A';
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    final s = seconds % 60;
+    if (h > 0) {
+      return '${h}h ${m}m ${s}s';
+    } else if (m > 0) {
+      return '${m}m ${s}s';
+    } else {
+      return '${s}s';
+    }
+  }
+
+  Widget _infoChip(IconData icon, String label, {Color? iconColor}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -2099,7 +3049,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppTheme.textSecondary),
+          Icon(icon, size: 14, color: iconColor ?? AppTheme.textSecondary),
           const SizedBox(width: 6),
           Text(
             label,
@@ -2237,6 +3187,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     );
   }
 
+  // ignore: unused_element
   Widget _metricBadge(IconData icon, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -2273,6 +3224,12 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     final scores = (a['scores'] as Map<String, dynamic>?) ?? {};
     final rse = a['rse'] as Map<String, dynamic>?;
     final cdses = a['cdses'] as Map<String, dynamic>?;
+    final existingInsights = a['generalInsights'] as Map<String, dynamic>?;
+
+    final isCalibrated = existingInsights != null &&
+        ((existingInsights['riasec'] ?? '').toString().trim().isNotEmpty ||
+         (existingInsights['rse'] ?? '').toString().trim().isNotEmpty ||
+         (existingInsights['cdses'] ?? '').toString().trim().isNotEmpty);
 
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 4),
@@ -2310,13 +3267,39 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'General Assessment Insights & Summary',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple.shade900,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'General Assessment Insights & Summary',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple.shade900,
+                              ),
+                            ),
+                          ),
+                          if (isCalibrated)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFFF59E0B)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFFB45309)),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Calibrated by Psychometrician',
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -2336,21 +3319,21 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             const SizedBox(height: 14),
 
             // 1. RIASEC Interest Profile Insights
-            _buildRiasecInsightSection(primary, secondary, tertiary, scores),
+            _buildRiasecInsightSection(primary, secondary, tertiary, scores, existingInsights),
 
             const SizedBox(height: 14),
             Divider(height: 1, thickness: 0.8, color: AppTheme.dividerColor),
             const SizedBox(height: 14),
 
             // 2. Self-Esteem Profile (RSE) Insights
-            _buildRseInsightSection(rse),
+            _buildRseInsightSection(rse, existingInsights),
 
             const SizedBox(height: 14),
             Divider(height: 1, thickness: 0.8, color: AppTheme.dividerColor),
             const SizedBox(height: 14),
 
             // 3. Career Decision Self-Efficacy (CDSES) Insights
-            _buildCdsesInsightSection(cdses),
+            _buildCdsesInsightSection(cdses, existingInsights),
           ],
         ),
       ),
@@ -2362,8 +3345,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     String primary,
     String secondary,
     String tertiary,
-    Map<String, dynamic> scores,
-  ) {
+    Map<String, dynamic> scores, [
+    Map<String, dynamic>? existingInsights,
+  ]) {
     final codeList = [primary, secondary, tertiary].where((t) => t.isNotEmpty).toList();
     final hollandCode = codeList.join();
 
@@ -2402,6 +3386,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       narrative = 'RIASEC interest profile is currently being finalized.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['riasec'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['riasec'].toString() : narrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2413,6 +3400,17 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
               '1. RIASEC Interest Profile Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -2472,7 +3470,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         ),
         const SizedBox(height: 8),
         Text(
-          narrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],
@@ -2480,7 +3478,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   }
 
   // 2. RSE Section
-  Widget _buildRseInsightSection(Map<String, dynamic>? rse) {
+  Widget _buildRseInsightSection(Map<String, dynamic>? rse, [Map<String, dynamic>? existingInsights]) {
     if (rse == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2527,6 +3525,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           'The student displays a healthy, balanced self-esteem profile ($score / 30 - Normal). This indicates sound emotional stability and realistic self-regard, providing a reliable emotional foundation for post-secondary transitions.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['rse'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['rse'].toString() : rseNarrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2538,6 +3539,17 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
               '2. Self-Esteem Profile (RSE) Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -2566,7 +3578,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         ),
         const SizedBox(height: 8),
         Text(
-          rseNarrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],
@@ -2574,7 +3586,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   }
 
   // 3. CDSES Section
-  Widget _buildCdsesInsightSection(Map<String, dynamic>? cdses) {
+  Widget _buildCdsesInsightSection(Map<String, dynamic>? cdses, [Map<String, dynamic>? existingInsights]) {
     if (cdses == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2638,6 +3650,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           'The student reflects low career decision self-efficacy (${totalScore.toInt()} / 125), signaling noticeable uncertainty or anxiety about post-secondary options. Priority counseling focused on ${lowest['name']} (${(lowest['score'] as double).toStringAsFixed(2)}/5.0) is recommended to build clarity and confidence.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['cdses'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['cdses'].toString() : cdsesNarrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2649,6 +3664,17 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
               '3. Career Decision Self-Efficacy (CDSES) Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -2696,7 +3722,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         ),
         const SizedBox(height: 8),
         Text(
-          cdsesNarrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],

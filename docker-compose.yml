@@ -10,6 +10,8 @@ services:
     depends_on:
       - backend
       - redis
+    volumes:
+      - ./backend:/var/www/html/api
     restart: unless-stopped
 
   backend:

@@ -80,6 +80,11 @@ class SessionManager {
     }
   }
 
+  bool get isStudent => role == 'student';
+  bool get isPsychometrician => role == 'psychometrician';
+  bool get isCounselor => role == 'guidance_counselor';
+  bool get isAdmin => role == 'admin' || role == 'super_admin';
+
   void setStudent(Map<String, dynamic> data) {
     role                = 'student';
     studentId           = data['studentId'].toString();
@@ -90,7 +95,15 @@ class SessionManager {
   }
 
   void setCounselor(Map<String, dynamic> data) {
-    role                 = 'guidance_counselor';
+    role                 = data['role'] ?? 'guidance_counselor';
+    counselorId          = data['counselorId'];
+    counselorFirstName   = data['firstName'];
+    counselorLastName    = data['lastName'];
+    _saveToStorage();
+  }
+
+  void setPsychometrician(Map<String, dynamic> data) {
+    role                 = 'psychometrician';
     counselorId          = data['counselorId'];
     counselorFirstName   = data['firstName'];
     counselorLastName    = data['lastName'];

@@ -27,9 +27,15 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
             break;
     }
 
-    $pending = $conn->query("
-        SELECT COUNT(*) as count FROM assessments a WHERE a.Status = 'pending_review' AND $dateCondition
+    $pendingPsychometrician = (int)$conn->query("
+        SELECT COUNT(*) as count FROM assessments a WHERE a.Status IN ('pending_psychometrician', 'pending_review') AND $dateCondition
     ")->fetch_assoc()['count'];
+
+    $pendingCounselor = (int)$conn->query("
+        SELECT COUNT(*) as count FROM assessments a WHERE a.Status = 'pending_counselor' AND $dateCondition
+    ")->fetch_assoc()['count'];
+
+    $pending = $pendingPsychometrician;
 
     $totalStudents = $conn->query("SELECT COUNT(*) as count FROM students")->fetch_assoc()['count'];
 
@@ -143,19 +149,112 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         ];
     }
 
+    // 6. Cumulative Grade Level distribution
+    $gradeStats = [];
+    $res = $conn->query("
+        SELECT IFNULL(pi.GradeLevel, 'Unassigned') as GradeLevel, COUNT(*) as count 
+        FROM personal_information pi
+        GROUP BY pi.GradeLevel
+        ORDER BY count DESC
+    ");
+    while ($row = $res->fetch_assoc()) {
+        if ($row['GradeLevel']) {
+            $gradeStats[] = [
+                "gradeLevel" => $row['GradeLevel'],
+                "count"      => (int)$row['count']
+            ];
+        }
+    }
+
+    // 7. Cumulative Gender distribution
+    $genderStats = [];
+    $res = $conn->query("
+        SELECT IFNULL(pi.Gender, 'Not Specified') as Gender, COUNT(*) as count 
+        FROM personal_information pi
+        GROUP BY pi.Gender
+        ORDER BY count DESC
+    ");
+    while ($row = $res->fetch_assoc()) {
+        if ($row['Gender']) {
+            $genderStats[] = [
+                "gender" => $row['Gender'],
+                "count"  => (int)$row['count']
+            ];
+        }
+    }
+
+    // 8. Priority Endorsements awaiting Counselor advisory
+    $priorityEndorsements = [];
+    $res = $conn->query("
+        SELECT a.AssessmentID, a.SubmittedAt, a.StudentID, pi.FirstName, pi.LastName, pi.Strand, pi.GradeLevel,
+               cf.FeedbackNotes as PsychometricianNotes, cf.ReviewedAt as EndorsedAt
+        FROM assessments a
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+        LEFT JOIN counselor_feedback cf ON cf.AssessmentID = a.AssessmentID AND cf.ReviewerRole = 'psychometrician'
+        WHERE a.Status = 'pending_counselor'
+        ORDER BY a.SubmittedAt DESC
+        LIMIT 5
+    ");
+    while ($row = $res->fetch_assoc()) {
+        $priorityEndorsements[] = [
+            "assessmentId"         => (int)$row['AssessmentID'],
+            "studentId"            => $row['StudentID'],
+            "studentName"          => $row['FirstName'] . ' ' . $row['LastName'],
+            "strand"               => $row['Strand'],
+            "gradeLevel"           => $row['GradeLevel'],
+            "endorsedAt"           => $row['EndorsedAt'] ?? $row['SubmittedAt'],
+            "psychometricianNotes" => $row['PsychometricianNotes'] ?? ''
+        ];
+    }
+
+    // 9. Recent Released Advisories (Official Counseling releases)
+    $recentReleased = [];
+    $res = $conn->query("
+        SELECT a.AssessmentID, a.SubmittedAt, a.StudentID, pi.FirstName, pi.LastName, pi.Strand, pi.GradeLevel,
+               cf.FeedbackNotes as CounselorNotes, cf.ReviewedAt as ReleasedAt
+        FROM assessments a
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+        LEFT JOIN counselor_feedback cf ON cf.AssessmentID = a.AssessmentID AND cf.ReviewerRole = 'guidance_counselor'
+        WHERE a.Status = 'approved'
+        ORDER BY a.AssessmentID DESC
+        LIMIT 5
+    ");
+    while ($row = $res->fetch_assoc()) {
+        $recentReleased[] = [
+            "assessmentId"   => (int)$row['AssessmentID'],
+            "studentId"      => $row['StudentID'],
+            "studentName"    => $row['FirstName'] . ' ' . $row['LastName'],
+            "strand"         => $row['Strand'],
+            "gradeLevel"     => $row['GradeLevel'],
+            "releasedAt"     => $row['ReleasedAt'] ?? $row['SubmittedAt'],
+            "counselorNotes" => $row['CounselorNotes'] ?? ''
+        ];
+    }
+
+    $activeStrandsCount = count($strandStats);
+
     return [
-        "status"           => "success",
-        "pendingCount"     => (int)$pending,
-        "totalStudents"    => (int)$totalStudents,
-        "assessmentsToday" => (int)$assessmentsToday,
-        "feedbackGiven"    => (int)$feedbackGiven,
-        "approvalRate"     => $approvalRate,
-        "inProgress"       => (int)$conn->query("SELECT COUNT(*) as count FROM live_sessions ls JOIN assessments a ON a.AssessmentID = ls.AssessmentID WHERE ls.IsActive = TRUE AND a.Status = 'in_progress'")->fetch_assoc()['count'],
-        "strandStats"      => $strandStats,
-        "riasecStats"      => $riasecStats,
-        "rseStats"         => $rseStats,
-        "cdsesStats"       => $cdsesStats,
-        "recentActivity"   => $recentActivity
+        "status"                      => "success",
+        "pendingCount"                => (int)$pending,
+        "pendingPsychometricianCount" => (int)$pendingPsychometrician,
+        "pendingCounselorCount"       => (int)$pendingCounselor,
+        "pendingTotalCount"           => (int)($pendingPsychometrician + $pendingCounselor),
+        "totalStudents"               => (int)$totalStudents,
+        "approved"                    => (int)$approved,
+        "assessmentsToday"            => (int)$assessmentsToday,
+        "feedbackGiven"               => (int)$feedbackGiven,
+        "approvalRate"                => $approvalRate,
+        "inProgress"                  => (int)$conn->query("SELECT COUNT(*) as count FROM live_sessions ls JOIN assessments a ON a.AssessmentID = ls.AssessmentID WHERE ls.IsActive = TRUE AND a.Status = 'in_progress'")->fetch_assoc()['count'],
+        "strandStats"                 => $strandStats,
+        "gradeStats"                  => $gradeStats,
+        "genderStats"                 => $genderStats,
+        "priorityEndorsements"        => $priorityEndorsements,
+        "recentReleased"              => $recentReleased,
+        "activeStrandsCount"          => $activeStrandsCount,
+        "riasecStats"                 => $riasecStats,
+        "rseStats"                    => $rseStats,
+        "cdsesStats"                  => $cdsesStats,
+        "recentActivity"              => $recentActivity
     ];
 });
 

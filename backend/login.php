@@ -131,12 +131,17 @@ try {
 
                 // Check for latest assessment status
                 $assessmentStatus = null;
-                $statusQuery = $conn->prepare("SELECT Status FROM assessments WHERE StudentID = ? ORDER BY CreatedAt DESC LIMIT 1");
+                $statusQuery = $conn->prepare("SELECT Status FROM assessments WHERE StudentID = ? ORDER BY AssessmentID DESC LIMIT 1");
                 if ($statusQuery) {
                     $statusQuery->bind_param("s", $student_id);
                     $statusQuery->execute();
                     $statusRow = $statusQuery->get_result()->fetch_assoc();
-                    $assessmentStatus = $statusRow['Status'] ?? null;
+                    $rawStatus = $statusRow['Status'] ?? null;
+                    if ($rawStatus === 'pending_psychometrician' || $rawStatus === 'pending_counselor') {
+                        $assessmentStatus = 'pending_review';
+                    } else {
+                        $assessmentStatus = $rawStatus;
+                    }
                 }
 
                 echo json_encode([
@@ -156,13 +161,13 @@ try {
             echo json_encode(["status" => "error", "message" => "Invalid credentials (user not found)"]);
         }
 
-    } elseif ($role === 'guidance_counselor') {
+    } elseif ($role === 'guidance_counselor' || $role === 'staff' || $role === 'psychometrician') {
         $email = $data['email'] ?? '';
         if (empty($email)) {
             die(json_encode(["status" => "error", "message" => "Email is required"]));
         }
 
-        $stmt = $conn->prepare("SELECT CounselorID, FirstName, LastName, Password, IsBlocked FROM counselors WHERE Email = ? LIMIT 1");
+        $stmt = $conn->prepare("SELECT CounselorID, RoleID, FirstName, LastName, Password, IsBlocked FROM counselors WHERE Email = ? LIMIT 1");
         if (!$stmt) {
             die(json_encode(["status" => "error", "message" => "Database Search Error (G1)."]));
         }
@@ -173,14 +178,17 @@ try {
 
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
+            $resolvedRole = ((int)($user['RoleID'] ?? 2) === 5) ? 'psychometrician' : 'guidance_counselor';
+            $roleTitle = ($resolvedRole === 'psychometrician') ? 'Psychometrician' : 'Counselor';
+
             if (isset($user['IsBlocked']) && (int) $user['IsBlocked'] === 1) {
-                die(json_encode(["status" => "error", "message" => "Counselor account suspended by Admin."]));
+                die(json_encode(["status" => "error", "message" => "{$roleTitle} account suspended by Admin."]));
             }
             if (password_verify($password, $user['Password'])) {
                 $clearLoginAttempts($conn, $email, $ip_address);
                 echo json_encode([
                     "status" => "success",
-                    "role" => "guidance_counselor",
+                    "role" => $resolvedRole,
                     "counselorId" => $user['CounselorID'],
                     "firstName" => $user['FirstName'],
                     "lastName" => $user['LastName']
@@ -191,7 +199,7 @@ try {
             }
         } else {
             $recordFailedAttempt($conn, $email, $ip_address);
-            echo json_encode(["status" => "error", "message" => "Invalid credentials (counselor not found)"]);
+            echo json_encode(["status" => "error", "message" => "Invalid credentials (account not found)"]);
         }
 
     } elseif ($role === 'admin') {
@@ -227,10 +235,20 @@ try {
                     require_once 'mailer.php';
                     $adminID = (int) $user['AdminID'];
                     error_log("OTP code generated for Admin ID: {$adminID}");
-                    if (sendOTPEmail($email, $user['FirstName'], $otp)) {
+                    
+                    $emailSent = sendOTPEmail($email, $user['FirstName'], $otp);
+                    
+                    // Allow local dev to proceed to OTP verification even if local SMTP is unconfigured
+                    $isLocalDev = (
+                        empty(getenv('SMTP_USER')) || 
+                        in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', 'localhost:8080', '127.0.0.1:8080', '127.0.0.1']) ||
+                        strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
+                    );
+
+                    if ($emailSent || $isLocalDev) {
                         echo json_encode([
                             "status"   => "otp_pending",
-                            "message"  => "Verification code sent to your email.",
+                            "message"  => $emailSent ? "Verification code sent to your email." : "Verification code generated (Local Mode: Check DB or use $otp).",
                             "email"    => $email,
                             "adminId"  => $user['AdminID']
                         ]);

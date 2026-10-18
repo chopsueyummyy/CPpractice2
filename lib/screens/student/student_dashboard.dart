@@ -274,92 +274,135 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                 ),
                                 const SizedBox(height: 32),
 
-                                // Modern Pill Action Button
-                                Container(
-                                  constraints: const BoxConstraints(maxWidth: 320),
-                                  height: 54,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    gradient: _buttonEnabled
-                                        ? LinearGradient(
-                                            colors: [
-                                              AppTheme.primaryPurple,
-                                              const Color(0xFF3B1BA5),
-                                            ],
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                          )
-                                        : null,
-                                    color: !_buttonEnabled
-                                        ? (isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200)
-                                        : null,
-                                    boxShadow: _buttonEnabled
-                                        ? [
-                                            BoxShadow(
-                                              color: AppTheme.primaryPurple.withOpacity(0.35),
-                                              blurRadius: 16,
-                                              offset: const Offset(0, 6),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
+                                // ── Action Button Area ──
+                                if (_assessmentStatus == 'approved')
+                                  Container(
+                                    constraints: const BoxConstraints(maxWidth: 320),
+                                    height: 54,
+                                    decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(30),
-                                      onTap: _buttonEnabled
-                                          ? () {
-                                              if (_assessmentStatus == 'in_progress') {
-                                                context.go('/student/assessment');
-                                              } else {
-                                                _showDisclaimerDialog(context);
-                                              }
-                                            }
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          AppTheme.primaryPurple,
+                                          Color(0xFF3B1BA5),
+                                        ],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppTheme.primaryPurple.withOpacity(0.35),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(30),
+                                        onTap: () => context.go('/student/results'),
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 24),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Icon(
+                                                Icons.assessment_rounded,
+                                                size: 22,
+                                                color: Colors.white,
+                                              ),
+                                              Text(
+                                                'View My Results',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                  letterSpacing: 0.3,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_rounded,
+                                                size: 20,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    constraints: const BoxConstraints(maxWidth: 320),
+                                    height: 54,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      gradient: _buttonEnabled
+                                          ? LinearGradient(
+                                              colors: [
+                                                AppTheme.primaryPurple,
+                                                const Color(0xFF3B1BA5),
+                                              ],
+                                              begin: Alignment.centerLeft,
+                                              end: Alignment.centerRight,
+                                            )
                                           : null,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Icon(
-                                              Icons.play_arrow_rounded,
-                                              size: 22,
-                                              color: _buttonEnabled ? Colors.white : Colors.grey,
-                                            ),
-                                            Text(
-                                              _buttonLabel == 'Start Test' ? 'Start Assessment' : _buttonLabel,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
+                                      color: !_buttonEnabled
+                                          ? (isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200)
+                                          : null,
+                                      boxShadow: _buttonEnabled
+                                          ? [
+                                              BoxShadow(
+                                                color: AppTheme.primaryPurple.withOpacity(0.35),
+                                                blurRadius: 16,
+                                                offset: const Offset(0, 6),
+                                              ),
+                                            ]
+                                          : [],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(30),
+                                        onTap: _buttonEnabled
+                                            ? () {
+                                                if (_assessmentStatus == 'in_progress') {
+                                                  context.go('/student/assessment');
+                                                } else {
+                                                  _showDisclaimerDialog(context);
+                                                }
+                                              }
+                                            : null,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Icon(
+                                                Icons.play_arrow_rounded,
+                                                size: 22,
                                                 color: _buttonEnabled ? Colors.white : Colors.grey,
                                               ),
-                                            ),
-                                            Icon(
-                                              Icons.arrow_forward_rounded,
-                                              size: 20,
-                                              color: _buttonEnabled ? Colors.white : Colors.grey,
-                                            ),
-                                          ],
+                                              Text(
+                                                _buttonLabel == 'Start Test' ? 'Start Assessment' : _buttonLabel,
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: _buttonEnabled ? Colors.white : Colors.grey,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_rounded,
+                                                size: 20,
+                                                color: _buttonEnabled ? Colors.white : Colors.grey,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-
-                                if (_assessmentStatus == 'approved') ...[
-                                  const SizedBox(height: 16),
-                                  OutlinedButton.icon(
-                                    onPressed: () => context.go('/student/results'),
-                                    icon: const Icon(Icons.assessment_rounded),
-                                    label: const Text('View My Results'),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           ),

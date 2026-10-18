@@ -43,7 +43,12 @@ $approvalRate     = ($totalAssessments > 0) ? round(($approvedCount / $totalAsse
 $strandRes = $conn->query("
     SELECT COALESCE(pi.Strand, 'Unassigned') as Strand, COUNT(*) as count 
     FROM assessments a 
-    LEFT JOIN personal_information pi ON pi.StudentID = a.StudentID 
+    LEFT JOIN (
+        SELECT pi1.StudentID, pi1.Strand FROM personal_information pi1
+        INNER JOIN (
+            SELECT MAX(PI_ID) as max_id FROM personal_information GROUP BY StudentID
+        ) pi2 ON pi1.PI_ID = pi2.max_id
+    ) pi ON pi.StudentID = a.StudentID 
     WHERE a.Status != 'in_progress' 
     GROUP BY pi.Strand
 ");
@@ -99,7 +104,7 @@ while ($row = $cdsesRes->fetch_assoc()) {
     $cdsesStats[$row['SelfEfficacyLevel']] = (int)$row['count'];
 }
 
-// 5. STUDENT RECORDS TABLE
+// 5. STUDENT RECORDS TABLE (Approved Only, Latest Record per Student)
 $recordsRes = $conn->query("
     SELECT a.AssessmentID, a.StudentID, s.FirstName, s.LastName, 
            pi.Strand, pi.GradeLevel,
@@ -110,6 +115,12 @@ $recordsRes = $conn->query("
            DATE_FORMAT(a.SubmittedAt, '%Y-%m-%d') as DateSubmitted
     FROM assessments a
     JOIN students s ON s.StudentID = a.StudentID
+    INNER JOIN (
+        SELECT StudentID, MAX(AssessmentID) as MaxAssessmentID
+        FROM assessments
+        WHERE Status = 'approved'
+        GROUP BY StudentID
+    ) latest_app ON a.AssessmentID = latest_app.MaxAssessmentID
     LEFT JOIN (
         SELECT pi1.* FROM personal_information pi1
         INNER JOIN (
@@ -119,7 +130,7 @@ $recordsRes = $conn->query("
     LEFT JOIN assessment_results r ON r.AssessmentID = a.AssessmentID
     LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
     LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
-    WHERE a.Status != 'in_progress'
+    WHERE a.Status = 'approved'
     ORDER BY a.SubmittedAt DESC
 ");
 
@@ -317,9 +328,9 @@ $pdf->Cell(47, 5.5, " $cdsesMod student(s) ({$cdsesModPct}%)", 1, 1, 'L');
 $pdf->Ln(6);
 
 // -----------------------------------------------------------------
-// 4. COMPLETED STUDENT RECORDS TABLE
+// 4. APPROVED STUDENT RECORDS TABLE
 // -----------------------------------------------------------------
-$pdf->SectionHeader('4. Completed Student Assessment Records Summary');
+$pdf->SectionHeader('4. Approved Student Assessment Records Summary');
 
 $pdf->SetFont('Arial', 'B', 7.5);
 $pdf->SetFillColor(91, 33, 182); // Primary Purple Header
@@ -338,40 +349,45 @@ $pdf->Cell(24, 6.5, 'Date Taken', 1, 1, 'C', true);
 $pdf->SetFont('Arial', '', 7.5);
 $pdf->SetTextColor(30, 30, 46);
 
-$fill = false;
-while ($row = $recordsRes->fetch_assoc()) {
-    $pdf->SetFillColor($fill ? 246 : 255, $fill ? 246 : 255, $fill ? 250 : 255);
-    
-    $studentName = mb_substr(trim($row['FirstName'] . ' ' . $row['LastName']), 0, 22);
-    $strandCode  = getStrandCode($row['Strand'] ?? 'N/A');
-    $gradeText   = !empty($row['GradeLevel']) ? str_replace('Grade ', 'G', $row['GradeLevel']) : 'G12';
-    
-    $pri = $row['PrimaryType'] ?? '-';
-    $sec = $row['SecondaryType'] ?? '-';
-    $riasecText = ($pri !== '-' && $sec !== '-') ? "$pri / $sec" : ($pri !== '-' ? $pri : 'N/A');
-    
-    // RSES Score
-    $rseScore = isset($row['RSE_Score']) ? (int)$row['RSE_Score'] : null;
-    $rseLevel = $row['RSE_Level'] ?? '';
-    $rseCategory = str_contains(strtolower($rseLevel), 'low') ? 'Low' : (str_contains(strtolower($rseLevel), 'norm') ? 'Normal' : '');
-    $rseText = ($rseScore !== null) ? ($rseCategory !== '' ? "$rseScore ($rseCategory)" : "$rseScore") : 'N/A';
-    
-    // CDSES Score
-    $cdsesScore = isset($row['CDSES_TotalScore']) ? (int)$row['CDSES_TotalScore'] : null;
-    $cdsesLevel = $row['CDSES_Level'] ?? '';
-    $cdsesCategory = str_contains(strtolower($cdsesLevel), 'high') ? 'High' : (str_contains(strtolower($cdsesLevel), 'mod') ? 'Mod' : (str_contains(strtolower($cdsesLevel), 'low') ? 'Low' : ''));
-    $cdsesText = ($cdsesScore !== null) ? ($cdsesCategory !== '' ? "$cdsesScore ($cdsesCategory)" : "$cdsesScore") : 'N/A';
+if ($recordsRes->num_rows === 0) {
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->Cell(190, 8, ' No approved student assessments on record yet.', 1, 1, 'C', true);
+} else {
+    $fill = false;
+    while ($row = $recordsRes->fetch_assoc()) {
+        $pdf->SetFillColor($fill ? 246 : 255, $fill ? 246 : 255, $fill ? 250 : 255);
+        
+        $studentName = mb_substr(trim($row['FirstName'] . ' ' . $row['LastName']), 0, 22);
+        $strandCode  = getStrandCode($row['Strand'] ?? 'N/A');
+        $gradeText   = !empty($row['GradeLevel']) ? str_replace('Grade ', 'G', $row['GradeLevel']) : 'G12';
+        
+        $pri = $row['PrimaryType'] ?? '-';
+        $sec = $row['SecondaryType'] ?? '-';
+        $riasecText = ($pri !== '-' && $sec !== '-') ? "$pri / $sec" : ($pri !== '-' ? $pri : 'N/A');
+        
+        // RSES Score
+        $rseScore = isset($row['RSE_Score']) ? (int)$row['RSE_Score'] : null;
+        $rseLevel = $row['RSE_Level'] ?? '';
+        $rseCategory = str_contains(strtolower($rseLevel), 'low') ? 'Low' : (str_contains(strtolower($rseLevel), 'norm') ? 'Normal' : '');
+        $rseText = ($rseScore !== null) ? ($rseCategory !== '' ? "$rseScore ($rseCategory)" : "$rseScore") : 'N/A';
+        
+        // CDSES Score
+        $cdsesScore = isset($row['CDSES_TotalScore']) ? (int)$row['CDSES_TotalScore'] : null;
+        $cdsesLevel = $row['CDSES_Level'] ?? '';
+        $cdsesCategory = str_contains(strtolower($cdsesLevel), 'high') ? 'High' : (str_contains(strtolower($cdsesLevel), 'mod') ? 'Mod' : (str_contains(strtolower($cdsesLevel), 'low') ? 'Low' : ''));
+        $cdsesText = ($cdsesScore !== null) ? ($cdsesCategory !== '' ? "$cdsesScore ($cdsesCategory)" : "$cdsesScore") : 'N/A';
 
-    $pdf->Cell(16, 5.5, ' ' . $row['StudentID'], 1, 0, 'C', true);
-    $pdf->Cell(40, 5.5, ' ' . $studentName, 1, 0, 'L', true);
-    $pdf->Cell(16, 5.5, ' ' . $strandCode, 1, 0, 'C', true);
-    $pdf->Cell(12, 5.5, ' ' . $gradeText, 1, 0, 'C', true);
-    $pdf->Cell(20, 5.5, ' ' . $riasecText, 1, 0, 'C', true);
-    $pdf->Cell(29, 5.5, ' ' . $rseText, 1, 0, 'C', true);
-    $pdf->Cell(33, 5.5, ' ' . $cdsesText, 1, 0, 'C', true);
-    $pdf->Cell(24, 5.5, ' ' . ($row['DateSubmitted'] ?? 'N/A'), 1, 1, 'C', true);
-    
-    $fill = !$fill;
+        $pdf->Cell(16, 5.5, ' ' . $row['StudentID'], 1, 0, 'C', true);
+        $pdf->Cell(40, 5.5, ' ' . $studentName, 1, 0, 'L', true);
+        $pdf->Cell(16, 5.5, ' ' . $strandCode, 1, 0, 'C', true);
+        $pdf->Cell(12, 5.5, ' ' . $gradeText, 1, 0, 'C', true);
+        $pdf->Cell(20, 5.5, ' ' . $riasecText, 1, 0, 'C', true);
+        $pdf->Cell(29, 5.5, ' ' . $rseText, 1, 0, 'C', true);
+        $pdf->Cell(33, 5.5, ' ' . $cdsesText, 1, 0, 'C', true);
+        $pdf->Cell(24, 5.5, ' ' . ($row['DateSubmitted'] ?? 'N/A'), 1, 1, 'C', true);
+        
+        $fill = !$fill;
+    }
 }
 
 // OUTPUT STREAM DIRECTLY TO BROWSER

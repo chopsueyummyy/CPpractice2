@@ -30,13 +30,17 @@ $row = $stmt->get_result()->fetch_assoc();
 if (!$row) {
     echo json_encode(["status" => "success", "assessmentStatus" => null, "assessmentId" => null]);
 } else {
-    $status = $row['Status'];
+    $rawStatus = $row['Status'];
+    $status = $rawStatus;
     if ($status === 'declined') {
         $status = 'rejected';
+    } elseif ($status === 'pending_psychometrician' || $status === 'pending_counselor') {
+        $status = 'pending_review';
     }
     echo json_encode([
         "status"           => "success",
         "assessmentStatus" => $status,
+        "rawStatus"        => $rawStatus,
         "assessmentId"     => (int)$row['AssessmentID']
     ]);
 }

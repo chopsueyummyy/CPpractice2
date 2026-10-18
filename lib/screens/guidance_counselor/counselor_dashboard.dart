@@ -17,6 +17,8 @@ class CounselorDashboard extends StatefulWidget {
 
 class _CounselorDashboardState extends State<CounselorDashboard> {
   final _session = SessionManager();
+  bool get isPsych => _session.isPsychometrician;
+  String get prefix => isPsych ? '/psychometrician' : '/guidance-counselor';
   String _timeFilter = 'all';
   bool _isLoading = true;
   Map<String, dynamic> _stats = {};
@@ -41,11 +43,13 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPsych = _session.isPsychometrician;
+    final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
 
     return Scaffold(
-      drawer: CounselorSidebar(currentRoute: '/guidance-counselor/dashboard'),
+      drawer: CounselorSidebar(currentRoute: '$prefix/dashboard'),
       appBar: AppBar(
-        title: const Text('Counselor Dashboard'),
+        title: Text(isPsych ? 'Psychometrician Dashboard' : 'Counselor Dashboard'),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu),
@@ -93,7 +97,11 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                     CircleAvatar(
                       radius: 28,
                       backgroundColor: AppTheme.primaryPurple.withOpacity(0.15),
-                      child: const Icon(Icons.psychology, size: 28, color: AppTheme.primaryPurple),
+                      child: Icon(
+                        isPsych ? Icons.analytics_outlined : Icons.psychology,
+                        size: 28,
+                        color: AppTheme.primaryPurple,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -101,7 +109,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome, ${_session.counselorFirstName ?? 'Counselor'}!',
+                            'Welcome, ${_session.counselorFirstName ?? (isPsych ? 'Psychometrician' : 'Counselor')}!',
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 22,
@@ -109,7 +117,9 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Monitor student assessments and review recommendations.',
+                            isPsych
+                                ? 'Monitor live testing sessions, calibrate AI models, and endorse evaluations.'
+                                : 'Track student cumulative records, demographic trends, and counseling caseloads.',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppTheme.textSecondary,
                               fontSize: 13,
@@ -146,6 +156,9 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                 )
               else ...[
                 () {
+                  if (!isPsych) {
+                    return _buildCounselorDashboard(context);
+                  }
                   final strandStats = List<Map<String, dynamic>>.from(_stats['strandStats'] ?? []);
                   final riasecStats = List<Map<String, dynamic>>.from(_stats['riasecStats'] ?? []);
                   final rseStats = List<Map<String, dynamic>>.from(_stats['rseStats'] ?? []);
@@ -155,6 +168,12 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   return LayoutBuilder(
                     builder: (context, constraints) {
                       final isWide = constraints.maxWidth > 900;
+                      final pendingLabel = isPsych ? 'Pending Evaluations' : 'Endorsements Awaiting Action';
+                      final pendingValue = '${isPsych ? (_stats['pendingPsychometricianCount'] ?? _stats['pendingCount'] ?? 0) : (_stats['pendingCounselorCount'] ?? _stats['pendingCount'] ?? 0)}';
+                      final card3Label = isPsych ? 'Assessments Today' : 'Results Released';
+                      final card3Value = '${isPsych ? (_stats['assessmentsToday'] ?? 0) : (_stats['approved'] ?? _stats['feedbackGiven'] ?? 0)}';
+                      final card3Icon = isPsych ? Icons.insert_chart_outlined_rounded : Icons.verified_outlined;
+                      final card3Route = isPsych ? '$prefix/monitoring' : '$prefix/student-records';
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,30 +183,30 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                             Row(
                               children: [
                                 Expanded(child: _buildSparklineStatCard(
-                                  context, 'Pending Approvals', '${_stats['pendingCount'] ?? 0}',
-                                  Icons.assignment_turned_in_outlined, const Color(0xFFFF9800),
-                                  () => context.go('/guidance-counselor/pending-approvals'),
+                                  context, pendingLabel, pendingValue,
+                                  isPsych ? Icons.assignment_turned_in_outlined : Icons.mark_email_unread_outlined, const Color(0xFFFF9800),
+                                  () => context.go('$prefix/pending-approvals'),
                                   sparklineType: 'wave',
                                 )),
                                 const SizedBox(width: 16),
                                 Expanded(child: _buildSparklineStatCard(
                                   context, 'Total Students', '${_stats['totalStudents'] ?? 0}',
                                   Icons.people_alt_outlined, const Color(0xFF2196F3),
-                                  () => context.go('/guidance-counselor/student-records'),
+                                  () => context.go('$prefix/student-records'),
                                   sparklineType: 'bars',
                                 )),
                                 const SizedBox(width: 16),
                                 Expanded(child: _buildSparklineStatCard(
-                                  context, 'Assessments Today', '${_stats['assessmentsToday'] ?? 0}',
-                                  Icons.insert_chart_outlined_rounded, const Color(0xFF4CAF50),
-                                  () => context.go('/guidance-counselor/monitoring'),
+                                  context, card3Label, card3Value,
+                                  card3Icon, const Color(0xFF4CAF50),
+                                  () => context.go(card3Route),
                                   sparklineType: 'bars',
                                 )),
                                 const SizedBox(width: 16),
                                 Expanded(child: _buildSparklineStatCard(
-                                  context, 'Live Now', '${_stats['inProgress'] ?? 0}',
+                                  context, isPsych ? 'Live Now' : 'Live Assessments', '${_stats['inProgress'] ?? 0}',
                                   Icons.sensors_rounded, AppTheme.primaryPurple,
-                                  () => context.go('/guidance-counselor/monitoring'),
+                                  () => context.go('$prefix/monitoring'),
                                   sparklineType: 'wave',
                                 )),
                               ],
@@ -198,16 +217,16 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                                 Row(
                                   children: [
                                     Expanded(child: _buildSparklineStatCard(
-                                      context, 'Pending Approvals', '${_stats['pendingCount'] ?? 0}',
-                                      Icons.assignment_turned_in_outlined, const Color(0xFFFF9800),
-                                      () => context.go('/guidance-counselor/pending-approvals'),
+                                      context, pendingLabel, pendingValue,
+                                      isPsych ? Icons.assignment_turned_in_outlined : Icons.mark_email_unread_outlined, const Color(0xFFFF9800),
+                                      () => context.go('$prefix/pending-approvals'),
                                       sparklineType: 'wave',
                                     )),
                                     const SizedBox(width: 12),
                                     Expanded(child: _buildSparklineStatCard(
                                       context, 'Total Students', '${_stats['totalStudents'] ?? 0}',
                                       Icons.people_alt_outlined, const Color(0xFF2196F3),
-                                      () => context.go('/guidance-counselor/student-records'),
+                                      () => context.go('$prefix/student-records'),
                                       sparklineType: 'bars',
                                     )),
                                   ],
@@ -216,16 +235,16 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                                 Row(
                                   children: [
                                     Expanded(child: _buildSparklineStatCard(
-                                      context, 'Assessments Today', '${_stats['assessmentsToday'] ?? 0}',
-                                      Icons.insert_chart_outlined_rounded, const Color(0xFF4CAF50),
-                                      () => context.go('/guidance-counselor/monitoring'),
+                                      context, card3Label, card3Value,
+                                      card3Icon, const Color(0xFF4CAF50),
+                                      () => context.go(card3Route),
                                       sparklineType: 'bars',
                                     )),
                                     const SizedBox(width: 12),
                                     Expanded(child: _buildSparklineStatCard(
-                                      context, 'Live Now', '${_stats['inProgress'] ?? 0}',
+                                      context, isPsych ? 'Live Now' : 'Live Assessments', '${_stats['inProgress'] ?? 0}',
                                       Icons.sensors_rounded, AppTheme.primaryPurple,
-                                      () => context.go('/guidance-counselor/monitoring'),
+                                      () => context.go('$prefix/monitoring'),
                                       sparklineType: 'wave',
                                     )),
                                   ],
@@ -301,6 +320,840 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // GUIDANCE COUNSELOR DASHBOARD: STUDENT RECORDS, DEMOGRAPHICS & CASELOAD
+  // ══════════════════════════════════════════════════════════════════════════
+  Widget _buildCounselorDashboard(BuildContext context) {
+    final strandStats = List<Map<String, dynamic>>.from(_stats['strandStats'] ?? []);
+    final gradeStats = List<Map<String, dynamic>>.from(_stats['gradeStats'] ?? []);
+    final genderStats = List<Map<String, dynamic>>.from(_stats['genderStats'] ?? []);
+    final priorityEndorsements = List<Map<String, dynamic>>.from(_stats['priorityEndorsements'] ?? []);
+    final recentReleased = List<Map<String, dynamic>>.from(_stats['recentReleased'] ?? []);
+
+    final pendingCounselor = '${_stats['pendingCounselorCount'] ?? _stats['pendingCount'] ?? 0}';
+    final totalStudents = '${_stats['totalStudents'] ?? 0}';
+    final approvedCount = '${_stats['approved'] ?? 0}';
+    final activeStrands = '${_stats['activeStrandsCount'] ?? strandStats.length}';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 900;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top 4 Counselor Stat Cards
+            if (isWide)
+              Row(
+                children: [
+                  Expanded(child: _buildSparklineStatCard(
+                    context, 'Total Registered Students', totalStudents,
+                    Icons.people_alt_outlined, const Color(0xFF2196F3),
+                    () => context.go('$prefix/student-records'),
+                    sparklineType: 'bars',
+                  )),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildSparklineStatCard(
+                    context, 'Endorsements Awaiting Action', pendingCounselor,
+                    Icons.mark_email_unread_outlined, const Color(0xFFFF9800),
+                    () => context.go('$prefix/pending-approvals'),
+                    sparklineType: 'wave',
+                  )),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildSparklineStatCard(
+                    context, 'Advisories Released', approvedCount,
+                    Icons.verified_outlined, const Color(0xFF4CAF50),
+                    () => context.go('$prefix/student-records'),
+                    sparklineType: 'bars',
+                  )),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildSparklineStatCard(
+                    context, 'Active Academic Strands', activeStrands,
+                    Icons.school_outlined, AppTheme.primaryPurple,
+                    () => context.go('$prefix/student-records'),
+                    sparklineType: 'wave',
+                  )),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _buildSparklineStatCard(
+                        context, 'Total Registered Students', totalStudents,
+                        Icons.people_alt_outlined, const Color(0xFF2196F3),
+                        () => context.go('$prefix/student-records'),
+                        sparklineType: 'bars',
+                      )),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildSparklineStatCard(
+                        context, 'Endorsements Awaiting Action', pendingCounselor,
+                        Icons.mark_email_unread_outlined, const Color(0xFFFF9800),
+                        () => context.go('$prefix/pending-approvals'),
+                        sparklineType: 'wave',
+                      )),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _buildSparklineStatCard(
+                        context, 'Advisories Released', approvedCount,
+                        Icons.verified_outlined, const Color(0xFF4CAF50),
+                        () => context.go('$prefix/student-records'),
+                        sparklineType: 'bars',
+                      )),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildSparklineStatCard(
+                        context, 'Active Strands', activeStrands,
+                        Icons.school_outlined, AppTheme.primaryPurple,
+                        () => context.go('$prefix/student-records'),
+                        sparklineType: 'wave',
+                      )),
+                    ],
+                  ),
+                ],
+              ),
+            const SizedBox(height: 24),
+
+            // Row 1: Academic Strand Distribution & Student Demographics
+            if (isWide)
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: _buildCounselorStrandCard(strandStats)),
+                    const SizedBox(width: 20),
+                    Expanded(child: _buildCounselorCohortCard(gradeStats, genderStats)),
+                  ],
+                ),
+              )
+            else ...[
+              _buildCounselorStrandCard(strandStats),
+              const SizedBox(height: 20),
+              _buildCounselorCohortCard(gradeStats, genderStats),
+            ],
+            const SizedBox(height: 24),
+
+            // Row 2: Priority Endorsements Queue (Ready for Guidance Counseling)
+            _buildCounselorPriorityEndorsementsCard(priorityEndorsements),
+            const SizedBox(height: 24),
+
+            // Row 3: Recent Released Advisories (Official Releases)
+            _buildCounselorRecentReleasedTable(recentReleased),
+            const SizedBox(height: 24),
+
+            // Row 4: Counselor Quick Actions
+            _buildCounselorQuickActionsGrid(),
+          ],
+        );
+      },
+    );
+  }
+
+  // Strand Distribution Card (Counselor view)
+  Widget _buildCounselorStrandCard(List<Map<String, dynamic>> strandStats) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final total = strandStats.fold(0, (sum, item) => sum + (item['count'] as int));
+
+    return Card(
+      elevation: 0,
+      color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.school_rounded, color: AppTheme.primaryPurple, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Senior High Academic Strands',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => context.go('$prefix/student-records'),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'View Directory',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryPurple,
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.primaryPurple),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Cumulative student distribution across academic tracks.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+            if (strandStats.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text('No student records found.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                ),
+              )
+            else
+              Column(
+                children: strandStats.map((item) {
+                  final strand = item['strand']?.toString() ?? 'Unassigned';
+                  final count = item['count'] as int? ?? 0;
+                  final pct = total > 0 ? (count / total) : 0.0;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                strand,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '$count student(s) (${(pct * 100).toStringAsFixed(1)}%)',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: pct,
+                            backgroundColor: isDark ? Colors.white10 : AppTheme.dividerColor.withOpacity(0.3),
+                            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryPurple),
+                            minHeight: 8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Student Cohort Profile (Grade Level & Gender)
+  Widget _buildCounselorCohortCard(List<Map<String, dynamic>> gradeStats, List<Map<String, dynamic>> genderStats) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final totalGrade = gradeStats.fold(0, (sum, item) => sum + (item['count'] as int));
+    final totalGender = genderStats.fold(0, (sum, item) => sum + (item['count'] as int));
+
+    return Card(
+      elevation: 0,
+      color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.groups_rounded, color: Color(0xFF2196F3), size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Student Demographics & Cohort Profile',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => context.go('$prefix/student-records'),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'Cumulative Records',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2196F3),
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFF2196F3)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Grade level and gender demographic distribution across registered cohorts.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 18),
+
+            // Grade Level Section
+            const Text(
+              'GRADE LEVEL REPRESENTATION',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Color(0xFF2196F3)),
+            ),
+            const SizedBox(height: 10),
+            if (gradeStats.isEmpty)
+              Text('No grade level data', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))
+            else
+              Row(
+                children: gradeStats.map((item) {
+                  final grade = item['gradeLevel']?.toString() ?? 'Grade 12';
+                  final count = item['count'] as int? ?? 0;
+                  final pct = totalGrade > 0 ? (count / totalGrade * 100).toStringAsFixed(1) : '0';
+
+                  return Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withOpacity(0.04) : const Color(0xFFF0F7FF),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF2196F3).withOpacity(0.25)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(grade, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          const SizedBox(height: 4),
+                          Text('$count students', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF2196F3))),
+                          Text('$pct% of cohort', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+            const SizedBox(height: 20),
+
+            // Gender Breakdown Section
+            const Text(
+              'GENDER DISTRIBUTION',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Color(0xFF9C27B0)),
+            ),
+            const SizedBox(height: 10),
+            if (genderStats.isEmpty)
+              Text('No gender data', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))
+            else
+              Row(
+                children: genderStats.map((item) {
+                  final gender = item['gender']?.toString() ?? 'Other';
+                  final count = item['count'] as int? ?? 0;
+                  final pct = totalGender > 0 ? (count / totalGender * 100).toStringAsFixed(1) : '0';
+                  final isMale = gender.toLowerCase() == 'male';
+                  final icon = isMale ? Icons.male_rounded : (gender.toLowerCase() == 'female' ? Icons.female_rounded : Icons.person_outline_rounded);
+                  final color = isMale ? const Color(0xFF0284C7) : const Color(0xFFE91E63);
+
+                  return Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withOpacity(0.04) : color.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: color.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor: color.withOpacity(0.15),
+                            child: Icon(icon, color: color, size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(gender, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)),
+                                Text('$count ($pct%)', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Priority Endorsement Queue (Actionable for Counselor)
+  Widget _buildCounselorPriorityEndorsementsCard(List<Map<String, dynamic>> priorityEndorsements) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Card(
+      elevation: 0,
+      color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.mark_email_unread_rounded, color: Color(0xFFFF9800), size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Priority Endorsement Queue',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF9800).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${priorityEndorsements.length} Awaiting Counseling',
+                        style: const TextStyle(
+                          color: Color(0xFFE65100),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => context.go('$prefix/pending-approvals'),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'Open Full Queue',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFF9800),
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFFFF9800)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Students screened & endorsed by Psychometrician awaiting Guidance Counselor interview and advisory release.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+
+            if (priorityEndorsements.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.02) : const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.dividerColor.withOpacity(0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.check_circle_outline_rounded, size: 36, color: AppTheme.success.withOpacity(0.8)),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'All Endorsements Completed',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'There are no students currently awaiting counseling action. You are completely caught up!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('$prefix/pending-approvals'),
+                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                      label: const Text('Check Endorsed Queue'),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Column(
+                children: priorityEndorsements.map((student) {
+                  final name = student['studentName']?.toString() ?? 'Student';
+                  final studentId = student['studentId']?.toString() ?? '';
+                  final strand = student['strand']?.toString() ?? 'N/A';
+                  final grade = student['gradeLevel']?.toString() ?? 'Grade 12';
+                  final psychNotes = student['psychometricianNotes']?.toString() ?? '';
+                  final endorsedAt = student['endorsedAt']?.toString() ?? '';
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withOpacity(0.03) : const Color(0xFFFFFBEB),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: const Color(0xFFFF9800).withOpacity(0.15),
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : 'S',
+                                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE65100)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text('ID: $studentId', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '$grade • $strand • Endorsed: $endorsedAt',
+                                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () => context.go('$prefix/pending-approvals'),
+                              icon: const Icon(Icons.rate_review_outlined, size: 16),
+                              label: const Text('Review & Counsel'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primaryPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (psychNotes.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white.withOpacity(0.03) : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.dividerColor.withOpacity(0.2)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.lock_outline_rounded, size: 14, color: AppTheme.primaryPurple),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Psychometrician Briefing: ',
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    psychNotes,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Recent Released Advisories (Counselor view)
+  Widget _buildCounselorRecentReleasedTable(List<Map<String, dynamic>> recentReleased) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Card(
+      elevation: 0,
+      color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.history_edu_rounded, color: Color(0xFF4CAF50), size: 20),
+                    SizedBox(width: 8),
+                    Text('Recent Official Advisories Released', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => context.go('$prefix/student-records'),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'View Records Directory',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50)),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFF4CAF50)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Historical ledger of completed student career guidance consultations and official result releases.',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+            if (recentReleased.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text('No advisories released yet.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                ),
+              )
+            else
+              SizedBox(
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 80),
+                    child: DataTable(
+                      horizontalMargin: 12,
+                      columnSpacing: 24,
+                      headingRowHeight: 42,
+                      dataRowMinHeight: 48,
+                      dataRowMaxHeight: 54,
+                      columns: [
+                        DataColumn(label: Text('STUDENT NAME', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                        DataColumn(label: Text('STUDENT ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                        DataColumn(label: Text('STRAND & GRADE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                        DataColumn(label: Text('RELEASED DATE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                        DataColumn(label: Text('COUNSELING ADVICE NOTE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                        DataColumn(label: Text('STATUS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple))),
+                      ],
+                      rows: recentReleased.map((item) {
+                        final name = item['studentName']?.toString() ?? 'Student';
+                        final studentId = item['studentId']?.toString() ?? '';
+                        final strand = item['strand']?.toString() ?? 'N/A';
+                        final grade = item['gradeLevel']?.toString() ?? 'Grade 12';
+                        final date = item['releasedAt']?.toString() ?? '';
+                        final notes = item['counselorNotes']?.toString() ?? 'Advice provided';
+
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 13,
+                                    backgroundColor: const Color(0xFF4CAF50).withOpacity(0.15),
+                                    child: Text(
+                                      name.isNotEmpty ? name[0].toUpperCase() : 'S',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF2E7D32)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                            DataCell(Text(studentId, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500))),
+                            DataCell(Text('$strand ($grade)', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))),
+                            DataCell(Text(date, style: TextStyle(fontSize: 11, color: AppTheme.textSecondary))),
+                            DataCell(
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 240),
+                                child: Text(
+                                  notes.isNotEmpty ? notes : 'Official Guidance Counseling Released',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.success.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: AppTheme.success.withOpacity(0.3)),
+                                ),
+                                child: const Text(
+                                  'Released',
+                                  style: TextStyle(color: AppTheme.success, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 2x2 Counselor Quick Actions Grid
+  Widget _buildCounselorQuickActionsGrid() {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E2E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.bolt_rounded, color: AppTheme.primaryPurple, size: 20),
+                SizedBox(width: 8),
+                Text('Guidance & Records Quick Actions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _quickActionButton(
+                        'Endorsed Student Queue',
+                        Icons.mark_email_unread_outlined,
+                        const Color(0xFFFEF3C7),
+                        const Color(0xFFD97706),
+                        () => context.go('$prefix/pending-approvals'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _quickActionButton(
+                        'Student Cumulative Records',
+                        Icons.badge_outlined,
+                        const Color(0xFFE0F2FE),
+                        const Color(0xFF0284C7),
+                        () => context.go('$prefix/student-records'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _quickActionButton(
+                        'Student Status Monitoring',
+                        Icons.monitor_heart_outlined,
+                        const Color(0xFFF3E8FF),
+                        AppTheme.primaryPurple,
+                        () => context.go('$prefix/monitoring'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _quickActionButton(
+                        'Released Advisories Ledger',
+                        Icons.verified_outlined,
+                        const Color(0xFFDCFCE7),
+                        const Color(0xFF16A34A),
+                        () => context.go('$prefix/student-records'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -948,7 +1801,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   ],
                 ),
                 InkWell(
-                  onTap: () => context.go('/guidance-counselor/monitoring'),
+                  onTap: () => context.go('$prefix/monitoring'),
                   child: const Row(
                     children: [
                       Text(
@@ -1204,17 +2057,17 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                         Icons.assignment_outlined,
                         const Color(0xFFF3E8FF),
                         AppTheme.primaryPurple,
-                        () => context.go('/guidance-counselor/monitoring'),
+                        () => context.go('$prefix/monitoring'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _quickActionButton(
-                        'Manage Students',
+                        isPsych ? 'Test Records Archive' : 'Manage Students',
                         Icons.people_outline_rounded,
                         const Color(0xFFE0F2FE),
                         const Color(0xFF0284C7),
-                        () => context.go('/guidance-counselor/student-records'),
+                        () => context.go('$prefix/student-records'),
                       ),
                     ),
                   ],
@@ -1224,21 +2077,21 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   children: [
                     Expanded(
                       child: _quickActionButton(
-                        'Pending Approvals',
+                        isPsych ? 'Pending Evaluations' : 'Endorsed Student Queue',
                         Icons.assignment_turned_in_outlined,
                         const Color(0xFFDCFCE7),
                         const Color(0xFF16A34A),
-                        () => context.go('/guidance-counselor/pending-approvals'),
+                        () => context.go('$prefix/pending-approvals'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _quickActionButton(
-                        'Student Feedback',
-                        Icons.rate_review_outlined,
+                        isPsych ? 'Psychometric Evaluation & Review' : 'Student Result',
+                        isPsych ? Icons.psychology_outlined : Icons.rate_review_outlined,
                         const Color(0xFFFFEDD5),
                         const Color(0xFFEA580C),
-                        () => context.go('/guidance-counselor/ai-feedback'),
+                        () => context.go('$prefix/ai-feedback'),
                       ),
                     ),
                   ],
@@ -1324,7 +2177,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryPurple),
             onPressed: () {
               Navigator.pop(ctx);
-              context.go('/guidance-counselor/student-records');
+              context.go(SessionManager().isPsychometrician ? '/psychometrician/student-records' : '/guidance-counselor/student-records');
             },
             child: const Text('View All Student Records'),
           ),
@@ -1410,7 +2263,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryPurple),
             onPressed: () {
               Navigator.pop(ctx);
-              context.go('/guidance-counselor/student-records');
+              context.go(SessionManager().isPsychometrician ? '/psychometrician/student-records' : '/guidance-counselor/student-records');
             },
             child: const Text('Review Student Records'),
           ),

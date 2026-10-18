@@ -169,11 +169,11 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>> getPendingApprovals() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/get_pending_approvals.php'),
-      headers: _headers,
-    );
+  static Future<Map<String, dynamic>> getPendingApprovals({String? role}) async {
+    final uri = (role != null && role.isNotEmpty)
+        ? Uri.parse('$baseUrl/get_pending_approvals.php?role=$role')
+        : Uri.parse('$baseUrl/get_pending_approvals.php');
+    final response = await http.get(uri, headers: _headers);
     return jsonDecode(response.body);
   }
 
@@ -192,18 +192,24 @@ class ApiService {
     String? feedbackNotes,
     int? modifiedCourseId,
     dynamic curatedRecommendations,
+    String? reviewerRole,
+    Map<String, dynamic>? generalInsights,
   }) async {
+    final Map<String, dynamic> body = {
+      'assessmentId': assessmentId,
+      'counselorId': counselorId,
+      'action': action,
+      'feedbackNotes': feedbackNotes,
+      'modifiedCourseId': modifiedCourseId,
+      'curatedRecommendations': curatedRecommendations,
+    };
+    if (reviewerRole != null) body['reviewerRole'] = reviewerRole;
+    if (generalInsights != null) body['generalInsights'] = generalInsights;
+
     final response = await http.post(
       Uri.parse('$baseUrl/submit_feedback.php'),
       headers: _headers,
-      body: jsonEncode({
-        'assessmentId': assessmentId,
-        'counselorId': counselorId,
-        'action': action,
-        'feedbackNotes': feedbackNotes,
-        'modifiedCourseId': modifiedCourseId,
-        'curatedRecommendations': curatedRecommendations,
-      }),
+      body: jsonEncode(body),
     );
     return jsonDecode(response.body);
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
+import '../../services/session_manager.dart';
 import '../../widgets/counselor_sidebar.dart';
 
 class MonitoringScreen extends StatefulWidget {
@@ -92,8 +93,11 @@ class _MonitoringScreenState extends State<MonitoringScreen> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
+    final isPsych = SessionManager().isPsychometrician;
+    final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
+
     return Scaffold(
-      drawer: CounselorSidebar(currentRoute: '/guidance-counselor/monitoring'),
+      drawer: CounselorSidebar(currentRoute: '$prefix/monitoring'),
       appBar: AppBar(
         title: const Text('Live Assessment Monitoring'),
         leading: Builder(
@@ -147,7 +151,7 @@ class _MonitoringScreenState extends State<MonitoringScreen> with WidgetsBinding
           IconButton(
             icon: const Icon(Icons.home),
             tooltip: 'Dashboard',
-            onPressed: () => context.go('/guidance-counselor/dashboard'),
+            onPressed: () => context.go('$prefix/dashboard'),
           ),
         ],
       ),

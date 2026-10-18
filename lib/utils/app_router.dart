@@ -26,8 +26,9 @@ final GoRouter appRouter = GoRouter(
 
     final bool isStudentLoggedIn = session.studentId != null && session.studentId!.isNotEmpty && session.role == 'student';
     final bool isCounselorLoggedIn = session.counselorId != null && session.role == 'guidance_counselor';
+    final bool isPsychometricianLoggedIn = session.counselorId != null && session.role == 'psychometrician';
     final bool isAdminLoggedIn = session.adminId != null && (session.role == 'admin' || session.role == 'super_admin');
-    final bool isAuthenticated = isStudentLoggedIn || isCounselorLoggedIn || isAdminLoggedIn;
+    final bool isAuthenticated = isStudentLoggedIn || isCounselorLoggedIn || isPsychometricianLoggedIn || isAdminLoggedIn;
 
     final bool isPublicRoute = path == '/login' || path == '/register' || path == '/verify-otp';
 
@@ -39,6 +40,7 @@ final GoRouter appRouter = GoRouter(
     // 2. Authenticated users trying to access login or register -> redirect to respective dashboard
     if (isAuthenticated && (path == '/login' || path == '/register')) {
       if (isStudentLoggedIn) return '/student/dashboard';
+      if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
       if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
       if (isAdminLoggedIn) return '/admin/dashboard';
     }
@@ -46,6 +48,7 @@ final GoRouter appRouter = GoRouter(
     // 3. Student Route Protections
     if (path.startsWith('/student/')) {
       if (!isStudentLoggedIn) {
+        if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
         if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
         if (isAdminLoggedIn) return '/admin/dashboard';
         return '/login';
@@ -62,19 +65,31 @@ final GoRouter appRouter = GoRouter(
       }
     }
 
-    // 4. Guidance Counselor Route Protections
-    if (path.startsWith('/guidance-counselor/')) {
-      if (!isCounselorLoggedIn) {
+    // 4. Psychometrician Route Protections
+    if (path.startsWith('/psychometrician/')) {
+      if (!isPsychometricianLoggedIn) {
         if (isStudentLoggedIn) return '/student/dashboard';
+        if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
         if (isAdminLoggedIn) return '/admin/dashboard';
         return '/login';
       }
     }
 
-    // 5. Admin Route Protections
+    // 5. Guidance Counselor Route Protections
+    if (path.startsWith('/guidance-counselor/')) {
+      if (!isCounselorLoggedIn) {
+        if (isStudentLoggedIn) return '/student/dashboard';
+        if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
+        if (isAdminLoggedIn) return '/admin/dashboard';
+        return '/login';
+      }
+    }
+
+    // 6. Admin Route Protections
     if (path.startsWith('/admin/')) {
       if (!isAdminLoggedIn) {
         if (isStudentLoggedIn) return '/student/dashboard';
+        if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
         if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
         return '/login';
       }
@@ -145,6 +160,30 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/guidance-counselor/ai-feedback',
+      builder: (context, state) {
+        final extraData = state.extra as Map<String, dynamic>?;
+        return StudentFeedbackScreen(extraData: extraData);
+      },
+    ),
+    // Psychometrician Routes
+    GoRoute(
+      path: '/psychometrician/dashboard',
+      builder: (context, state) => const CounselorDashboard(),
+    ),
+    GoRoute(
+      path: '/psychometrician/monitoring',
+      builder: (context, state) => const MonitoringScreen(),
+    ),
+    GoRoute(
+      path: '/psychometrician/pending-approvals',
+      builder: (context, state) => const PendingApprovalsScreen(),
+    ),
+    GoRoute(
+      path: '/psychometrician/student-records',
+      builder: (context, state) => const StudentRecordsScreen(),
+    ),
+    GoRoute(
+      path: '/psychometrician/ai-feedback',
       builder: (context, state) {
         final extraData = state.extra as Map<String, dynamic>?;
         return StudentFeedbackScreen(extraData: extraData);

@@ -25,13 +25,20 @@ class AppTheme {
   static Color get dividerColor    => ThemeManager.isDarkMode ? const Color(0xFF2E2E3E) : const Color(0xFFE8E0F0);
   static Color get cardBackground  => ThemeManager.isDarkMode ? const Color(0xFF1E1E2E) : const Color(0xFFFFFFFF);
 
-  // RIASEC type colors (kept distinct for data visualization)
-  static const Color riasecR = Color(0xFFE74C3C);
-  static const Color riasecI = Color(0xFF2980B9);
-  static const Color riasecA = Color(0xFF8E44AD);
-  static const Color riasecS = Color(0xFF27AE60);
-  static const Color riasecE = Color(0xFFE67E22);
-  static const Color riasecC = Color(0xFF16A085);
+  // RIASEC type colors (matching Holland Hexagon: R=Red, I=Blue, A=Green, S=Purple, E=Orange, C=Yellow)
+  static const Color riasecR = Color(0xFFE53935); // Realistic (Red / Doers)
+  static const Color riasecI = Color(0xFF1E88E5); // Investigative (Blue / Thinkers)
+  static const Color riasecA = Color(0xFF43A047); // Artistic (Green / Creators)
+  static const Color riasecS = Color(0xFF8E44AD); // Social (Purple / Helpers)
+  static const Color riasecE = Color(0xFFE67E22); // Enterprising (Orange / Persuaders)
+  static const Color riasecC = Color(0xFFEAB308); // Conventional (Bright Sunflower Yellow / Organizers)
+
+  // CDSES Subscale Colors (5 distinct hues: no duplicate greens)
+  static const Color cdsesSA = Color(0xFF8B5CF6); // Self-Appraisal (Violet / Purple)
+  static const Color cdsesOI = Color(0xFF0EA5E9); // Occupational Information (Sky Blue / Cyan)
+  static const Color cdsesGS = Color(0xFF2563EB); // Goal Selection (Royal Blue)
+  static const Color cdsesPL = Color(0xFFF59E0B); // Planning (Amber / Orange)
+  static const Color cdsesPS = Color(0xFF10B981); // Problem Solving (Emerald Green)
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -241,6 +248,18 @@ class AppTheme {
       case 'E': return riasecE;
       case 'C': return riasecC;
       default:  return primaryPurple;
+    }
+  }
+
+  // Helper: Get CDSES subscale color
+  static Color cdsesColor(String code) {
+    switch (code.toUpperCase()) {
+      case 'SA': return cdsesSA;
+      case 'OI': return cdsesOI;
+      case 'GS': return cdsesGS;
+      case 'PL': return cdsesPL;
+      case 'PS': return cdsesPS;
+      default:   return primaryPurple;
     }
   }
 

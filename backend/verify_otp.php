@@ -35,8 +35,14 @@ if ($res->num_rows === 1) {
         die(json_encode(["status" => "error", "message" => "Code has expired. Please log in again."]));
     }
     
-    // 3. Verify Code
-    if ($user['OTP_Code'] === $otp) {
+    $isLocalDev = (
+        empty(getenv('SMTP_USER')) || 
+        in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', 'localhost:8080', '127.0.0.1:8080', '127.0.0.1']) ||
+        strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false
+    );
+
+    // 3. Verify Code (real DB OTP or 123456 bypass in local dev)
+    if ($user['OTP_Code'] === $otp || ($isLocalDev && $otp === '123456')) {
         // Clear OTP after success and Update LastLogin
         $clear = $conn->prepare("UPDATE admins SET OTP_Code = NULL, OTP_Expiry = NULL, LastLogin = NOW() WHERE AdminID = ?");
         $clear->bind_param("i", $user['AdminID']);

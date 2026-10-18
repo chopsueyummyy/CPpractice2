@@ -14,6 +14,9 @@ class CounselorSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPsych = SessionManager().isPsychometrician || currentRoute.startsWith('/psychometrician');
+    final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -36,25 +39,25 @@ class CounselorSidebar extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    child: const Icon(
-                      Icons.psychology,
+                    child: Icon(
+                      isPsych ? Icons.analytics_outlined : Icons.psychology,
                       color: Colors.white,
                       size: 30,
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Guidance Counselor',
-                  style: TextStyle(
+                Text(
+                  isPsych ? 'Psychometrician' : 'Guidance Counselor',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Text(
-                  'Career Assessment Suite',
-                  style: TextStyle(
+                Text(
+                  isPsych ? 'Testing & Psychometrics Suite' : 'Career Counseling Suite',
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
                   ),
@@ -68,36 +71,36 @@ class CounselorSidebar extends StatelessWidget {
             context,
             icon: Icons.dashboard,
             title: 'Dashboard',
-            route: '/guidance-counselor/dashboard',
-            isSelected: currentRoute == '/guidance-counselor/dashboard',
+            route: '$prefix/dashboard',
+            isSelected: currentRoute == '$prefix/dashboard',
           ),
           _buildNavItem(
             context,
             icon: Icons.monitor_heart,
             title: 'Monitor Assessments',
-            route: '/guidance-counselor/monitoring',
-            isSelected: currentRoute == '/guidance-counselor/monitoring',
+            route: '$prefix/monitoring',
+            isSelected: currentRoute == '$prefix/monitoring',
           ),
           _buildNavItem(
             context,
             icon: Icons.pending_actions,
-            title: 'Pending Approvals',
-            route: '/guidance-counselor/pending-approvals',
-            isSelected: currentRoute == '/guidance-counselor/pending-approvals',
+            title: isPsych ? 'Pending Evaluations' : 'Endorsed Queue',
+            route: '$prefix/pending-approvals',
+            isSelected: currentRoute == '$prefix/pending-approvals',
           ),
           _buildNavItem(
             context,
             icon: Icons.people,
-            title: 'Student Records',
-            route: '/guidance-counselor/student-records',
-            isSelected: currentRoute == '/guidance-counselor/student-records',
+            title: isPsych ? 'Test Records Archive' : 'Student Records',
+            route: '$prefix/student-records',
+            isSelected: currentRoute == '$prefix/student-records',
           ),
           _buildNavItem(
             context,
-            icon: Icons.psychology,
-            title: 'Student Feedback',
-            route: '/guidance-counselor/ai-feedback',
-            isSelected: currentRoute == '/guidance-counselor/ai-feedback',
+            icon: isPsych ? Icons.psychology_outlined : Icons.rate_review_outlined,
+            title: isPsych ? 'Psychometric Evaluation & Review' : 'Student Result',
+            route: '$prefix/ai-feedback',
+            isSelected: currentRoute == '$prefix/ai-feedback',
           ),
           const Divider(),
           

@@ -150,7 +150,7 @@ def main():
 
             # Get sub-courses from catalog
             sub_courses = catalog.get(cluster_name, [])
-            top_sub_courses = sub_courses[:4]  # Top 4 explore courses
+            top_sub_courses = sub_courses[:3]  # Top 3 explore courses
 
             recommendations.append({
                 "rank": rank,

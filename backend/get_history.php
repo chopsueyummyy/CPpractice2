@@ -18,6 +18,7 @@ if (empty($studentId)) {
 
 $stmt = $conn->prepare("
     SELECT a.AssessmentID, a.Status, a.SubmittedAt,
+           GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds,
            ar.PrimaryType, ar.SecondaryType, ar.TertiaryType,
            ar.ResultID, ar.ClusterRecommendations
     FROM assessments a
@@ -60,7 +61,7 @@ while ($row = $result->fetch_assoc()) {
     $cdses->execute();
     $cdsesRow = $cdses->get_result()->fetch_assoc();
 
-    $cf = $conn->prepare("SELECT FeedbackNotes, ReviewedAt FROM counselor_feedback WHERE AssessmentID = ? ORDER BY ReviewedAt DESC LIMIT 1");
+    $cf = $conn->prepare("SELECT FeedbackNotes, ReviewedAt FROM counselor_feedback WHERE AssessmentID = ? AND IsStudentVisible = 1 AND ReviewerRole = 'guidance_counselor' ORDER BY ReviewedAt DESC LIMIT 1");
     $cf->bind_param("i", $row['AssessmentID']);
     $cf->execute();
     $cfRow = $cf->get_result()->fetch_assoc();
@@ -70,6 +71,7 @@ while ($row = $result->fetch_assoc()) {
         "assessmentNum"          => $count++,
         "status"                 => $row['Status'],
         "submittedAt"            => $row['SubmittedAt'],
+        "durationSeconds"        => (int)($row['DurationSeconds'] ?? 0),
         "primaryType"            => $row['PrimaryType'],
         "secondaryType"          => $row['SecondaryType'],
         "tertiaryType"           => $row['TertiaryType'],

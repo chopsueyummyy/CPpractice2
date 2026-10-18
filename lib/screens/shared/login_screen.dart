@@ -41,8 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final session = SessionManager();
       if (session.studentId != null && session.role == 'student') {
         context.go('/student/dashboard');
-      } else if (session.counselorId != null && session.role == 'guidance_counselor') {
-        context.go('/guidance-counselor/dashboard');
+      } else if (session.counselorId != null) {
+        if (session.role == 'psychometrician') {
+          context.go('/psychometrician/dashboard');
+        } else if (session.role == 'guidance_counselor') {
+          context.go('/guidance-counselor/dashboard');
+        } else if (session.role == 'super_admin' || session.role == 'admin') {
+          context.go('/admin/dashboard');
+        }
       }
     });
   }
@@ -134,10 +140,13 @@ class _LoginScreenState extends State<LoginScreen> {
             'lastName':    data['lastName'],
             'role':        data['role'],
           });
-          if (data['role'] == 'super_admin') {
-              context.go('/admin/dashboard');
+          final returnedRole = (data['role'] ?? '').toString();
+          if (returnedRole == 'super_admin' || returnedRole == 'admin') {
+            context.go('/admin/dashboard');
+          } else if (returnedRole == 'psychometrician') {
+            context.go('/psychometrician/dashboard');
           } else {
-              context.go('/guidance-counselor/dashboard');
+            context.go('/guidance-counselor/dashboard');
           }
         }
       } else if (data['status'] == 'otp_pending') {
@@ -273,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               // Subtitle keeps the default theme font
                               Text(
-                                _userType == 'admin' ? 'Secure Administration Access' : 'Course Recommendation System',
+                                _userType == 'admin' ? 'Secure Administration Access' : 'Career Assessment and Course Recommendation System',
                                 textAlign: TextAlign.center,
                                 style:
                                     Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -301,15 +310,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ButtonSegment(
                                   value: 'student',
                                   label: Text('Student'),
-                                  icon: Icon(Icons.person),
+                                  icon: Icon(Icons.school_outlined),
                                 ),
                                 ButtonSegment(
-                                  value: 'guidance_counselor',
-                                  label: Text('Counselor'),
-                                  icon: Icon(Icons.psychology),
+                                  value: 'staff',
+                                  label: Text('Staff'),
+                                  icon: Icon(Icons.badge_outlined),
                                 ),
                               ],
-                              selected: {_userType},
+                              selected: {_userType == 'student' ? 'student' : 'staff'},
                               onSelectionChanged: (Set<String> newSelection) {
                                 setState(() {
                                   _userType = newSelection.first;
@@ -456,8 +465,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
 
-                          // ── Admin Login Button (Counselor only) ───────────────
-                          if (_userType == 'guidance_counselor') ...[
+                          // ── Admin Login Button (Staff only) ───────────────────
+                          if (_userType == 'staff') ...[
                             const SizedBox(height: 16),
                             TextButton(
                               onPressed: () {
@@ -478,13 +487,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
 
-                          // ── Back to Counselor (Admin only) ────────────────────
+                          // ── Back to Staff (Admin only) ────────────────────────
                           if (_userType == 'admin') ...[
                             const SizedBox(height: 16),
                             TextButton(
                               onPressed: () {
                                 setState(() {
-                                  _userType = 'guidance_counselor';
+                                  _userType = 'staff';
                                   _primaryController.clear();
                                   _passwordController.clear();
                                   _errorMessage = '';

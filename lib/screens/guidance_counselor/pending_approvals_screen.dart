@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../services/api_service.dart';
+import '../../services/session_manager.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/counselor_sidebar.dart';
 import '../../widgets/jmcfi_badge.dart';
@@ -37,12 +38,28 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
   Future<void> _loadPending() async {
     setState(() => _isLoading = true);
     try {
-      final data = await ApiService.getPendingApprovals();
+      final isPsych = SessionManager().isPsychometrician;
+      final data = await ApiService.getPendingApprovals(role: isPsych ? 'psychometrician' : 'guidance_counselor');
       if (data['status'] == 'success') {
         setState(() => _pending = List<Map<String, dynamic>>.from(data['pending']));
       }
     } catch (_) {}
     setState(() => _isLoading = false);
+  }
+
+  String _formatDuration(dynamic rawSeconds) {
+    final seconds = int.tryParse(rawSeconds.toString()) ?? 0;
+    if (seconds <= 0) return 'N/A';
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    final s = seconds % 60;
+    if (h > 0) {
+      return '${h}h ${m}m ${s}s';
+    } else if (m > 0) {
+      return '${m}m ${s}s';
+    } else {
+      return '${s}s';
+    }
   }
 
   List<Map<String, dynamic>> get _filtered {
@@ -77,7 +94,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
 
   // Navigate to student_feedback_screen with all needed data
   void _goToFeedback(Map<String, dynamic> approval, String action) {
-    context.go('/guidance-counselor/ai-feedback', extra: {
+    final isPsych = SessionManager().isPsychometrician;
+    final route = isPsych ? '/psychometrician/ai-feedback' : '/guidance-counselor/ai-feedback';
+    context.go(route, extra: {
       'action':       action,
       'assessmentId': int.tryParse(approval['assessmentId'].toString()) ?? 0,
       'studentName':  approval['studentName'],
@@ -85,17 +104,21 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
       'primaryType':  approval['primaryType'],
       'secondaryType': approval['secondaryType'],
       'tertiaryType':  approval['tertiaryType'],
+      'psychometricianNote': approval['psychometricianNote'],
+      'generalInsights': approval['generalInsights'],
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
+    final isPsych = SessionManager().isPsychometrician;
+    final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
 
     return Scaffold(
-      drawer: CounselorSidebar(currentRoute: '/guidance-counselor/pending-approvals'),
+      drawer: CounselorSidebar(currentRoute: '$prefix/pending-approvals'),
       appBar: AppBar(
-        title: const Text('Pending Approvals'),
+        title: Text(isPsych ? 'Pending Evaluations' : 'Endorsed Student Queue'),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu),
@@ -105,7 +128,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadPending),
           IconButton(icon: const Icon(Icons.home),
-            onPressed: () => context.go('/guidance-counselor/dashboard')),
+            onPressed: () => context.go('$prefix/dashboard')),
         ],
       ),
       body: Column(
@@ -176,11 +199,11 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                           Icon(Icons.check_circle_outline, size: 64, color: AppTheme.primaryPurple),
                           const SizedBox(height: 16),
-                          Text('No Pending Approvals',
+                          Text(isPsych ? 'No Pending Evaluations' : 'No Endorsed Students Awaiting Action',
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(color: AppTheme.textSecondary)),
                           const SizedBox(height: 8),
-                          Text('All assessments have been reviewed.',
+                          Text(isPsych ? 'All assessments have been evaluated.' : 'All endorsed assessments have been reviewed and released to students.',
                             style: TextStyle(color: AppTheme.textSecondary)),
                         ]),
                       )
@@ -206,15 +229,73 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                   backgroundColor: AppTheme.warning.withOpacity(0.1),
                                   child: Icon(Icons.pending, color: AppTheme.warning),
                                 ),
-                                title: Text(a['studentName'] ?? '',
-                                  style: const TextStyle(fontWeight: FontWeight.w600)),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(a['studentName'] ?? '',
+                                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                                    ),
+                                    if (!isPsych)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE0F2FE),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: const Color(0xFF0284C7)),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.verified_rounded, size: 12, color: Color(0xFF0284C7)),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              'Endorsed',
+                                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('ID: ${a['studentId']}'),
-                                    Text('Submitted: $submittedAt',
-                                      style: TextStyle(
-                                          fontSize: 12, color: AppTheme.textSecondary)),
+                                    Text('ID: ${a['studentId']} • Strand: ${a['strand'] ?? "N/A"}'),
+                                    const SizedBox(height: 2),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      children: [
+                                        Text('Submitted: $submittedAt',
+                                          style: TextStyle(
+                                              fontSize: 12, color: AppTheme.textSecondary)),
+                                        if (a['durationSeconds'] != null && (int.tryParse(a['durationSeconds'].toString()) ?? 0) > 0)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.primaryPurple.withOpacity(0.08),
+                                              borderRadius: BorderRadius.circular(4),
+                                              border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.2)),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(Icons.timer_outlined, size: 12, color: AppTheme.primaryPurple),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  _formatDuration(a['durationSeconds']),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppTheme.primaryPurple,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ]),
                                 children: [
                                   Padding(
@@ -222,6 +303,55 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
+                                        // Psychometrician Briefing Box (for Counselor view)
+                                        if (!isPsych && a['psychometricianNote'] != null) ...[
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(14),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFFFBEB),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.6)),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Icon(Icons.lock_rounded, size: 16, color: Color(0xFFB45309)),
+                                                    const SizedBox(width: 6),
+                                                    const Text(
+                                                      'Psychometrician Diagnostic Briefing (Confidential):',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Color(0xFFB45309),
+                                                      ),
+                                                    ),
+                                                    const Spacer(),
+                                                    if (a['psychometricianNote'] is Map && a['psychometricianNote']['endorserName'] != null)
+                                                      Text(
+                                                        'By ${a['psychometricianNote']['endorserName']}',
+                                                        style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Color(0xFFB45309)),
+                                                      ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  (a['psychometricianNote'] is Map ? (a['psychometricianNote']['notes'] ?? '') : a['psychometricianNote'].toString()),
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: Color(0xFF78350F),
+                                                    fontWeight: FontWeight.w500,
+                                                    height: 1.4,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                        ],
+
                                         // Student info
                                         _infoRow('Grade Level', a['gradeLevel'] ?? '-'),
                                         _infoRow('Strand',      a['strand']     ?? '-'),
@@ -379,7 +509,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                             } else if (rank == 2) {
                                               rankColor = const Color(0xFF7C3AED);
                                             } else {
-                                              rankColor = const Color(0xFF059669);
+                                              rankColor = const Color(0xFF0284C7);
                                             }
 
                                             return Card(
@@ -651,7 +781,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                             child: OutlinedButton.icon(
                                               onPressed: () => _goToFeedback(a, 'rejected'),
                                               icon: const Icon(Icons.close),
-                                              label: const Text('Reject'),
+                                              label: Text(isPsych ? 'Decline' : 'Request Retake'),
                                               style: OutlinedButton.styleFrom(
                                                   foregroundColor: const Color(0xFFE53E3E)),
                                             ),
@@ -659,9 +789,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                           const SizedBox(width: 12),
                                           Expanded(
                                             child: ElevatedButton.icon(
-                                              onPressed: () => _goToFeedback(a, 'approved'),
-                                              icon: const Icon(Icons.check),
-                                              label: const Text('Approve'),
+                                              onPressed: () => _goToFeedback(a, isPsych ? 'endorse' : 'approved'),
+                                              icon: Icon(isPsych ? Icons.send_rounded : Icons.rate_review_rounded),
+                                              label: Text(isPsych ? 'Endorse to Counselor' : 'Review & Counsel'),
                                             ),
                                           ),
                                         ]),
@@ -806,6 +936,12 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
     final scores = (a['scores'] as Map<String, dynamic>?) ?? {};
     final rse = a['rse'] as Map<String, dynamic>?;
     final cdses = a['cdses'] as Map<String, dynamic>?;
+    final existingInsights = a['generalInsights'] as Map<String, dynamic>?;
+
+    final isCalibrated = existingInsights != null &&
+        ((existingInsights['riasec'] ?? '').toString().trim().isNotEmpty ||
+         (existingInsights['rse'] ?? '').toString().trim().isNotEmpty ||
+         (existingInsights['cdses'] ?? '').toString().trim().isNotEmpty);
 
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 4),
@@ -843,13 +979,39 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'General Assessment Insights & Summary',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple.shade900,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'General Assessment Insights & Summary',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple.shade900,
+                              ),
+                            ),
+                          ),
+                          if (isCalibrated)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFFF59E0B)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFFB45309)),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Calibrated by Psychometrician',
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -869,21 +1031,21 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
             const SizedBox(height: 14),
 
             // 1. RIASEC Interest Profile Insights
-            _buildRiasecInsightSection(primary, secondary, tertiary, scores),
+            _buildRiasecInsightSection(primary, secondary, tertiary, scores, existingInsights),
 
             const SizedBox(height: 14),
             Divider(height: 1, thickness: 0.8, color: AppTheme.dividerColor),
             const SizedBox(height: 14),
 
             // 2. Self-Esteem Profile (RSE) Insights
-            _buildRseInsightSection(rse),
+            _buildRseInsightSection(rse, existingInsights),
 
             const SizedBox(height: 14),
             Divider(height: 1, thickness: 0.8, color: AppTheme.dividerColor),
             const SizedBox(height: 14),
 
             // 3. Career Decision Self-Efficacy (CDSES) Insights
-            _buildCdsesInsightSection(cdses),
+            _buildCdsesInsightSection(cdses, existingInsights),
           ],
         ),
       ),
@@ -895,8 +1057,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
     String primary,
     String secondary,
     String tertiary,
-    Map<String, dynamic> scores,
-  ) {
+    Map<String, dynamic> scores, [
+    Map<String, dynamic>? existingInsights,
+  ]) {
     final codeList = [primary, secondary, tertiary].where((t) => t.isNotEmpty).toList();
     final hollandCode = codeList.join();
 
@@ -935,6 +1098,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
       narrative = 'RIASEC interest profile is currently being finalized.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['riasec'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['riasec'].toString() : narrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -946,6 +1112,17 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
               '1. RIASEC Interest Profile Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1005,7 +1182,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          narrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],
@@ -1013,7 +1190,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
   }
 
   // 2. RSE Section
-  Widget _buildRseInsightSection(Map<String, dynamic>? rse) {
+  Widget _buildRseInsightSection(Map<String, dynamic>? rse, [Map<String, dynamic>? existingInsights]) {
     if (rse == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1060,6 +1237,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           'The student displays a healthy, balanced self-esteem profile ($score / 30 - Normal). This indicates sound emotional stability and realistic self-regard, providing a reliable emotional foundation for post-secondary transitions.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['rse'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['rse'].toString() : rseNarrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1071,6 +1251,17 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
               '2. Self-Esteem Profile (RSE) Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1099,7 +1290,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          rseNarrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],
@@ -1107,7 +1298,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
   }
 
   // 3. CDSES Section
-  Widget _buildCdsesInsightSection(Map<String, dynamic>? cdses) {
+  Widget _buildCdsesInsightSection(Map<String, dynamic>? cdses, [Map<String, dynamic>? existingInsights]) {
     if (cdses == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1171,6 +1362,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           'The student reflects low career decision self-efficacy (${totalScore.toInt()} / 125), signaling noticeable uncertainty or anxiety about post-secondary options. Priority counseling focused on ${lowest['name']} (${(lowest['score'] as double).toStringAsFixed(2)}/5.0) is recommended to build clarity and confidence.';
     }
 
+    final hasCustom = existingInsights != null && (existingInsights['cdses'] ?? '').toString().trim().isNotEmpty;
+    final displayText = hasCustom ? existingInsights['cdses'].toString() : cdsesNarrative;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1182,6 +1376,17 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
               '3. Career Decision Self-Efficacy (CDSES) Insights',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
+            const Spacer(),
+            if (hasCustom)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: const Color(0xFFF59E0B)),
+                ),
+                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1229,7 +1434,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          cdsesNarrative,
+          displayText,
           style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
         ),
       ],

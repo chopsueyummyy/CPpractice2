@@ -82,6 +82,8 @@ $query = "
         a.AssessmentID,
         a.Status,
         a.SubmittedAt,
+        a.StartedAt,
+        GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds,
         pi.FirstName,
         pi.LastName,
         pi.MiddleName,
@@ -101,14 +103,19 @@ $query = "
         ar.C_Percentage,
         ar.ResultID,
         ar.ClusterRecommendations,
-        cf.Action AS CounselorAction,
-        cf.FeedbackNotes,
-        cf.ReviewedAt
+        ar.GeneralInsights,
+        cf_counselor.Action AS CounselorAction,
+        cf_counselor.FeedbackNotes AS CounselorNotes,
+        cf_counselor.ReviewedAt AS CounselorReviewedAt,
+        cf_pm.FeedbackNotes AS PsychometricianNotes,
+        cf_pm.AiRating AS PsychometricianAiRating,
+        cf_pm.ReviewedAt AS PsychometricianReviewedAt
     FROM assessments a
     JOIN personal_information pi ON pi.PI_ID = a.PI_ID
     JOIN students s ON s.StudentID = a.StudentID
     LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
-    LEFT JOIN counselor_feedback cf ON cf.AssessmentID = a.AssessmentID
+    LEFT JOIN counselor_feedback cf_counselor ON cf_counselor.AssessmentID = a.AssessmentID AND cf_counselor.ReviewerRole = 'guidance_counselor'
+    LEFT JOIN counselor_feedback cf_pm ON cf_pm.AssessmentID = a.AssessmentID AND cf_pm.ReviewerRole = 'psychometrician'
     LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
     LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
     WHERE $whereClause
@@ -171,6 +178,7 @@ while ($row = $result->fetch_assoc()) {
         "age"            => $row['Age'],
         "status"         => $row['Status'],
         "submittedAt"    => $row['SubmittedAt'],
+        "durationSeconds" => (int)($row['DurationSeconds'] ?? 0),
         "primaryType"    => $row['PrimaryType'],
         "secondaryType"  => $row['SecondaryType'],
         "tertiaryType"   => $row['TertiaryType'],
@@ -184,6 +192,7 @@ while ($row = $result->fetch_assoc()) {
         ],
         "recommendations" => $recommendations,
         "clusterRecommendations" => $clusterRecommendations,
+        "generalInsights" => !empty($row['GeneralInsights']) ? json_decode($row['GeneralInsights'], true) : null,
         "rse" => $rseRow ? [
             "score" => (int)$rseRow['Score'],
             "level" => $rseRow['Level']
@@ -198,8 +207,12 @@ while ($row = $result->fetch_assoc()) {
             "selfEfficacyLevel" => $cdsesRow['SelfEfficacyLevel']
         ] : null,
         "counselorAction" => $row['CounselorAction'],
-        "feedbackNotes"   => $row['FeedbackNotes'],
-        "reviewedAt"      => $row['ReviewedAt']
+        "feedbackNotes"   => $row['CounselorNotes'] ?? null,
+        "counselorNotes"  => $row['CounselorNotes'],
+        "reviewedAt"      => $row['CounselorReviewedAt'],
+        "psychometricianNotes" => $row['PsychometricianNotes'],
+        "psychometricianAiRating" => $row['PsychometricianAiRating'] !== null ? (int)$row['PsychometricianAiRating'] : null,
+        "psychometricianReviewedAt" => $row['PsychometricianReviewedAt']
     ];
 }
 

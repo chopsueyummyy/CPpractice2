@@ -357,7 +357,7 @@ if (!$recommendationsSaved) {
     }
 }
 
-$upd = $conn->prepare("UPDATE assessments SET Status = 'pending_review', SubmittedAt = NOW() WHERE AssessmentID = ?");
+$upd = $conn->prepare("UPDATE assessments SET Status = 'pending_psychometrician', SubmittedAt = NOW() WHERE AssessmentID = ?");
 $upd->bind_param("i", $assessmentId);
 $upd->execute();
 

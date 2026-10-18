@@ -16,6 +16,7 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
   
   List<dynamic> _students = [];
   List<dynamic> _counselors = [];
+  List<dynamic> _psychometricians = [];
   List<dynamic> _admins = [];
   
   String _searchQuery = '';
@@ -35,6 +36,7 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
         setState(() {
           _students = res['data']['students'] ?? [];
           _counselors = res['data']['counselors'] ?? [];
+          _psychometricians = res['data']['psychometricians'] ?? [];
           _admins = res['data']['admins'] ?? [];
         });
       }
@@ -108,9 +110,15 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
 
   List<dynamic> _getFilteredList() {
     List<dynamic> baseList;
-    if (_selectedTab == 'Students') baseList = _students;
-    else if (_selectedTab == 'Counselors') baseList = _counselors;
-    else baseList = _admins;
+    if (_selectedTab == 'Students') {
+      baseList = _students;
+    } else if (_selectedTab == 'Counselors') {
+      baseList = _counselors;
+    } else if (_selectedTab == 'Psychometricians') {
+      baseList = _psychometricians;
+    } else {
+      baseList = _admins;
+    }
 
     if (_searchQuery.isEmpty) return baseList;
     
@@ -171,6 +179,7 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
             segments: [
               const ButtonSegment(value: 'Students', label: Text('Students'), icon: Icon(Icons.school_outlined)),
               const ButtonSegment(value: 'Counselors', label: Text('Counselors'), icon: Icon(Icons.psychology_outlined)),
+              const ButtonSegment(value: 'Psychometricians', label: Text('Psychometricians'), icon: Icon(Icons.analytics_outlined)),
               if (_session.roleId == 4)
                 const ButtonSegment(value: 'Admins', label: Text('Admins'), icon: Icon(Icons.admin_panel_settings_outlined)),
             ],
@@ -216,7 +225,11 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
       itemBuilder: (context, index) {
         final user = users[index];
         final bool isBlocked = (user['isBlocked'].toString() == '1');
-        final String targetType = _selectedTab == 'Students' ? 'student' : (_selectedTab == 'Counselors' ? 'counselor' : 'admin');
+        final String targetType = _selectedTab == 'Students' 
+            ? 'student' 
+            : (_selectedTab == 'Counselors' 
+                ? 'counselor' 
+                : (_selectedTab == 'Psychometricians' ? 'psychometrician' : 'admin'));
         
         final String firstName = user['firstName'] ?? '';
         final String lastName = user['lastName'] ?? '';
@@ -234,7 +247,9 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
             leading: CircleAvatar(
               backgroundColor: isBlocked ? AppTheme.error.withOpacity(0.1) : AppTheme.primaryPurple.withOpacity(0.1),
               child: Icon(
-                _selectedTab == 'Students' ? Icons.person : Icons.verified_user, 
+                _selectedTab == 'Students' 
+                    ? Icons.person 
+                    : (_selectedTab == 'Psychometricians' ? Icons.analytics_outlined : Icons.verified_user), 
                 color: isBlocked ? AppTheme.error : AppTheme.primaryPurple
               ),
             ),

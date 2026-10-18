@@ -32,7 +32,7 @@ CREATE TABLE `assessments` (
   `AssessmentID` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `StudentID` bigint(20) NOT NULL,
   `PI_ID` bigint(20) NOT NULL,
-  `Status` enum('in_progress','pending_review','approved','declined') NOT NULL DEFAULT 'in_progress',
+  `Status` enum('in_progress','pending_review','pending_psychometrician','pending_counselor','approved','declined') NOT NULL DEFAULT 'in_progress',
   `StartedAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `SubmittedAt` timestamp NULL DEFAULT NULL,
   `AgreedToDisclaimer` tinyint(1) NOT NULL DEFAULT 1,
@@ -81,7 +81,8 @@ CREATE TABLE `assessment_results` (
   `SecondaryType` char(1) DEFAULT NULL,
   `TertiaryType` char(1) DEFAULT NULL,
   `CalculatedAt` timestamp NOT NULL DEFAULT current_timestamp(),
-  `ClusterRecommendations` text DEFAULT NULL
+  `ClusterRecommendations` text DEFAULT NULL,
+  `GeneralInsights` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -122,6 +123,9 @@ CREATE TABLE `counselor_feedback` (
   `ModifiedCourseID` bigint(20) DEFAULT NULL,
   `FeedbackNotes` text DEFAULT NULL,
   `ReviewedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ReviewerRole` enum('psychometrician','guidance_counselor') NOT NULL DEFAULT 'guidance_counselor',
+  `IsStudentVisible` tinyint(1) NOT NULL DEFAULT 0,
+  `AiRating` tinyint(1) DEFAULT NULL,
   KEY `AssessmentID` (`AssessmentID`),
   KEY `CounselorID` (`CounselorID`),
   KEY `ModifiedCourseID` (`ModifiedCourseID`)
@@ -325,8 +329,11 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`RoleID`, `RoleName`) VALUES
+(1, 'student'),
 (2, 'guidance_counselor'),
-(1, 'student');
+(3, 'admin'),
+(4, 'super_admin'),
+(5, 'psychometrician');
 
 -- --------------------------------------------------------
 

@@ -33,6 +33,14 @@ addColumnIfNotExists($conn, 'admins', 'CreatedAt', 'timestamp NOT NULL DEFAULT C
 addColumnIfNotExists($conn, 'assessment_results', 'ClusterRecommendations', 'text DEFAULT NULL', $migrationLogs);
 addColumnIfNotExists($conn, 'riasec_recommendations', 'ShapWeights', 'text DEFAULT NULL', $migrationLogs);
 
+// Psychometrician & Counselor Separation Schema Migrations
+@$conn->query("INSERT INTO `roles` (`RoleID`, `RoleName`) VALUES (5, 'psychometrician') ON DUPLICATE KEY UPDATE `RoleName` = 'psychometrician'");
+@$conn->query("ALTER TABLE `assessments` MODIFY COLUMN `Status` ENUM('in_progress', 'pending_review', 'pending_psychometrician', 'pending_counselor', 'approved', 'declined') NOT NULL DEFAULT 'in_progress'");
+addColumnIfNotExists($conn, 'counselor_feedback', 'ReviewerRole', "ENUM('psychometrician', 'guidance_counselor') NOT NULL DEFAULT 'guidance_counselor'", $migrationLogs);
+addColumnIfNotExists($conn, 'counselor_feedback', 'IsStudentVisible', "tinyint(1) NOT NULL DEFAULT 0", $migrationLogs);
+addColumnIfNotExists($conn, 'counselor_feedback', 'AiRating', "tinyint(1) NULL DEFAULT NULL", $migrationLogs);
+@$conn->query("INSERT INTO `counselors` (`RoleID`, `FirstName`, `LastName`, `Email`, `Password`, `IsBlocked`) VALUES (5, 'Patricia', 'Reyes', 'psychometrician@school.com', '\$2y\$10\$CKmjC.lXJHuDLjhrzkhmTuy7t7vyAcQR6bQ78nzlxLze5vNohUdIm', 0) ON DUPLICATE KEY UPDATE `RoleID` = 5, `FirstName` = 'Patricia', `LastName` = 'Reyes'");
+
 
 $filesToImport = [
     __DIR__ . '/../assets/riasec_db.sql',

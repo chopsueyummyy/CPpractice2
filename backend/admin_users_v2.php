@@ -43,6 +43,7 @@ if ($method === 'GET') {
     $response = [
         "admins" => [],
         "counselors" => [],
+        "psychometricians" => [],
         "students" => []
     ];
     
@@ -54,9 +55,13 @@ if ($method === 'GET') {
         }
     }
     
-    $res = $conn->query("SELECT CounselorID as id, FirstName as firstName, LastName as lastName, Email as email, IsBlocked as isBlocked FROM counselors");
+    $res = $conn->query("SELECT CounselorID as id, RoleID as roleId, FirstName as firstName, LastName as lastName, Email as email, IsBlocked as isBlocked FROM counselors");
     while ($row = $res->fetch_assoc()) {
-        $response['counselors'][] = $row;
+        if ((int)$row['roleId'] === 5) {
+            $response['psychometricians'][] = $row;
+        } else {
+            $response['counselors'][] = $row;
+        }
     }
     
     $res = $conn->query("SELECT StudentID as id, FirstName as firstName, LastName as lastName, Email as email, IsBlocked as isBlocked FROM students");
@@ -80,7 +85,7 @@ if ($method === 'POST') {
     }
 
     if ($action === 'create') {
-        $targetType = $data['targetType']; // admin, counselor, student
+        $targetType = $data['targetType']; // admin, counselor, psychometrician, student
         $email = $data['email'];
         $password = password_hash($data['password'], PASSWORD_DEFAULT);
         $fn = $data['firstName'];
@@ -93,6 +98,10 @@ if ($method === 'POST') {
             
         } elseif ($targetType === 'counselor') {
             $stmt = $conn->prepare("INSERT INTO counselors (RoleID, FirstName, LastName, Email, Password) VALUES (2, ?, ?, ?, ?)");
+            $stmt->bind_param("ssss", $fn, $ln, $email, $password);
+            
+        } elseif ($targetType === 'psychometrician') {
+            $stmt = $conn->prepare("INSERT INTO counselors (RoleID, FirstName, LastName, Email, Password) VALUES (5, ?, ?, ?, ?)");
             $stmt->bind_param("ssss", $fn, $ln, $email, $password);
             
         } elseif ($targetType === 'student') {

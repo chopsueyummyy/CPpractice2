@@ -15,7 +15,9 @@ $studentId    = $_GET['studentId'] ?? '';
 
 if (!empty($assessmentId)) {
     $stmt = $conn->prepare("
-        SELECT ar.*, a.Status, a.AssessmentID as AID, pi.Strand FROM assessment_results ar
+        SELECT ar.*, a.Status, a.AssessmentID as AID, pi.Strand, a.SubmittedAt,
+               GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds
+        FROM assessment_results ar
         JOIN assessments a ON a.AssessmentID = ar.AssessmentID
         JOIN personal_information pi ON pi.PI_ID = a.PI_ID
         WHERE ar.AssessmentID = ?
@@ -38,17 +40,20 @@ if (!empty($assessmentId)) {
         exit();
     }
 
-    if ($aRow['Status'] === 'pending_review') {
+    if (in_array($aRow['Status'], ['pending_review', 'pending_psychometrician', 'pending_counselor'])) {
         echo json_encode([
             "status"           => "success",
             "assessmentStatus" => "pending_review",
+            "rawStatus"        => $aRow['Status'],
             "assessmentId"     => (int)$aRow['AssessmentID']
         ]);
         exit();
     }
 
     $stmt = $conn->prepare("
-        SELECT ar.*, a.Status, pi.Strand FROM assessment_results ar
+        SELECT ar.*, a.Status, pi.Strand, a.SubmittedAt,
+               GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds
+        FROM assessment_results ar
         JOIN assessments a ON a.AssessmentID = ar.AssessmentID
         JOIN personal_information pi ON pi.PI_ID = a.PI_ID
         WHERE ar.AssessmentID = ?
@@ -66,10 +71,11 @@ if (!$result) {
     exit();
 }
 
-if ($result['Status'] === 'pending_review') {
+if (in_array($result['Status'], ['pending_review', 'pending_psychometrician', 'pending_counselor'])) {
     echo json_encode([
         "status"           => "success",
         "assessmentStatus" => "pending_review",
+        "rawStatus"        => $result['Status'],
         "assessmentId"     => (int)$result['AssessmentID']
     ]);
     exit();
@@ -105,8 +111,13 @@ $cdses->execute();
 $cdsesRow = $cdses->get_result()->fetch_assoc();
 $cdses->close();
 
-// Fetch counselor feedback/notes for this assessment
-$cf = $conn->prepare("SELECT FeedbackNotes FROM counselor_feedback WHERE AssessmentID = ? ORDER BY ReviewedAt DESC LIMIT 1");
+// Fetch counselor feedback/notes for this assessment (Strict Privacy: Only student-visible notes from guidance counselor)
+$cf = $conn->prepare("
+    SELECT FeedbackNotes 
+    FROM counselor_feedback 
+    WHERE AssessmentID = ? AND IsStudentVisible = 1 AND ReviewerRole = 'guidance_counselor' 
+    ORDER BY ReviewedAt DESC LIMIT 1
+");
 $cf->bind_param("i", $result['AssessmentID']);
 $cf->execute();
 $cfRow = $cf->get_result()->fetch_assoc();
@@ -120,6 +131,8 @@ echo json_encode([
     "status"           => "success",
     "assessmentStatus" => $result['Status'],
     "assessmentId"     => (int)$result['AssessmentID'],
+    "submittedAt"      => $result['SubmittedAt'] ?? null,
+    "durationSeconds"  => (int)($result['DurationSeconds'] ?? 0),
     "strand"           => $result['Strand'] ?? null,
     "scores" => [
         "R" => ["score" => $result['R_Score'], "percentage" => $result['R_Percentage']],
@@ -134,6 +147,7 @@ echo json_encode([
     "tertiaryType"    => $result['TertiaryType'],
     "recommendations" => $recommendations,
     "clusterRecommendations" => $xgboostRecs,
+    "generalInsights" => !empty($result['GeneralInsights']) ? json_decode($result['GeneralInsights'], true) : null,
     "rse" => $rseRow ? [
         "score" => (int)$rseRow['Score'],
         "level" => $rseRow['Level']
