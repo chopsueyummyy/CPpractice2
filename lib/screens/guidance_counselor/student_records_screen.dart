@@ -854,13 +854,23 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   }
 
   Widget _buildKpiSection() {
+    final isPsych = _session.isPsychometrician;
     final isTotalActive = _status == 'all';
     final isPendingActive = _status == 'pending_review' || _status == 'pending_psychometrician' || _status == 'pending_counselor';
     final isApprovedActive = _status == 'approved';
     final isDeclinedActive = _status == 'declined' || _status == 'rejected';
 
     final totalCount = _totalCohort > 0 ? _totalCohort : _records.length;
-    final pendingCount = _totalCohort > 0 ? _totalPending : _records.where((r) => r['status'] == 'pending_review' || r['status'] == 'pending_psychometrician' || r['status'] == 'pending_counselor').length;
+    final pendingCount = _totalCohort > 0
+        ? _totalPending
+        : _records.where((r) {
+            final s = (r['status'] ?? '').toString();
+            if (isPsych) {
+              return s == 'pending_psychometrician' || s == 'pending_review';
+            } else {
+              return s == 'pending_counselor';
+            }
+          }).length;
     final approvedCount = _totalCohort > 0 ? _totalApproved : _records.where((r) => r['status'] == 'approved').length;
     final declinedCount = _totalCohort > 0 ? _totalDeclined : _records.where((r) => r['status'] == 'declined' || r['status'] == 'rejected').length;
 
