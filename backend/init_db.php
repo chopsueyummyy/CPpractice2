@@ -31,6 +31,7 @@ function addColumnIfNotExists($conn, $table, $column, $definition, &$logs) {
 addColumnIfNotExists($conn, 'assessments', 'AgreedToDisclaimer', 'tinyint(1) NOT NULL DEFAULT 1', $migrationLogs);
 addColumnIfNotExists($conn, 'admins', 'CreatedAt', 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP', $migrationLogs);
 addColumnIfNotExists($conn, 'assessment_results', 'ClusterRecommendations', 'text DEFAULT NULL', $migrationLogs);
+addColumnIfNotExists($conn, 'assessment_results', 'GeneralInsights', 'text DEFAULT NULL', $migrationLogs);
 addColumnIfNotExists($conn, 'riasec_recommendations', 'ShapWeights', 'text DEFAULT NULL', $migrationLogs);
 
 // Psychometrician & Counselor Separation Schema Migrations

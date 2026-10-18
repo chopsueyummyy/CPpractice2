@@ -77,59 +77,67 @@ if (!empty($search)) {
 
 $whereClause = implode(" AND ", $where);
 
-$query = "
-    SELECT
-        a.AssessmentID,
-        a.Status,
-        a.SubmittedAt,
-        a.StartedAt,
-        GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds,
-        pi.FirstName,
-        pi.LastName,
-        pi.MiddleName,
-        pi.Strand,
-        pi.GradeLevel,
-        pi.Gender,
-        pi.Age,
-        s.StudentID,
-        ar.PrimaryType,
-        ar.SecondaryType,
-        ar.TertiaryType,
-        ar.R_Percentage,
-        ar.I_Percentage,
-        ar.A_Percentage,
-        ar.S_Percentage,
-        ar.E_Percentage,
-        ar.C_Percentage,
-        ar.ResultID,
-        ar.ClusterRecommendations,
-        ar.GeneralInsights,
-        cf_counselor.Action AS CounselorAction,
-        cf_counselor.FeedbackNotes AS CounselorNotes,
-        cf_counselor.ReviewedAt AS CounselorReviewedAt,
-        cf_pm.FeedbackNotes AS PsychometricianNotes,
-        cf_pm.AiRating AS PsychometricianAiRating,
-        cf_pm.ReviewedAt AS PsychometricianReviewedAt
-    FROM assessments a
-    JOIN personal_information pi ON pi.PI_ID = a.PI_ID
-    JOIN students s ON s.StudentID = a.StudentID
-    LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
-    LEFT JOIN counselor_feedback cf_counselor ON cf_counselor.AssessmentID = a.AssessmentID AND cf_counselor.ReviewerRole = 'guidance_counselor'
-    LEFT JOIN counselor_feedback cf_pm ON cf_pm.AssessmentID = a.AssessmentID AND cf_pm.ReviewerRole = 'psychometrician'
-    LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
-    LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
-    WHERE $whereClause
-    ORDER BY a.SubmittedAt DESC
-";
-
-if (!empty($params)) {
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
-} else {
-    $result = $conn->query($query);
+$hasGeneralInsights = false;
+$colCheck = $conn->query("SHOW COLUMNS FROM `assessment_results` LIKE 'GeneralInsights'");
+if ($colCheck && $colCheck->num_rows > 0) {
+    $hasGeneralInsights = true;
 }
+$giSelect = $hasGeneralInsights ? "ar.GeneralInsights" : "NULL AS GeneralInsights";
+
+try {
+    $query = "
+        SELECT
+            a.AssessmentID,
+            a.Status,
+            a.SubmittedAt,
+            a.StartedAt,
+            GREATEST(0, IFNULL(TIMESTAMPDIFF(SECOND, a.StartedAt, a.SubmittedAt), 0)) AS DurationSeconds,
+            pi.FirstName,
+            pi.LastName,
+            pi.MiddleName,
+            pi.Strand,
+            pi.GradeLevel,
+            pi.Gender,
+            pi.Age,
+            s.StudentID,
+            ar.PrimaryType,
+            ar.SecondaryType,
+            ar.TertiaryType,
+            ar.R_Percentage,
+            ar.I_Percentage,
+            ar.A_Percentage,
+            ar.S_Percentage,
+            ar.E_Percentage,
+            ar.C_Percentage,
+            ar.ResultID,
+            ar.ClusterRecommendations,
+            $giSelect,
+            cf_counselor.Action AS CounselorAction,
+            cf_counselor.FeedbackNotes AS CounselorNotes,
+            cf_counselor.ReviewedAt AS CounselorReviewedAt,
+            cf_pm.FeedbackNotes AS PsychometricianNotes,
+            cf_pm.AiRating AS PsychometricianAiRating,
+            cf_pm.ReviewedAt AS PsychometricianReviewedAt
+        FROM assessments a
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+        JOIN students s ON s.StudentID = a.StudentID
+        LEFT JOIN assessment_results ar ON ar.AssessmentID = a.AssessmentID
+        LEFT JOIN counselor_feedback cf_counselor ON cf_counselor.AssessmentID = a.AssessmentID AND cf_counselor.ReviewerRole = 'guidance_counselor'
+        LEFT JOIN counselor_feedback cf_pm ON cf_pm.AssessmentID = a.AssessmentID AND cf_pm.ReviewerRole = 'psychometrician'
+        LEFT JOIN rse_results rse ON rse.AssessmentID = a.AssessmentID
+        LEFT JOIN cdses_results cdses ON cdses.AssessmentID = a.AssessmentID
+        WHERE $whereClause
+        ORDER BY a.SubmittedAt DESC
+    ";
+
+    if (!empty($params)) {
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    } else {
+        $result = $conn->query($query);
+    }
 
 $records = [];
 while ($row = $result->fetch_assoc()) {
@@ -216,11 +224,19 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-echo json_encode([
-    "status"  => "success",
-    "records" => $records,
-    "total"   => count($records)
-]);
+    echo json_encode([
+        "status"  => "success",
+        "records" => $records,
+        "total"   => count($records)
+    ]);
+} catch (Throwable $e) {
+    echo json_encode([
+        "status"  => "error",
+        "message" => $e->getMessage(),
+        "records" => [],
+        "total"   => 0
+    ]);
+}
 
 $conn->close();
 ?>
