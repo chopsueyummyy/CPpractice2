@@ -19,6 +19,7 @@ $cdsesLevel   = $_GET['cdsesLevel']   ?? 'all';
 $dateFrom     = $_GET['dateFrom']     ?? '';
 $dateTo       = $_GET['dateTo']       ?? '';
 $search       = $_GET['search']       ?? '';
+$role         = strtolower($_GET['role'] ?? 'all');
 
 $where = ["1=1"];
 $params = [];
@@ -27,6 +28,14 @@ $types  = "";
 if ($status !== 'all') {
     if ($status === 'declined' || $status === 'rejected') {
         $where[] = "(a.Status = 'declined' OR a.Status = 'rejected')";
+    } elseif ($status === 'pending_review' || $status === 'pending') {
+        if ($role === 'guidance_counselor' || $role === 'counselor') {
+            $where[] = "a.Status = 'pending_counselor'";
+        } elseif ($role === 'psychometrician') {
+            $where[] = "a.Status IN ('pending_psychometrician', 'pending_review')";
+        } else {
+            $where[] = "a.Status IN ('pending_review', 'pending_psychometrician', 'pending_counselor')";
+        }
     } else {
         $where[] = "a.Status = ?";
         $params[] = $status;

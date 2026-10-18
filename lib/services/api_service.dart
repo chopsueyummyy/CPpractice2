@@ -224,6 +224,7 @@ class ApiService {
     String dateFrom = '',
     String dateTo = '',
     String search = '',
+    String role = 'all',
   }) async {
     final uri = Uri.parse('$baseUrl/get_student_records.php').replace(
       queryParameters: {
@@ -236,6 +237,7 @@ class ApiService {
         'dateFrom': dateFrom,
         'dateTo': dateTo,
         'search': search,
+        'role': role,
       },
     );
     final response = await http.get(uri, headers: _headers);

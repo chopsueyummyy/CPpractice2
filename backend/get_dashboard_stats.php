@@ -149,12 +149,18 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         ];
     }
 
-    // 6. Cumulative Grade Level distribution
+    // 6. Cumulative Grade Level distribution (deduplicated per registered student)
     $gradeStats = [];
     $res = $conn->query("
-        SELECT IFNULL(pi.GradeLevel, 'Unassigned') as GradeLevel, COUNT(*) as count 
-        FROM personal_information pi
-        GROUP BY pi.GradeLevel
+        SELECT IFNULL(pi.GradeLevel, 'Grade 12') as GradeLevel, COUNT(DISTINCT s.StudentID) as count 
+        FROM students s
+        LEFT JOIN (
+            SELECT StudentID, MAX(PI_ID) as max_pi
+            FROM personal_information
+            GROUP BY StudentID
+        ) latest ON latest.StudentID = s.StudentID
+        LEFT JOIN personal_information pi ON pi.PI_ID = latest.max_pi
+        GROUP BY GradeLevel
         ORDER BY count DESC
     ");
     while ($row = $res->fetch_assoc()) {
@@ -166,12 +172,18 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         }
     }
 
-    // 7. Cumulative Gender distribution
+    // 7. Cumulative Gender distribution (deduplicated per registered student)
     $genderStats = [];
     $res = $conn->query("
-        SELECT IFNULL(pi.Gender, 'Not Specified') as Gender, COUNT(*) as count 
-        FROM personal_information pi
-        GROUP BY pi.Gender
+        SELECT IFNULL(pi.Gender, 'Not Specified') as Gender, COUNT(DISTINCT s.StudentID) as count 
+        FROM students s
+        LEFT JOIN (
+            SELECT StudentID, MAX(PI_ID) as max_pi
+            FROM personal_information
+            GROUP BY StudentID
+        ) latest ON latest.StudentID = s.StudentID
+        LEFT JOIN personal_information pi ON pi.PI_ID = latest.max_pi
+        GROUP BY Gender
         ORDER BY count DESC
     ");
     while ($row = $res->fetch_assoc()) {

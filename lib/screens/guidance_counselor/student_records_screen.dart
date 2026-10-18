@@ -60,12 +60,15 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
 
   final _searchController = TextEditingController();
 
-  final _statusOptions = {
-    'all': 'All Statuses',
-    'approved': 'Approved',
-    'pending_review': 'Pending Review',
-    'declined': 'Declined / Retake',
-  };
+  Map<String, String> get _statusOptions {
+    final isPsych = SessionManager().isPsychometrician;
+    return {
+      'all': 'All Statuses',
+      'approved': 'Approved',
+      'pending_review': isPsych ? 'Pending Evaluation' : 'Pending Endorsement',
+      'declined': 'Declined / Retake',
+    };
+  }
 
   final _gradeLevelOptions = {
     'all': 'All Grade Levels',
@@ -157,6 +160,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       setState(() => _isLoading = true);
     }
     try {
+      final isPsych = SessionManager().isPsychometrician;
+      final role = isPsych ? 'psychometrician' : 'guidance_counselor';
+
       final data = await ApiService.getStudentRecords(
         status: _status,
         gradeLevel: _gradeLevel,
@@ -167,6 +173,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         dateFrom: _dateFrom,
         dateTo: _dateTo,
         search: _search,
+        role: role,
       );
       if (data['status'] == 'success' && mounted) {
         setState(() {
@@ -177,7 +184,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
 
           final allPending = _records.where((r) {
             final s = (r['status'] ?? '').toString();
-            return s == 'pending_review' || s == 'pending_psychometrician' || s == 'pending_counselor';
+            if (isPsych) {
+              return s == 'pending_psychometrician' || s == 'pending_review';
+            } else {
+              return s == 'pending_counselor';
+            }
           }).length;
           final allApproved = _records.where((r) => r['status'] == 'approved').length;
           final allDeclined = _records.where((r) {
@@ -447,7 +458,14 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     final isPsych = SessionManager().isPsychometrician;
     final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
     final approvedCount = _records.where((r) => r['status'] == 'approved').length;
-    final pendingCount = _records.where((r) => r['status'] == 'pending_review' || r['status'] == 'pending_psychometrician' || r['status'] == 'pending_counselor').length;
+    final pendingCount = _records.where((r) {
+      final s = (r['status'] ?? '').toString();
+      if (isPsych) {
+        return s == 'pending_psychometrician' || s == 'pending_review';
+      } else {
+        return s == 'pending_counselor';
+      }
+    }).length;
 
     return Scaffold(
       drawer: CounselorSidebar(currentRoute: '$prefix/student-records'),
@@ -867,7 +885,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           ),
           _buildKpiCard(
             icon: Icons.hourglass_top_rounded,
-            title: 'Pending Review',
+            title: isPsych ? 'Pending Evaluation' : 'Pending Endorsement',
             count: pendingCount,
             accentColor: const Color(0xFFD97706),
             bgColor: const Color(0xFFFEF3C7),
