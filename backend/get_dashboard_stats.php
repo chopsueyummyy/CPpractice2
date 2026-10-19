@@ -149,18 +149,21 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         ];
     }
 
-    // 6. Cumulative Grade Level distribution (deduplicated per registered student)
+    // 6. Cumulative Grade Level distribution (deduplicated per student with assessment records)
     $gradeStats = [];
     $res = $conn->query("
-        SELECT IFNULL(pi.GradeLevel, 'Grade 12') as GradeLevel, COUNT(DISTINCT s.StudentID) as count 
-        FROM students s
-        LEFT JOIN (
-            SELECT StudentID, MAX(PI_ID) as max_pi
-            FROM personal_information
-            GROUP BY StudentID
-        ) latest ON latest.StudentID = s.StudentID
-        LEFT JOIN personal_information pi ON pi.PI_ID = latest.max_pi
-        GROUP BY GradeLevel
+        SELECT 
+            COALESCE(NULLIF(TRIM(pi.GradeLevel), ''), 'Unassigned') as GradeLevel,
+            COUNT(*) as count
+        FROM (
+            SELECT a.StudentID, MAX(a.AssessmentID) as latest_assessment_id
+            FROM assessments a
+            WHERE a.Status != 'in_progress'
+            GROUP BY a.StudentID
+        ) latest
+        JOIN assessments a ON a.AssessmentID = latest.latest_assessment_id
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+        GROUP BY COALESCE(NULLIF(TRIM(pi.GradeLevel), ''), 'Unassigned')
         ORDER BY count DESC
     ");
     while ($row = $res->fetch_assoc()) {
@@ -172,18 +175,21 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         }
     }
 
-    // 7. Cumulative Gender distribution (deduplicated per registered student)
+    // 7. Cumulative Gender distribution (deduplicated per student with assessment records)
     $genderStats = [];
     $res = $conn->query("
-        SELECT IFNULL(pi.Gender, 'Not Specified') as Gender, COUNT(DISTINCT s.StudentID) as count 
-        FROM students s
-        LEFT JOIN (
-            SELECT StudentID, MAX(PI_ID) as max_pi
-            FROM personal_information
-            GROUP BY StudentID
-        ) latest ON latest.StudentID = s.StudentID
-        LEFT JOIN personal_information pi ON pi.PI_ID = latest.max_pi
-        GROUP BY Gender
+        SELECT 
+            COALESCE(NULLIF(TRIM(pi.Gender), ''), 'Not Specified') as Gender,
+            COUNT(*) as count
+        FROM (
+            SELECT a.StudentID, MAX(a.AssessmentID) as latest_assessment_id
+            FROM assessments a
+            WHERE a.Status != 'in_progress'
+            GROUP BY a.StudentID
+        ) latest
+        JOIN assessments a ON a.AssessmentID = latest.latest_assessment_id
+        JOIN personal_information pi ON pi.PI_ID = a.PI_ID
+        GROUP BY COALESCE(NULLIF(TRIM(pi.Gender), ''), 'Not Specified')
         ORDER BY count DESC
     ");
     while ($row = $res->fetch_assoc()) {

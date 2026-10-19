@@ -573,8 +573,32 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
   // Student Cohort Profile (Grade Level & Gender)
   Widget _buildCounselorCohortCard(List<Map<String, dynamic>> gradeStats, List<Map<String, dynamic>> genderStats) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final totalGrade = gradeStats.fold(0, (sum, item) => sum + (item['count'] as int));
-    final totalGender = genderStats.fold(0, (sum, item) => sum + (item['count'] as int));
+
+    // Defensive client-side deduplication / merging by key in case of identical entries
+    final Map<String, int> mergedGrades = {};
+    for (final item in gradeStats) {
+      final key = item['gradeLevel']?.toString().trim() ?? 'Grade 12';
+      final count = (item['count'] is num) ? (item['count'] as num).toInt() : 0;
+      mergedGrades[key] = (mergedGrades[key] ?? 0) + count;
+    }
+    final normalizedGradeStats = mergedGrades.entries
+        .map((e) => {'gradeLevel': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
+    final Map<String, int> mergedGenders = {};
+    for (final item in genderStats) {
+      final key = item['gender']?.toString().trim() ?? 'Not Specified';
+      final count = (item['count'] is num) ? (item['count'] as num).toInt() : 0;
+      mergedGenders[key] = (mergedGenders[key] ?? 0) + count;
+    }
+    final normalizedGenderStats = mergedGenders.entries
+        .map((e) => {'gender': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
+    final totalGrade = normalizedGradeStats.fold(0, (sum, item) => sum + (item['count'] as int));
+    final totalGender = normalizedGenderStats.fold(0, (sum, item) => sum + (item['count'] as int));
 
     return Card(
       elevation: 0,
@@ -633,11 +657,11 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Color(0xFF2196F3)),
             ),
             const SizedBox(height: 10),
-            if (gradeStats.isEmpty)
+            if (normalizedGradeStats.isEmpty)
               Text('No grade level data', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))
             else
               Row(
-                children: gradeStats.map((item) {
+                children: normalizedGradeStats.map((item) {
                   final grade = item['gradeLevel']?.toString() ?? 'Grade 12';
                   final count = item['count'] as int? ?? 0;
                   final pct = totalGrade > 0 ? (count / totalGrade * 100).toStringAsFixed(1) : '0';
@@ -673,11 +697,11 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: Color(0xFF9C27B0)),
             ),
             const SizedBox(height: 10),
-            if (genderStats.isEmpty)
+            if (normalizedGenderStats.isEmpty)
               Text('No gender data', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12))
             else
               Row(
-                children: genderStats.map((item) {
+                children: normalizedGenderStats.map((item) {
                   final gender = item['gender']?.toString() ?? 'Other';
                   final count = item['count'] as int? ?? 0;
                   final pct = totalGender > 0 ? (count / totalGender * 100).toStringAsFixed(1) : '0';
