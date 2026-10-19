@@ -364,7 +364,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     switch (status) {
       case 'approved':               return 'Approved';
       case 'pending_psychometrician': return 'Pending Psychometrician';
-      case 'pending_counselor':      return 'Pending Counselor';
+      case 'pending_counselor':      return 'Pending Counselor/Facilitator';
       case 'pending_review':         return 'Pending Review';
       case 'declined':
       case 'rejected':               return 'Declined / Retake';
@@ -389,7 +389,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         icon = Icons.psychology_outlined;
         break;
       case 'pending_counselor':
-        label = 'Pending Counselor';
+        label = 'Pending Counselor/Facilitator';
         color = const Color(0xFF0284C7);
         bgColor = const Color(0xFFE0F2FE);
         icon = Icons.rate_review_outlined;
@@ -2378,7 +2378,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
               const Icon(Icons.rate_review_outlined, size: 18, color: AppTheme.primaryPurple),
               const SizedBox(width: 6),
               Text(
-                'Counselor\'s Note',
+                'Counselor/Facilitator\'s Note',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
               ),
             ],
@@ -2454,7 +2454,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           final isWide = constraints.maxWidth > 860;
           final donut1 = _buildDonutCard(
             title: 'Assessment Approval Status',
-            subtitle: 'Counselor decision breakdown across cohort',
+            subtitle: 'Counselor/Facilitator decision breakdown across cohort',
             centerPrimary: '$approvalPct%',
             centerSecondary: 'Approved',
             segments: statusSegments,
@@ -3544,7 +3544,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     String rseNarrative;
     if (isLow) {
       rseNarrative =
-          'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
+          'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor/facilitator is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
     } else if (isHigh) {
       rseNarrative =
           'The student reflects high self-esteem ($score / 30), representing strong self-assurance, personal optimism, and emotional resilience. They are well-equipped to manage academic setbacks and actively advocate for their goals.';

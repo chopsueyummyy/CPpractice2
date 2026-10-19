@@ -156,7 +156,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             Icon(Icons.hourglass_top, size: 80, color: AppTheme.warning),
             const SizedBox(height: 24),
             Text(
-              'Awaiting Counselor Review',
+              'Awaiting Counselor/Facilitator Review',
               style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -169,7 +169,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 border: Border.all(color: AppTheme.warning.withOpacity(0.3)),
               ),
               child: Text(
-                'Your assessment has been submitted and is currently being reviewed by your guidance counselor. You will be able to view your results once they have been approved or rejected.',
+                'Your assessment has been submitted and is currently being reviewed by your guidance counselor/facilitator. You will be able to view your results once they have been approved or rejected.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppTheme.warning, height: 1.5, fontSize: 14),
               ),
@@ -236,8 +236,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
               Expanded(
                 child: Text(
                   status == 'approved' 
-                    ? 'Your assessment results have been approved by your guidance counselor.\nYou can now view the complete results and recommendations.'
-                    : 'Your counselor has rejected this submission. Please review the details below and retake the assessment.',
+                    ? 'Your assessment results have been approved by your guidance counselor/facilitator.\nYou can now view the complete results and recommendations.'
+                    : 'Your counselor/facilitator has rejected this submission. Please review the details below and retake the assessment.',
                   style: GoogleFonts.plusJakartaSans(
                     color: status == 'approved' ? const Color(0xFF1B5E20) : const Color(0xFFB71C1C),
                     fontWeight: FontWeight.w600,
@@ -674,7 +674,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 const SizedBox(height: 10),
                 Text(
                   isLow
-                      ? 'Your self-esteem score suggests low self-esteem. We advise speaking with your guidance counselor for helpful self-esteem enhancement activities.'
+                      ? 'Your self-esteem score suggests low self-esteem. We advise speaking with your guidance counselor/facilitator for helpful self-esteem enhancement activities.'
                       : 'Your self-esteem score is within the normal range. Keep nurturing a positive and healthy relationship with yourself!',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.plusJakartaSans(
@@ -1716,7 +1716,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ),
               const SizedBox(width: 12),
               Text(
-                'Counselor\'s Note',
+                'Counselor/Facilitator\'s Note',
                 style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
@@ -1741,7 +1741,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      "Counselor's Note",
+                      "Counselor/Facilitator's Note",
                       style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryPurple),
                     ),
                   ],
@@ -1766,7 +1766,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         Text('Noted on: $formattedDate', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: const Color(0xFF64748B))),
                       ],
                     ),
-                    Text('Guidance Counselor', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF64748B))),
+                    Text('Guidance Counselor/Facilitator', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF64748B))),
                   ],
                 ),
               ],
@@ -1935,7 +1935,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'These recommendations are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
+            'These recommendations are intended to support—not replace—your personal judgment and the guidance provided by your Guidance Counselor/Facilitator. While the system identifies courses that are compatible with your assessment profile, it does not guarantee academic success or future career outcomes.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               height: 1.5,

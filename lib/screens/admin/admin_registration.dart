@@ -72,7 +72,7 @@ class _AdminRegistrationState extends State<AdminRegistration> {
                   decoration: const InputDecoration(labelText: 'User Role', border: OutlineInputBorder()),
                   items: const [
                     DropdownMenuItem(value: 'student', child: Text('Student')),
-                    DropdownMenuItem(value: 'counselor', child: Text('Guidance Counselor')),
+                    DropdownMenuItem(value: 'counselor', child: Text('Guidance Counselor/Facilitator')),
                   ],
                   onChanged: (v) => setState(() => _role = v!),
                 ),

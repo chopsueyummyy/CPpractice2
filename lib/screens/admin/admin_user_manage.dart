@@ -82,7 +82,7 @@ class _AdminUserManageState extends State<AdminUserManage> {
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit ${role == "student" ? "Student" : "Counselor"} Credentials'),
+        title: Text('Edit ${role == "student" ? "Student" : "Counselor/Facilitator"} Credentials'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -130,7 +130,7 @@ class _AdminUserManageState extends State<AdminUserManage> {
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text('Counselors', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryPurple)),
+          Text('Counselors/Facilitators', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryPurple)),
           const SizedBox(height: 8),
           ..._counselors.map((c) => _userTile(c, 'counselor')),
           const SizedBox(height: 24),

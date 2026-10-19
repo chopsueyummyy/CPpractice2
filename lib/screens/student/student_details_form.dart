@@ -71,7 +71,7 @@ class _StudentDetailsFormState extends State<StudentDetailsForm> {
               SnackBar(
                 content: Text(
                   asmStatus == 'pending_review'
-                      ? 'Your assessment is awaiting counselor review.'
+                      ? 'Your assessment is awaiting counselor/facilitator review.'
                       : 'Your assessment has already been completed.',
                 ),
                 backgroundColor: AppTheme.primaryPurple,

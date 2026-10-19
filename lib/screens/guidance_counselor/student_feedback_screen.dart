@@ -157,7 +157,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     final isHigh = level.toLowerCase().contains('high') || score >= 25;
 
     if (isLow) {
-      return 'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
+      return 'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor/facilitator is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
     } else if (isHigh) {
       return 'The student reflects high self-esteem ($score / 30), representing strong self-assurance, personal optimism, and emotional resilience. They are well-equipped to manage academic setbacks and actively advocate for their goals.';
     } else {
@@ -276,13 +276,13 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           isPsych
-              ? (isApproveOrEndorse ? 'Endorse Assessment to Counselor' : 'Flag / Retake Assessment')
+              ? (isApproveOrEndorse ? 'Endorse Assessment to Counselor/Facilitator' : 'Flag / Retake Assessment')
               : (_action == 'approved' ? 'Approve & Release Results' : 'Request Assessment Retake'),
         ),
         content: Text(
           isPsych
               ? (isApproveOrEndorse
-                  ? 'This will forward $studentName\'s assessment to the Guidance Counselor with your notes and course calibrations.'
+                  ? 'This will forward $studentName\'s assessment to the Guidance Counselor/Facilitator with your notes and course calibrations.'
                   : 'This will reject $studentName\'s assessment and request a retake.')
               : (_action == 'approved'
                   ? 'This will approve $studentName\'s assessment, send them an automated notification email, and release their official results to their dashboard and downloadable report.'
@@ -340,7 +340,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             content: Text(
               isPsych
                   ? (isApproveOrEndorse
-                      ? 'Assessment successfully endorsed to Guidance Counselor!'
+                      ? 'Assessment successfully endorsed to Guidance Counselor/Facilitator!'
                       : 'Assessment flagged for retake.')
                   : (_action == 'approved'
                       ? 'Assessment approved! Notification email sent and results released to student.'
@@ -582,7 +582,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             Text(
               isPsych
                   ? (isApproveOrEndorse
-                      ? 'Evaluate psychometric profile, refine course recommendations & prepare counselor briefing'
+                      ? 'Evaluate psychometric profile, refine course recommendations & prepare counselor/facilitator briefing'
                       : 'Flagging assessment — student will retake')
                   : (_action == 'approved'
                       ? 'Review psychometrician briefing, provide guidance, and release results'
@@ -929,7 +929,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 _isSubmitting
                     ? 'Submitting...'
                     : isPsych
-                        ? (isApproveOrEndorse ? 'Endorse to Counselor' : 'Flag for Retake')
+                        ? (isApproveOrEndorse ? 'Endorse to Counselor/Facilitator' : 'Flag for Retake')
                         : (_action == 'approved' ? 'Approve & Release' : 'Request Retake'),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
               ),
@@ -1875,7 +1875,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                   child: Text(
                     isPsych
                         ? (isApproveOrEndorse
-                            ? 'The assessment will be forwarded to the Guidance Counselor with your notes and course calibrations.'
+                            ? 'The assessment will be forwarded to the Guidance Counselor/Facilitator with your notes and course calibrations.'
                             : 'The student will be asked to retake the assessment. Your notes will be logged.')
                         : (_action == 'approved'
                             ? 'The student will immediately receive an official email notification, and their career match results will be unlocked on their student dashboard and official report.'
@@ -1895,7 +1895,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
           Row(
             children: [
               Text(
-                isPsych ? 'Notes for Counselor' : 'Counselor\'s Note',
+                isPsych ? 'Notes for Counselor/Facilitator' : 'Counselor/Facilitator\'s Note',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               const SizedBox(width: 8),
@@ -1978,7 +1978,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                         ? 'Submitting...'
                         : isPsych
                             ? (isApproveOrEndorse
-                                ? 'Endorse to Guidance Counselor'
+                                ? 'Endorse to Guidance Counselor/Facilitator'
                                 : 'Flag for Retake')
                             : (_action == 'approved'
                                 ? 'Approve & Release to Student'
@@ -2129,7 +2129,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                       const SizedBox(height: 3),
                       Text(
                         isPsych
-                            ? 'Review and refine the psychometric interpretations below for the guidance counselor. Use "Reset" to restore AI defaults.'
+                            ? 'Review and refine the psychometric interpretations below for the guidance counselor/facilitator. Use "Reset" to restore AI defaults.'
                             : 'Holistic synthesis across RIASEC Interests, Self-Esteem (RSE), and Decision Self-Efficacy (CDSES)',
                         style: TextStyle(
                           fontSize: 11.5,

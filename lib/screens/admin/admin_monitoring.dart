@@ -104,7 +104,7 @@ class _AdminMonitoringState extends State<AdminMonitoring> {
                 const SizedBox(width: 16),
                 _buildStatCard('Total Students', '${_stats?['total_students'] ?? 0}', Icons.people, Colors.blue),
                 const SizedBox(width: 16),
-                _buildStatCard('Active Counselors', '${_stats?['total_counselors'] ?? 0}', Icons.psychology, Colors.orange),
+                _buildStatCard('Active Counselors/Facilitators', '${_stats?['total_counselors'] ?? 0}', Icons.psychology, Colors.orange),
               ],
             ),
           const SizedBox(height: 32),

@@ -178,7 +178,7 @@ class _AdminUserManageV2State extends State<AdminUserManageV2> {
           child: SegmentedButton<String>(
             segments: [
               const ButtonSegment(value: 'Students', label: Text('Students'), icon: Icon(Icons.school_outlined)),
-              const ButtonSegment(value: 'Counselors', label: Text('Counselors'), icon: Icon(Icons.psychology_outlined)),
+              const ButtonSegment(value: 'Counselors', label: Text('Counselors/Facilitators'), icon: Icon(Icons.psychology_outlined)),
               const ButtonSegment(value: 'Psychometricians', label: Text('Psychometricians'), icon: Icon(Icons.analytics_outlined)),
               if (_session.roleId == 4)
                 const ButtonSegment(value: 'Admins', label: Text('Admins'), icon: Icon(Icons.admin_panel_settings_outlined)),

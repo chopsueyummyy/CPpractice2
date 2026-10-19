@@ -791,7 +791,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                             child: ElevatedButton.icon(
                                               onPressed: () => _goToFeedback(a, isPsych ? 'endorse' : 'approved'),
                                               icon: Icon(isPsych ? Icons.send_rounded : Icons.rate_review_rounded),
-                                              label: Text(isPsych ? 'Endorse to Counselor' : 'Review & Counsel'),
+                                              label: Text(isPsych ? 'Endorse to Counselor/Facilitator' : 'Review & Counsel'),
                                             ),
                                           ),
                                         ]),
@@ -1228,7 +1228,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
     String rseNarrative;
     if (isLow) {
       rseNarrative =
-          'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
+          'The student exhibits low self-esteem ($score / 30), which can indicate susceptibility to academic anxiety, impostor feelings, or hesitance in challenging programs. The counselor/facilitator is advised to offer positive affirmation and confidence-building support alongside academic guidance.';
     } else if (isHigh) {
       rseNarrative =
           'The student reflects high self-esteem ($score / 30), representing strong self-assurance, personal optimism, and emotional resilience. They are well-equipped to manage academic setbacks and actively advocate for their goals.';

@@ -49,7 +49,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       case 'in_progress':
         return 'Resume Assessment';
       case 'pending_review':
-        return 'Awaiting Counselor Review...';
+        return 'Awaiting Counselor/Facilitator Review...';
       case 'approved':
         return 'Assessment Completed';
       case 'rejected':
@@ -260,9 +260,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                   _assessmentStatus == 'approved'
                                       ? 'Your results have been approved. Check your results in the sidebar or click below to view your Course recommendations.'
                                       : _assessmentStatus == 'pending_review'
-                                          ? 'Your guidance counselor is currently reviewing your assessment. Please wait for authorization.'
+                                          ? 'Your guidance counselor/facilitator is currently reviewing your assessment. Please wait for authorization.'
                                           : (_assessmentStatus == 'rejected' || _assessmentStatus == 'declined')
-                                              ? 'Your counselor has requested you to retake the assessment. Press start to proceed.'
+                                              ? 'Your counselor/facilitator has requested you to retake the assessment. Press start to proceed.'
                                               : 'Kickstart your journey by taking our Course Assessment to discover the best course path for you today!',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(

@@ -298,7 +298,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
               icon: Icon(Icons.check_circle, color: AppTheme.success, size: 48),
               title: const Text('Assessment Submitted!'),
               content: const Text(
-                'Your assessments (RIASEC, Self-Esteem, and Career Decision Self-Efficacy) have been submitted and are now pending review by your guidance counselor. '
+                'Your assessments (RIASEC, Self-Esteem, and Career Decision Self-Efficacy) have been submitted and are now pending review by your guidance counselor/facilitator. '
                 'You will be notified once results are available.',
                 textAlign: TextAlign.center,
               ),

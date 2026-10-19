@@ -873,7 +873,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               const SizedBox(width: 10),
               Text(
-                'Counselor\'s Note',
+                'Counselor/Facilitator\'s Note',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -900,7 +900,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Guidance Counselor',
+                    'Guidance Counselor/Facilitator',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,

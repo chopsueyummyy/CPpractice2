@@ -135,7 +135,7 @@ class _AdminRegistrationV2State extends State<AdminRegistrationV2> {
       child: SegmentedButton<String>(
         segments: [
           const ButtonSegment(value: 'student', label: Text('Student'), icon: Icon(Icons.school)),
-          const ButtonSegment(value: 'counselor', label: Text('Counselor'), icon: Icon(Icons.psychology)),
+          const ButtonSegment(value: 'counselor', label: Text('Counselor/Facilitator'), icon: Icon(Icons.psychology)),
           const ButtonSegment(value: 'psychometrician', label: Text('Psychometrician'), icon: Icon(Icons.analytics_outlined)),
           if (_session.roleId == 4)
             const ButtonSegment(value: 'admin', label: Text('Admin'), icon: Icon(Icons.admin_panel_settings)),

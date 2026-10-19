@@ -48,18 +48,18 @@ class CounselorSidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  isPsych ? 'Psychometrician' : 'Guidance Counselor',
-                  style: const TextStyle(
+                  isPsych ? 'Psychometrician' : 'Guidance Counselor/Facilitator',
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: isPsych ? 20 : 17,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  isPsych ? 'Testing & Psychometrics Suite' : 'Career Counseling Suite',
+                  isPsych ? 'Testing & Psychometrics Suite' : 'Career Counseling & Facilitation Suite',
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
               ],

@@ -49,7 +49,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
     return Scaffold(
       drawer: CounselorSidebar(currentRoute: '$prefix/dashboard'),
       appBar: AppBar(
-        title: Text(isPsych ? 'Psychometrician Dashboard' : 'Counselor Dashboard'),
+        title: Text(isPsych ? 'Psychometrician Dashboard' : 'Counselor/Facilitator Dashboard'),
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu),
@@ -109,7 +109,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome, ${_session.counselorFirstName ?? (isPsych ? 'Psychometrician' : 'Counselor')}!',
+                            'Welcome, ${_session.counselorFirstName ?? (isPsych ? 'Psychometrician' : 'Counselor/Facilitator')}!',
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 22,
@@ -828,7 +828,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Students screened & endorsed by Psychometrician awaiting Guidance Counselor interview and advisory release.',
+              'Students screened & endorsed by Psychometrician awaiting Guidance Counselor/Facilitator interview and advisory release.',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
             ),
             const SizedBox(height: 16),

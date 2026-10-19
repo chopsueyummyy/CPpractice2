@@ -137,7 +137,7 @@ $pdf->Cell(28, 4.8, 'Review Status:', 1, 0, 'L', true);
 $pdf->SetFont('Arial', 'B', 8);
 if ($data['Status'] === 'approved') {
     $pdf->SetTextColor(34, 139, 34); // Green
-    $statusText = 'APPROVED BY COUNSELOR';
+    $statusText = 'APPROVED BY COUNSELOR/FACILITATOR';
 } else {
     $pdf->SetTextColor(200, 100, 0); // Orange
     $statusText = strtoupper($data['Status'] ?? 'PENDING REVIEW');
@@ -332,15 +332,15 @@ if (!empty($data['ClusterRecommendations'])) {
 $pdf->Ln(1.5);
 
 // SECTION 5: COUNSELOR NOTES & OFFICIAL SIGN-OFF
-$pdf->ChapterTitle('COUNSELOR\'S NOTE');
+$pdf->ChapterTitle('COUNSELOR/FACILITATOR\'S NOTE');
 
-$notes = !empty($data['FeedbackNotes']) ? $data['FeedbackNotes'] : 'No written counselor notes attached.';
+$notes = !empty($data['FeedbackNotes']) ? $data['FeedbackNotes'] : 'No written counselor/facilitator notes attached.';
 $reviewedAt = !empty($data['ReviewedAt']) ? $data['ReviewedAt'] : ($data['SubmittedAt'] ?? 'N/A');
 
 $pdf->SetFillColor(252, 252, 252);
 $pdf->SetFont('Arial', 'I', 7.5);
 $pdf->SetCellMargin(2.0);
-$pdf->MultiCell(190, 3.8, "Counselor's Note (Reviewed on $reviewedAt):\n\"$notes\"", 1, 'L', true);
+$pdf->MultiCell(190, 3.8, "Counselor/Facilitator's Note (Reviewed on $reviewedAt):\n\"$notes\"", 1, 'L', true);
 $pdf->SetCellMargin(1.0);
 
 $pdf->Ln(2);
