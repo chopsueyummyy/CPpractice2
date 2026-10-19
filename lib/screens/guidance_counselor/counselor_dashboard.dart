@@ -458,8 +458,22 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
   }
 
   // Strand Distribution Card (Counselor view)
-  Widget _buildCounselorStrandCard(List<Map<String, dynamic>> strandStats) {
+  // Strand Distribution Card (Counselor view)
+  Widget _buildCounselorStrandCard(List<Map<String, dynamic>> rawStrandStats) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Normalize and aggregate strands (e.g. merge raw "STEM" into full title)
+    final Map<String, int> merged = {};
+    for (final item in rawStrandStats) {
+      final canonical = AppTheme.normalizeStrand(item['strand']?.toString() ?? '');
+      final count = (item['count'] is num) ? (item['count'] as num).toInt() : 0;
+      merged[canonical] = (merged[canonical] ?? 0) + count;
+    }
+    final strandStats = merged.entries
+        .map((e) => {'strand': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
     final total = strandStats.fold(0, (sum, item) => sum + (item['count'] as int));
 
     return Card(
@@ -525,6 +539,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   final strand = item['strand']?.toString() ?? 'Unassigned';
                   final count = item['count'] as int? ?? 0;
                   final pct = total > 0 ? (count / total) : 0.0;
+                  final color = AppTheme.strandColor(strand);
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -545,7 +560,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                             const SizedBox(width: 8),
                             Text(
                               '$count student(s) (${(pct * 100).toStringAsFixed(1)}%)',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryPurple),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
                             ),
                           ],
                         ),
@@ -554,8 +569,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: pct,
-                            backgroundColor: isDark ? Colors.white10 : AppTheme.dividerColor.withOpacity(0.3),
-                            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryPurple),
+                            backgroundColor: isDark ? Colors.white10 : color.withOpacity(0.12),
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
                             minHeight: 8,
                           ),
                         ),
@@ -1438,8 +1453,21 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
   }
 
   // Strand Distribution Card
-  Widget _buildStrandCard(List<Map<String, dynamic>> strandStats) {
+  Widget _buildStrandCard(List<Map<String, dynamic>> rawStrandStats) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Normalize and aggregate strands (e.g. merge raw "STEM" into full title)
+    final Map<String, int> merged = {};
+    for (final item in rawStrandStats) {
+      final canonical = AppTheme.normalizeStrand(item['strand']?.toString() ?? '');
+      final count = (item['count'] is num) ? (item['count'] as num).toInt() : 0;
+      merged[canonical] = (merged[canonical] ?? 0) + count;
+    }
+    final strandStats = merged.entries
+        .map((e) => {'strand': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
     final total = strandStats.fold(0, (sum, item) => sum + (item['count'] as int));
 
     return Card(
@@ -1502,6 +1530,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                             final strandName = item['strand'].toString();
                             final count = item['count'] as int;
                             final pct = total > 0 ? count / total : 0.0;
+                            final color = AppTheme.strandColor(strandName);
 
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12.0),
@@ -1512,7 +1541,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(strandName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                      Text('$count student(s)', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
+                                      Text('$count student(s) (${(pct * 100).toStringAsFixed(1)}%)', style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                   const SizedBox(height: 6),
@@ -1520,8 +1549,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                                     borderRadius: BorderRadius.circular(6),
                                     child: LinearProgressIndicator(
                                       value: pct,
-                                      backgroundColor: isDark ? Colors.white10 : AppTheme.dividerColor.withOpacity(0.3),
-                                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryPurple),
+                                      backgroundColor: isDark ? Colors.white10 : color.withOpacity(0.12),
+                                      valueColor: AlwaysStoppedAnimation<Color>(color),
                                       minHeight: 10,
                                     ),
                                   ),
@@ -1998,6 +2027,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
               final name = item['name'].toString();
               final count = item['count'] as int;
               final pct = item['pct'] as double;
+              final color = AppTheme.clusterColor(name);
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 14.0),
@@ -2005,7 +2035,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                   children: [
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: AppTheme.primaryPurple,
+                      backgroundColor: color,
                       child: Text(
                         '$rank',
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
@@ -2022,8 +2052,8 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: pct,
-                              backgroundColor: isDark ? Colors.white10 : AppTheme.dividerColor.withOpacity(0.3),
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryPurple),
+                              backgroundColor: isDark ? Colors.white10 : color.withOpacity(0.12),
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
                               minHeight: 6,
                             ),
                           ),
@@ -2033,7 +2063,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
                     const SizedBox(width: 12),
                     Text(
                       '$count student(s)',
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 4),
                     Icon(Icons.chevron_right_rounded, size: 16, color: AppTheme.textSecondary),
@@ -2210,16 +2240,28 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
     );
   }
 
-  void _showStrandDetailsDialog(List<Map<String, dynamic>> strandStats) {
+  void _showStrandDetailsDialog(List<Map<String, dynamic>> rawStrandStats) {
+    // Normalize and aggregate strands
+    final Map<String, int> merged = {};
+    for (final item in rawStrandStats) {
+      final canonical = AppTheme.normalizeStrand(item['strand']?.toString() ?? '');
+      final count = (item['count'] is num) ? (item['count'] as num).toInt() : 0;
+      merged[canonical] = (merged[canonical] ?? 0) + count;
+    }
+    final strandStats = merged.entries
+        .map((e) => {'strand': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.school_rounded, color: AppTheme.primaryPurple),
-            const SizedBox(width: 8),
-            const Text('Strand Distribution Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Icon(Icons.school_rounded, color: AppTheme.primaryPurple),
+            SizedBox(width: 8),
+            Text('Strand Distribution Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
         content: SizedBox(
@@ -2227,11 +2269,13 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: strandStats.map((item) {
+              final sName = item['strand'].toString();
+              final sColor = AppTheme.strandColor(sName);
               return ListTile(
                 dense: true,
-                leading: const Icon(Icons.bookmark_outline, color: AppTheme.primaryPurple),
-                title: Text(item['strand'].toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                trailing: Text('${item['count']} Student(s)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                leading: Icon(Icons.bookmark_outline, color: sColor),
+                title: Text(sName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                trailing: Text('${item['count']} Student(s)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: sColor)),
               );
             }).toList(),
           ),
@@ -2334,32 +2378,44 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.collections_bookmark_rounded, color: AppTheme.primaryPurple),
-            const SizedBox(width: 8),
-            const Text('Top Recommended Course Clusters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Icon(Icons.collections_bookmark_rounded, color: AppTheme.primaryPurple),
+            SizedBox(width: 8),
+            Text('Top Recommended Course Clusters', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
-        content: const SizedBox(
+        content: SizedBox(
           width: 440,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: CircleAvatar(radius: 12, child: Text('1')),
-                title: Text('Technology & Engineering Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                subtitle: Text('BS CS, BS IT, BS Mechanical Engg'),
+                leading: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: AppTheme.clusterColor('Technology & Engineering Cluster'),
+                  child: const Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+                title: const Text('Technology & Engineering Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                subtitle: const Text('BS CS, BS IT, BS Mechanical Engg'),
               ),
               ListTile(
-                leading: CircleAvatar(radius: 12, child: Text('2')),
-                title: Text('Business & Accountancy Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                subtitle: Text('BS Accountancy, BSBA Marketing'),
+                leading: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: AppTheme.clusterColor('Business & Accountancy Cluster'),
+                  child: const Text('2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+                title: const Text('Business & Accountancy Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                subtitle: const Text('BS Accountancy, BSBA Marketing'),
               ),
               ListTile(
-                leading: CircleAvatar(radius: 12, child: Text('3')),
-                title: Text('Humanities & Social Sciences Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                subtitle: Text('BA Psychology, BS Criminology'),
+                leading: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: AppTheme.clusterColor('Humanities & Social Sciences Cluster'),
+                  child: const Text('3', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+                title: const Text('Humanities & Social Sciences Cluster', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                subtitle: const Text('BA Psychology, BS Criminology'),
               ),
             ],
           ),

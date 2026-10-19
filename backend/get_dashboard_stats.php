@@ -59,8 +59,8 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
 
     $approvalRate = $total > 0 ? round(($approved / $total) * 100, 1) : 0;
 
-    // 1. Strand distribution
-    $strandStats = [];
+    // 1. Strand distribution (normalized and aggregated)
+    $strandAgg = [];
     $res = $conn->query("
         SELECT pi.Strand, COUNT(*) as count 
         FROM assessments a
@@ -69,9 +69,35 @@ $response = CacheService::remember("dashboard_stats_" . $filter, 60, function() 
         GROUP BY pi.Strand
     ");
     while ($row = $res->fetch_assoc()) {
+        $raw = trim($row['Strand'] ?? '');
+        $canonical = $raw;
+        if (stripos($raw, 'STEM') !== false) {
+            $canonical = 'STEM (Science, Technology, Engineering, Mathematics)';
+        } elseif (stripos($raw, 'ABM') !== false) {
+            $canonical = 'ABM (Accountancy, Business, Management)';
+        } elseif (stripos($raw, 'HUMSS') !== false) {
+            $canonical = 'HUMSS (Humanities and Social Sciences)';
+        } elseif (stripos($raw, 'GAS') !== false || stripos($raw, 'General Academic') !== false) {
+            $canonical = 'GAS (General Academic Strand)';
+        } elseif (stripos($raw, 'TVL') !== false || stripos($raw, 'Technical-Vocational') !== false) {
+            $canonical = 'TVL (Technical-Vocational-Livelihood)';
+        } elseif (stripos($raw, 'ICT') !== false) {
+            $canonical = 'ICT (Information and Communications Technology)';
+        } elseif (stripos($raw, 'Arts') !== false) {
+            $canonical = 'Arts and Design Track';
+        } elseif (stripos($raw, 'Sports') !== false) {
+            $canonical = 'Sports Track';
+        }
+        if (!empty($canonical)) {
+            $strandAgg[$canonical] = ($strandAgg[$canonical] ?? 0) + (int)$row['count'];
+        }
+    }
+    arsort($strandAgg);
+    $strandStats = [];
+    foreach ($strandAgg as $sName => $sCount) {
         $strandStats[] = [
-            "strand" => $row['Strand'],
-            "count" => (int)$row['count']
+            "strand" => $sName,
+            "count"  => $sCount
         ];
     }
 

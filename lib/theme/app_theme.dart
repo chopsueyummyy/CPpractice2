@@ -263,6 +263,77 @@ class AppTheme {
     }
   }
 
+  // Helper: Get Senior High School Academic Strand color
+  static Color strandColor(String strand) {
+    final s = strand.toUpperCase();
+    if (s.contains('STEM')) {
+      return const Color(0xFF0284C7); // Electric Blue (Science, Tech, Engineering, Math)
+    } else if (s.contains('ABM')) {
+      return const Color(0xFF10B981); // Emerald Green (Accountancy, Business, Management)
+    } else if (s.contains('HUMSS')) {
+      return const Color(0xFFE11D48); // Rose / Coral (Humanities, Social Sciences)
+    } else if (s.contains('GAS') || s.contains('GENERAL')) {
+      return const Color(0xFF8B5CF6); // Deep Violet (General Academic Strand)
+    } else if (s.contains('TVL') || s.contains('VOCATIONAL') || s.contains('LIVELIHOOD')) {
+      return const Color(0xFFF59E0B); // Amber / Warm Orange (Technical-Vocational)
+    } else if (s.contains('ICT')) {
+      return const Color(0xFF06B6D4); // Cyan (Information & Communications Tech)
+    } else if (s.contains('ARTS')) {
+      return const Color(0xFFEC4899); // Fuchsia / Pink (Arts & Design Track)
+    } else if (s.contains('SPORTS')) {
+      return const Color(0xFF84CC16); // Lime Green (Sports Track)
+    }
+    return primaryPurple;
+  }
+
+  // Helper: Normalize strand name to standard full school title
+  static String normalizeStrand(String strand) {
+    final s = strand.trim();
+    final u = s.toUpperCase();
+    if (u.contains('STEM')) {
+      return 'STEM (Science, Technology, Engineering, Mathematics)';
+    } else if (u.contains('ABM')) {
+      return 'ABM (Accountancy, Business, Management)';
+    } else if (u.contains('HUMSS')) {
+      return 'HUMSS (Humanities and Social Sciences)';
+    } else if (u.contains('GAS') || u.contains('GENERAL')) {
+      return 'GAS (General Academic Strand)';
+    } else if (u.contains('TVL') || u.contains('VOCATIONAL') || u.contains('LIVELIHOOD')) {
+      return 'TVL (Technical-Vocational-Livelihood)';
+    } else if (u.contains('ICT')) {
+      return 'ICT (Information and Communications Technology)';
+    } else if (u.contains('ARTS')) {
+      return 'Arts and Design Track';
+    } else if (u.contains('SPORTS')) {
+      return 'Sports Track';
+    }
+    return s.isNotEmpty ? s : 'Unassigned';
+  }
+
+  // Helper: Get Top Recommended Course Cluster color (Thematic Domain Colors)
+  static Color clusterColor(String clusterName) {
+    final c = clusterName.toLowerCase();
+    if (c.contains('tech') || c.contains('engine') || c.contains('comput')) {
+      return const Color(0xFF2563EB); // Royal Blue
+    } else if (c.contains('business') || c.contains('account') || c.contains('manage') || c.contains('finance')) {
+      return const Color(0xFF059669); // Emerald Green
+    } else if (c.contains('humanit') || c.contains('social') || c.contains('law') || c.contains('crimin')) {
+      return const Color(0xFFE11D48); // Rose / Crimson
+    } else if (c.contains('health') || c.contains('nurs') || c.contains('medic') || c.contains('allied')) {
+      return const Color(0xFF0D9488); // Medical Teal
+    } else if (c.contains('media') || c.contains('creative') || c.contains('art') || c.contains('communicat')) {
+      return const Color(0xFF9333EA); // Vibrant Violet / Magenta
+    } else if (c.contains('educat') || c.contains('psycholog') || c.contains('service')) {
+      return const Color(0xFFF59E0B); // Amber / Warm Orange
+    } else if (c.contains('agri') || c.contains('environ') || c.contains('natur')) {
+      return const Color(0xFF65A30D); // Olive / Forest Green
+    } else if (c.contains('science') || c.contains('math') || c.contains('research')) {
+      return const Color(0xFF0284C7); // Tech Blue / Cyan
+    }
+    return primaryPurple;
+  }
+
+
   // Helper: Get RIASEC type full name
   static String riasecName(String type) {
     switch (type.toUpperCase()) {
