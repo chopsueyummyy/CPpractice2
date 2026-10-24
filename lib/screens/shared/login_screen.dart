@@ -14,7 +14,12 @@ import '../../theme/theme_manager.dart';
 import '../../utils/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String portalType;
+
+  const LoginScreen({
+    super.key,
+    this.portalType = 'student',
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -24,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _primaryController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _userType = 'student';
+  late String _userType;
   bool _isLoading = false;
   bool _obscurePassword = true;
   String _errorMessage = '';
@@ -36,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    _userType = widget.portalType;
     // Auto-login logic: If a session exists, teleport to the dashboard!
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final session = SessionManager();
@@ -46,9 +52,9 @@ class _LoginScreenState extends State<LoginScreen> {
           context.go('/psychometrician/dashboard');
         } else if (session.role == 'guidance_counselor') {
           context.go('/guidance-counselor/dashboard');
-        } else if (session.role == 'super_admin' || session.role == 'admin') {
-          context.go('/admin/dashboard');
         }
+      } else if (session.adminId != null && (session.role == 'super_admin' || session.role == 'admin')) {
+        context.go('/admin/dashboard');
       }
     });
   }
@@ -154,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context.go('/verify-otp', extra: {
               'email': data['email'],
               'counselorId': data['counselorId'],
+              'portalType': _userType,
           });
       } else {
         setState(() => _errorMessage = data['message'] ?? 'Login failed');
@@ -269,7 +276,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               // ── Title with Montserrat ──
                               Text(
-                                _userType == 'admin' ? 'Admin Portal' : 'CourseAlign',
+                                _userType == 'admin' 
+                                    ? 'Admin Portal' 
+                                    : (_userType == 'staff' ? 'Staff Portal' : 'CourseAlign'),
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.montserrat(
                                   fontSize: 28, // Slightly larger and bold
@@ -282,7 +291,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               // Subtitle keeps the default theme font
                               Text(
-                                _userType == 'admin' ? 'Secure Administration Access' : 'Career Assessment and Course Recommendation System',
+                                _userType == 'admin' 
+                                    ? 'Secure Administration Access' 
+                                    : (_userType == 'staff' 
+                                        ? 'Guidance Counselor & Facilitator Access' 
+                                        : 'Career Assessment and Course Recommendation System'),
                                 textAlign: TextAlign.center,
                                 style:
                                     Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -292,7 +305,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _userType == 'admin' ? 'Administrators Only!' : 'v3.0 - Stable Release',
+                                _userType == 'admin' 
+                                    ? 'Administrators Only!' 
+                                    : (_userType == 'staff' 
+                                        ? 'Career Counseling & Testing Suite' 
+                                        : 'v3.0 - Student Portal'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 10,
@@ -302,32 +319,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               const SizedBox(height: 28),
-
-                          // ── Role Toggle ───────────────────────────────────────
-                          if (_userType != 'admin')
-                            SegmentedButton<String>(
-                              segments: const [
-                                ButtonSegment(
-                                  value: 'student',
-                                  label: Text('Student'),
-                                  icon: Icon(Icons.school_outlined),
-                                ),
-                                ButtonSegment(
-                                  value: 'staff',
-                                  label: Text('Staff'),
-                                  icon: Icon(Icons.badge_outlined),
-                                ),
-                              ],
-                              selected: {_userType == 'student' ? 'student' : 'staff'},
-                              onSelectionChanged: (Set<String> newSelection) {
-                                setState(() {
-                                  _userType = newSelection.first;
-                                  _primaryController.clear();
-                                  _errorMessage = '';
-                                });
-                              },
-                            ),
-                          if (_userType != 'admin') const SizedBox(height: 24),
 
                           // ── ID / Email field ──────────────────────────────────
                           TextFormField(
@@ -465,48 +456,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
 
-                          // ── Admin Login Button (Staff only) ───────────────────
-                          if (_userType == 'staff') ...[
-                            const SizedBox(height: 16),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _userType = 'admin';
-                                  _primaryController.clear();
-                                  _passwordController.clear();
-                                  _errorMessage = '';
-                                });
-                              },
-                              child: Text(
-                                "Admin Login",
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
 
-                          // ── Back to Staff (Admin only) ────────────────────────
-                          if (_userType == 'admin') ...[
-                            const SizedBox(height: 16),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _userType = 'staff';
-                                  _primaryController.clear();
-                                  _passwordController.clear();
-                                  _errorMessage = '';
-                                });
-                              },
-                              child: Text(
-                                "Back to Staff Portal",
-                                style: TextStyle(
-                                  color: AppTheme.primaryPurple.withOpacity(0.8),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),

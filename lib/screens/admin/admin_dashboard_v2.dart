@@ -61,7 +61,7 @@ class _AdminDashboardV2State extends State<AdminDashboardV2> {
             tooltip: 'Logout',
             onPressed: () {
               _session.logout();
-              context.go('/login');
+              context.go('/admin/login');
             },
           ),
           const SizedBox(width: 8),

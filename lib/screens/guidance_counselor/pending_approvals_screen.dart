@@ -22,6 +22,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
   bool _sortAscending = false;
   String _filterStatus = 'all';
   final _searchController = TextEditingController();
+  bool _isDark = false;
 
   @override
   void initState() {
@@ -114,11 +115,15 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
     final filtered = _filtered;
     final isPsych = SessionManager().isPsychometrician;
     final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
+    _isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: _isDark ? const Color(0xFF161426) : AppTheme.backgroundWhite,
       drawer: CounselorSidebar(currentRoute: '$prefix/pending-approvals'),
       appBar: AppBar(
         title: Text(isPsych ? 'Pending Evaluations' : 'Endorsed Student Queue'),
+        backgroundColor: _isDark ? const Color(0xFF1E1B2E) : AppTheme.primaryPurple,
+        elevation: _isDark ? 0 : 2,
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: const Icon(Icons.menu),
@@ -136,16 +141,22 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           // Search & filters
           Container(
             padding: const EdgeInsets.all(16),
-            color: AppTheme.backgroundWhite,
+            color: _isDark ? const Color(0xFF1E1B2E) : AppTheme.backgroundWhite,
             child: Column(children: [
               TextField(
                 controller: _searchController,
+                style: TextStyle(color: _isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Search by student name or ID...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  hintStyle: TextStyle(color: _isDark ? Colors.white60 : Colors.grey.shade500),
+                  prefixIcon: Icon(Icons.search, color: _isDark ? Colors.white70 : Colors.grey.shade600),
+                  filled: true,
+                  fillColor: _isDark ? const Color(0xFF161426) : Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppTheme.primaryPurple, width: 1.5)),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(icon: const Icon(Icons.clear),
+                      ? IconButton(icon: Icon(Icons.clear, color: _isDark ? Colors.white70 : Colors.grey.shade600),
                           onPressed: () => setState(() => _searchController.clear()))
                       : null,
                 ),
@@ -156,10 +167,16 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _sortBy,
-                    decoration: const InputDecoration(
+                    dropdownColor: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
+                    style: TextStyle(color: _isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
                       labelText: 'Sort By',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                      labelStyle: TextStyle(color: _isDark ? Colors.white70 : null),
+                      filled: true,
+                      fillColor: _isDark ? const Color(0xFF161426) : Colors.white,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                     items: const [
                       DropdownMenuItem(value: 'date', child: Text('Date')),
                       DropdownMenuItem(value: 'name', child: Text('Student Name')),
@@ -169,17 +186,23 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(_sortAscending ? Icons.arrow_upward : Icons.arrow_downward),
+                  icon: Icon(_sortAscending ? Icons.arrow_upward : Icons.arrow_downward, color: _isDark ? Colors.white70 : null),
                   onPressed: () => setState(() => _sortAscending = !_sortAscending),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _filterStatus,
-                    decoration: const InputDecoration(
+                    dropdownColor: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
+                    style: TextStyle(color: _isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
                       labelText: 'Filter',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                      labelStyle: TextStyle(color: _isDark ? Colors.white70 : null),
+                      filled: true,
+                      fillColor: _isDark ? const Color(0xFF161426) : Colors.white,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                     items: const [
                       DropdownMenuItem(value: 'all', child: Text('All')),
                       DropdownMenuItem(value: 'recent', child: Text('Recent (24h)')),
@@ -224,6 +247,11 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 16),
+                              color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
+                              ),
                               child: ExpansionTile(
                                 leading: CircleAvatar(
                                   backgroundColor: AppTheme.warning.withOpacity(0.1),
@@ -233,7 +261,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                   children: [
                                     Expanded(
                                       child: Text(a['studentName'] ?? '',
-                                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                                        style: TextStyle(fontWeight: FontWeight.w600, color: _isDark ? Colors.white : null)),
                                     ),
                                     if (!isPsych)
                                       Container(
@@ -309,39 +337,39 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                             width: double.infinity,
                                             padding: const EdgeInsets.all(14),
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFFFFFBEB),
+                                              color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFFFBEB),
                                               borderRadius: BorderRadius.circular(10),
-                                              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.6)),
+                                              border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B).withOpacity(0.6)),
                                             ),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   children: [
-                                                    const Icon(Icons.lock_rounded, size: 16, color: Color(0xFFB45309)),
+                                                    Icon(Icons.lock_rounded, size: 16, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
                                                     const SizedBox(width: 6),
-                                                    const Text(
+                                                    Text(
                                                       'Psychometrician Diagnostic Briefing (Confidential):',
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontWeight: FontWeight.bold,
-                                                        color: Color(0xFFB45309),
+                                                        color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309),
                                                       ),
                                                     ),
                                                     const Spacer(),
                                                     if (a['psychometricianNote'] is Map && a['psychometricianNote']['endorserName'] != null)
                                                       Text(
                                                         'By ${a['psychometricianNote']['endorserName']}',
-                                                        style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Color(0xFFB45309)),
+                                                        style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
                                                       ),
                                                   ],
                                                 ),
                                                 const SizedBox(height: 8),
                                                 Text(
                                                   (a['psychometricianNote'] is Map ? (a['psychometricianNote']['notes'] ?? '') : a['psychometricianNote'].toString()),
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 13,
-                                                    color: Color(0xFF78350F),
+                                                    color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF78350F),
                                                     fontWeight: FontWeight.w500,
                                                     height: 1.4,
                                                   ),
@@ -514,6 +542,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
 
                                             return Card(
                                               margin: const EdgeInsets.only(bottom: 12),
+                                              color: _isDark ? const Color(0xFF161426) : Colors.white,
                                               elevation: 0,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
@@ -544,14 +573,14 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                     const SizedBox(height: 8),
                                                     Text(
                                                       clusterName,
-                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _isDark ? Colors.white : null),
                                                     ),
                                                     const SizedBox(height: 12),
                                                     if (shapExps.isNotEmpty) ...[
                                                       Container(
                                                         padding: const EdgeInsets.all(10),
                                                         decoration: BoxDecoration(
-                                                          color: AppTheme.primaryPurple.withOpacity(0.04),
+                                                          color: _isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryPurple.withOpacity(0.04),
                                                           borderRadius: BorderRadius.circular(8),
                                                         ),
                                                         child: Column(
@@ -559,11 +588,11 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                           children: [
                                                             Row(
                                                               children: [
-                                                                Icon(Icons.auto_awesome, size: 14, color: Colors.purple.shade700),
+                                                                Icon(Icons.auto_awesome, size: 14, color: _isDark ? AppTheme.lilac : Colors.purple.shade700),
                                                                 const SizedBox(width: 6),
                                                                 Text(
                                                                   'Why this cluster was recommended:',
-                                                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900),
+                                                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? AppTheme.lilac : Colors.purple.shade900),
                                                                 ),
                                                               ],
                                                             ),
@@ -578,7 +607,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                                     Expanded(
                                                                       child: Text(
                                                                         feat,
-                                                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: _isDark ? Colors.white70 : null),
                                                                       ),
                                                                     ),
                                                                     Text(
@@ -597,7 +626,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                     if (exploreCourses.isNotEmpty) ...[
                                                       Text(
                                                         '📌 Recommended Courses under this Cluster:',
-                                                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                                                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.grey.shade800),
                                                       ),
                                                       const SizedBox(height: 6),
                                                       ...exploreCourses.map((crs) {
@@ -610,10 +639,10 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                           height: 48,
                                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                           decoration: BoxDecoration(
-                                                            color: Colors.white,
+                                                            color: _isDark ? Colors.white.withOpacity(0.06) : Colors.white,
                                                             borderRadius: BorderRadius.circular(8),
                                                             border: Border.all(
-                                                              color: const Color(0xFFE2E8F0),
+                                                              color: _isDark ? Colors.white.withOpacity(0.1) : const Color(0xFFE2E8F0),
                                                               width: 1.0,
                                                             ),
                                                           ),
@@ -632,11 +661,11 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                                     cleanName,
                                                                     maxLines: 2,
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    style: const TextStyle(
+                                                                    style: TextStyle(
                                                                       fontSize: 11.5,
                                                                       fontWeight: FontWeight.w500,
                                                                       height: 1.25,
-                                                                      color: Color(0xFF1E293B),
+                                                                      color: _isDark ? Colors.white : const Color(0xFF1E293B),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -665,10 +694,11 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                             final explanation = rec['Explanation'] ?? '';
                                             return Card(
                                               margin: const EdgeInsets.only(bottom: 12),
+                                              color: _isDark ? const Color(0xFF161426) : Colors.white,
                                               elevation: 0,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(12),
-                                                side: BorderSide(color: AppTheme.dividerColor.withOpacity(0.5)),
+                                                side: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : AppTheme.dividerColor.withOpacity(0.5)),
                                               ),
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,7 +713,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                         Expanded(
                                                           child: Text(
                                                             JmcfiBadge.cleanCourseTitle(rec['CourseName'] ?? ''),
-                                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _isDark ? Colors.white : null),
                                                           ),
                                                         ),
                                                         if (JmcfiBadge.isJmcfiCourse(rec['CourseName'] ?? '')) ...[
@@ -694,7 +724,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                     ),
                                                     subtitle: Text(
                                                       '${rec['CourseCode']} • ${AppTheme.riasecName(rec['RIASECCategory'] ?? '')}',
-                                                      style: const TextStyle(fontSize: 12),
+                                                      style: TextStyle(fontSize: 12, color: _isDark ? Colors.white70 : null),
                                                     ),
                                                     trailing: Column(
                                                       mainAxisAlignment: MainAxisAlignment.center,
@@ -714,7 +744,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                           style: TextStyle(
                                                             fontSize: 10,
                                                             fontWeight: FontWeight.w600,
-                                                            color: AppTheme.textSecondary,
+                                                            color: _isDark ? Colors.white60 : AppTheme.textSecondary,
                                                           ),
                                                         ),
                                                       ],
@@ -725,7 +755,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                       width: double.infinity,
                                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                                       decoration: BoxDecoration(
-                                                        color: AppTheme.primaryPurple.withOpacity(0.04),
+                                                        color: _isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryPurple.withOpacity(0.04),
                                                         borderRadius: const BorderRadius.only(
                                                           bottomLeft: Radius.circular(12),
                                                           bottomRight: Radius.circular(12),
@@ -736,14 +766,14 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                         children: [
                                                           Row(
                                                             children: [
-                                                              Icon(Icons.lightbulb_outline, size: 16, color: Colors.purple.shade700),
+                                                              Icon(Icons.lightbulb_outline, size: 16, color: _isDark ? AppTheme.lilac : Colors.purple.shade700),
                                                               const SizedBox(width: 8),
                                                               Text(
                                                                 'Why Recommended (AI Analysis):',
                                                                 style: TextStyle(
                                                                   fontSize: 11,
                                                                   fontWeight: FontWeight.w800,
-                                                                  color: Colors.purple.shade900,
+                                                                  color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                                                                 ),
                                                               ),
                                                             ],
@@ -754,7 +784,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                                                             style: TextStyle(
                                                               fontSize: 12,
                                                               height: 1.4,
-                                                              color: Colors.purple.shade900,
+                                                              color: _isDark ? Colors.white70 : Colors.purple.shade900,
                                                               fontWeight: FontWeight.w500,
                                                             ),
                                                           ),
@@ -946,12 +976,12 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.35), width: 1.5),
+        border: Border.all(color: AppTheme.primaryPurple.withOpacity(_isDark ? 0.3 : 0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryPurple.withOpacity(0.05),
+            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -987,7 +1017,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.purple.shade900,
+                                color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                               ),
                             ),
                           ),
@@ -995,18 +1025,18 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFF59E0B)),
+                                border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFFB45309)),
-                                  SizedBox(width: 4),
+                                  Icon(Icons.verified_user_rounded, size: 14, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Calibrated by Psychometrician',
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E)),
                                   ),
                                 ],
                               ),
@@ -1018,7 +1048,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
                         'Holistic synthesis across RIASEC Interests, Self-Esteem (RSE), and Decision Self-Efficacy (CDSES)',
                         style: TextStyle(
                           fontSize: 11.5,
-                          color: Colors.grey.shade600,
+                          color: _isDark ? Colors.white60 : Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -1108,20 +1138,20 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           children: [
             Icon(Icons.bar_chart_rounded, size: 16, color: AppTheme.primaryPurple),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '1. RIASEC Interest Profile Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -1183,7 +1213,7 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
         const SizedBox(height: 8),
         Text(
           displayText,
-          style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+          style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
         ),
       ],
     );
@@ -1199,16 +1229,16 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
             children: [
               Icon(Icons.favorite_rounded, size: 16, color: Colors.pink.shade400),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '2. Self-Esteem Profile (RSE) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Self-Esteem assessment data is not yet recorded for this student.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: _isDark ? Colors.white60 : Colors.grey.shade600),
           ),
         ],
       );
@@ -1247,20 +1277,20 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           children: [
             Icon(Icons.favorite_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '2. Self-Esteem Profile (RSE) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -1307,9 +1337,9 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
             children: [
               Icon(Icons.explore_rounded, size: 16, color: AppTheme.primaryPurple),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '3. Career Decision Self-Efficacy (CDSES) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
@@ -1372,20 +1402,20 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
           children: [
             Icon(Icons.explore_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '3. Career Decision Self-Efficacy (CDSES) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -1409,25 +1439,25 @@ class _PendingApprovalsScreenState extends State<PendingApprovalsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Highest: ${highest['code']} (${(highest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Lowest: ${lowest['code']} (${(lowest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
           ],

@@ -113,7 +113,7 @@ class CounselorSidebar extends StatelessWidget {
             ),
             onTap: () {
               SessionManager().logout();
-              context.go('/login');
+              context.go('/staff/login');
             },
           ),
         ],

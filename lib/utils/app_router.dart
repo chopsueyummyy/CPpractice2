@@ -30,15 +30,36 @@ final GoRouter appRouter = GoRouter(
     final bool isAdminLoggedIn = session.adminId != null && (session.role == 'admin' || session.role == 'super_admin');
     final bool isAuthenticated = isStudentLoggedIn || isCounselorLoggedIn || isPsychometricianLoggedIn || isAdminLoggedIn;
 
-    final bool isPublicRoute = path == '/login' || path == '/register' || path == '/verify-otp';
+    final bool isPublicRoute = path == '/login' ||
+        path == '/staff/login' ||
+        path == '/staff' ||
+        path == '/admin/login' ||
+        path == '/admin' ||
+        path == '/register' ||
+        path == '/verify-otp';
 
-    // 1. Unauthenticated users trying to access protected routes -> redirect to /login
+    // 1. Unauthenticated users trying to access protected routes -> redirect to appropriate portal
     if (!isAuthenticated && !isPublicRoute) {
+      if (path.startsWith('/admin')) {
+        return '/admin/login';
+      }
+      if (path.startsWith('/guidance-counselor') ||
+          path.startsWith('/psychometrician') ||
+          path.startsWith('/staff')) {
+        return '/staff/login';
+      }
       return '/login';
     }
 
     // 2. Authenticated users trying to access login or register -> redirect to respective dashboard
-    if (isAuthenticated && (path == '/login' || path == '/register')) {
+    final bool isAuthLandingRoute = path == '/login' ||
+        path == '/staff/login' ||
+        path == '/staff' ||
+        path == '/admin/login' ||
+        path == '/admin' ||
+        path == '/register';
+
+    if (isAuthenticated && isAuthLandingRoute) {
       if (isStudentLoggedIn) return '/student/dashboard';
       if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
       if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
@@ -71,7 +92,7 @@ final GoRouter appRouter = GoRouter(
         if (isStudentLoggedIn) return '/student/dashboard';
         if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
         if (isAdminLoggedIn) return '/admin/dashboard';
-        return '/login';
+        return '/staff/login';
       }
     }
 
@@ -81,17 +102,17 @@ final GoRouter appRouter = GoRouter(
         if (isStudentLoggedIn) return '/student/dashboard';
         if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
         if (isAdminLoggedIn) return '/admin/dashboard';
-        return '/login';
+        return '/staff/login';
       }
     }
 
     // 6. Admin Route Protections
-    if (path.startsWith('/admin/')) {
+    if (path.startsWith('/admin/') && path != '/admin/login') {
       if (!isAdminLoggedIn) {
         if (isStudentLoggedIn) return '/student/dashboard';
         if (isPsychometricianLoggedIn) return '/psychometrician/dashboard';
         if (isCounselorLoggedIn) return '/guidance-counselor/dashboard';
-        return '/login';
+        return '/admin/login';
       }
     }
 
@@ -100,7 +121,23 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const LoginScreen(portalType: 'student'),
+    ),
+    GoRoute(
+      path: '/staff/login',
+      builder: (context, state) => const LoginScreen(portalType: 'staff'),
+    ),
+    GoRoute(
+      path: '/staff',
+      builder: (context, state) => const LoginScreen(portalType: 'staff'),
+    ),
+    GoRoute(
+      path: '/admin/login',
+      builder: (context, state) => const LoginScreen(portalType: 'admin'),
+    ),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const LoginScreen(portalType: 'admin'),
     ),
     GoRoute(
       path: '/register',

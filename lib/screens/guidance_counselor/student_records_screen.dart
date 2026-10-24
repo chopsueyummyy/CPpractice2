@@ -17,6 +17,7 @@ class StudentRecordsScreen extends StatefulWidget {
 }
 
 class _StudentRecordsScreenState extends State<StudentRecordsScreen> with WidgetsBindingObserver {
+  bool _isDark = false;
   final _session = SessionManager();
   List<Map<String, dynamic>> _records = [];
   bool _isLoading = true;
@@ -455,6 +456,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
 
   @override
   Widget build(BuildContext context) {
+    _isDark = Theme.of(context).brightness == Brightness.dark;
     final isPsych = SessionManager().isPsychometrician;
     final prefix = isPsych ? '/psychometrician' : '/guidance-counselor';
     final approvedCount = _records.where((r) => r['status'] == 'approved').length;
@@ -527,7 +529,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   // ==========================================
   Widget _buildFilterSection(int approvedCount, int pendingCount) {
     return Container(
-      color: AppTheme.backgroundWhite,
+      color: _isDark ? const Color(0xFF141124) : AppTheme.backgroundWhite,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,6 +541,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
                     hintText: 'Search by name or student ID...',
                     prefixIcon: const Icon(Icons.search, size: 20),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -609,10 +613,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _isFilterExpanded || _activeFilterCount > 0
                       ? AppTheme.primaryPurple
-                      : Colors.purple.shade50,
+                      : (_isDark ? Colors.white.withOpacity(0.08) : Colors.purple.shade50),
                   foregroundColor: _isFilterExpanded || _activeFilterCount > 0
                       ? Colors.white
-                      : AppTheme.primaryPurple,
+                      : (_isDark ? Colors.white70 : AppTheme.primaryPurple),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -982,10 +986,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? accentColor : Colors.grey.shade200,
+              color: isSelected ? accentColor : (_isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
               width: isSelected ? 2.0 : 1.0,
             ),
             boxShadow: isSelected
@@ -998,7 +1002,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
+                      color: Colors.black.withOpacity(_isDark ? 0.2 : 0.02),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -1026,7 +1030,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? accentColor : AppTheme.textPrimary,
+                        color: isSelected ? accentColor : (_isDark ? Colors.white : AppTheme.textPrimary),
                         height: 1.1,
                       ),
                     ),
@@ -1036,7 +1040,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                        color: isSelected ? accentColor : AppTheme.textSecondary,
+                        color: isSelected ? accentColor : (_isDark ? Colors.white70 : AppTheme.textSecondary),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1118,9 +1122,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                     // Grid / List Toggle
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1339,12 +1343,12 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(_isDark ? 0.25 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -1383,10 +1387,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         children: [
                           Text(
                             r['studentName'] ?? 'Unknown Student',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Color(0xFF1E293B),
+                              color: _isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1417,16 +1421,16 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                           margin: const EdgeInsets.only(left: 6),
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                           decoration: BoxDecoration(
-                            color: Colors.blueGrey.shade50,
+                            color: _isDark ? Colors.white.withOpacity(0.08) : Colors.blueGrey.shade50,
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.blueGrey.shade100),
+                            border: Border.all(color: _isDark ? Colors.white.withOpacity(0.12) : Colors.blueGrey.shade100),
                           ),
                           child: Text(
                             r['strand'].toString(),
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey.shade700,
+                              color: _isDark ? Colors.white70 : Colors.blueGrey.shade700,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1504,7 +1508,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                 ),
 
                 const Spacer(),
-                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                Divider(height: 1, color: _isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFF1F5F9)),
                 const SizedBox(height: 8),
 
                 // Bottom Action Row
@@ -1515,11 +1519,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         height: 32,
                         child: OutlinedButton.icon(
                           onPressed: () => _showStudentDossierModal(context, r),
-                          icon: const Icon(Icons.badge_outlined, size: 14),
-                          label: const Text('View Dossier', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          icon: const Icon(Icons.assignment_outlined, size: 14),
+                          label: const Text('View Result', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.primaryPurple,
-                            side: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.4)),
+                            foregroundColor: _isDark ? AppTheme.lilac : AppTheme.primaryPurple,
+                            side: BorderSide(color: _isDark ? AppTheme.lilac.withOpacity(0.4) : AppTheme.primaryPurple.withOpacity(0.4)),
                             padding: EdgeInsets.zero,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
@@ -1563,12 +1567,12 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -1605,10 +1609,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                           Flexible(
                             child: Text(
                               r['studentName'] ?? 'Unknown Student',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Color(0xFF1E293B),
+                                color: _isDark ? Colors.white : const Color(0xFF1E293B),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1628,7 +1632,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         children: [
                           Text(
                             '${r['gradeLevel'] ?? ''} • ${r['strand'] ?? ''}',
-                            style: TextStyle(fontSize: 11.5, color: Colors.grey.shade700),
+                            style: TextStyle(fontSize: 11.5, color: _isDark ? Colors.white70 : Colors.grey.shade700),
                           ),
                           if (primaryType.isNotEmpty)
                             Text(
@@ -1659,11 +1663,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                 const SizedBox(width: 10),
                 OutlinedButton.icon(
                   onPressed: () => _showStudentDossierModal(context, r),
-                  icon: const Icon(Icons.badge_outlined, size: 14),
-                  label: const Text('View Dossier', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.assignment_outlined, size: 14),
+                  label: const Text('View Result', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.primaryPurple,
-                    side: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.4)),
+                    foregroundColor: _isDark ? AppTheme.lilac : AppTheme.primaryPurple,
+                    side: BorderSide(color: _isDark ? AppTheme.lilac.withOpacity(0.4) : AppTheme.primaryPurple.withOpacity(0.4)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
@@ -1693,6 +1697,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
       barrierDismissible: true,
       builder: (ctx) {
         return Dialog(
+          backgroundColor: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: ConstrainedBox(
@@ -1709,8 +1714,8 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryPurple.withOpacity(0.06),
-                      border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                      color: _isDark ? const Color(0xFF161426) : AppTheme.primaryPurple.withOpacity(0.06),
+                      border: Border(bottom: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200)),
                     ),
                     child: Row(
                       children: [
@@ -1736,10 +1741,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                                   Flexible(
                                     child: Text(
                                       r['studentName'] ?? 'Unknown Student',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1E293B),
+                                        color: _isDark ? Colors.white : const Color(0xFF1E293B),
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -1775,7 +1780,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         IconButton(
                           icon: const Icon(Icons.close_rounded, size: 22),
                           splashRadius: 20,
-                          tooltip: 'Close Dossier',
+                          tooltip: 'Close Result',
                           onPressed: () => Navigator.of(ctx).pop(),
                         ),
                       ],
@@ -2041,6 +2046,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
+              color: _isDark ? const Color(0xFF161426) : Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -2071,14 +2077,14 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                     const SizedBox(height: 8),
                     Text(
                       clusterName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 12),
                     if (shapExps.isNotEmpty) ...[
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryPurple.withOpacity(0.04),
+                          color: _isDark ? Colors.white.withOpacity(0.04) : AppTheme.primaryPurple.withOpacity(0.04),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -2086,11 +2092,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.auto_awesome, size: 14, color: Colors.purple.shade700),
+                                Icon(Icons.auto_awesome, size: 14, color: _isDark ? AppTheme.lilac : Colors.purple.shade700),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Why this cluster was recommended:',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900),
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? AppTheme.lilac : Colors.purple.shade900),
                                 ),
                               ],
                             ),
@@ -2105,7 +2111,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                                     Expanded(
                                       child: Text(
                                         feat,
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: _isDark ? Colors.white70 : Colors.black87),
                                       ),
                                     ),
                                     Text(
@@ -2122,9 +2128,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.purple.shade100),
+                                  border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.purple.shade100),
                                 ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2142,7 +2148,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                                           fontStyle: FontStyle.italic,
                                           height: 1.35,
                                           fontWeight: FontWeight.w500,
-                                          color: Colors.grey.shade700,
+                                          color: _isDark ? Colors.white70 : Colors.grey.shade700,
                                         ),
                                       ),
                                     ),
@@ -2158,7 +2164,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                     if (exploreCourses.isNotEmpty) ...[
                       Text(
                         '📌 Recommended Courses under this Cluster:',
-                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.grey.shade800),
                       ),
                       const SizedBox(height: 6),
                       ...exploreCourses.take(3).map((crs) {
@@ -2171,10 +2177,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                           height: 48,
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: _isDark ? Colors.white.withOpacity(0.06) : Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: const Color(0xFFE2E8F0),
+                              color: _isDark ? Colors.white.withOpacity(0.1) : const Color(0xFFE2E8F0),
                               width: 1.0,
                             ),
                           ),
@@ -2193,11 +2199,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                                     cleanName,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w500,
                                       height: 1.25,
-                                      color: Color(0xFF1E293B),
+                                      color: _isDark ? Colors.white : const Color(0xFF1E293B),
                                     ),
                                   ),
                                 ),
@@ -2322,7 +2328,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: Colors.purple.shade900,
+                              color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -2346,11 +2352,11 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           const Divider(height: 24),
           Row(
             children: [
-              const Icon(Icons.psychology_outlined, size: 18, color: Color(0xFFD97706)),
+              Icon(Icons.psychology_outlined, size: 18, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFD97706)),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Psychometrician\'s Briefing & Observations',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFB45309)),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
               ),
             ],
           ),
@@ -2359,13 +2365,13 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFFEF3C7).withOpacity(0.5),
+              color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7).withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+              border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B).withOpacity(0.4)),
             ),
             child: Text(
               psychNotes,
-              style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF78350F)),
+              style: TextStyle(fontSize: 12, height: 1.4, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF78350F)),
             ),
           ),
         ],
@@ -2394,7 +2400,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             ),
             child: Text(
               counselorNotes,
-              style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 12, height: 1.4, color: _isDark ? Colors.white70 : const Color(0xFF1E293B)),
             ),
           ),
         ],
@@ -2526,9 +2532,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
   }) {
     return Card(
       elevation: 0,
+      color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -2563,7 +2570,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         children: [
                           Text(
                             centerPrimary,
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: _isDark ? Colors.white : Colors.black87),
                           ),
                           Text(
                             centerSecondary,
@@ -2590,9 +2597,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         margin: const EdgeInsets.only(bottom: 5),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: _isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
                         ),
                         child: Row(
                           children: [
@@ -2617,7 +2624,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade800,
+                                color: _isDark ? Colors.white : Colors.grey.shade800,
                               ),
                             ),
                           ],
@@ -2639,9 +2646,10 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     const types = ['R', 'I', 'A', 'S', 'E', 'C'];
     return Card(
       elevation: 0,
+      color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -2701,7 +2709,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: pct,
-                          backgroundColor: Colors.grey.shade100,
+                          backgroundColor: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                           valueColor: AlwaysStoppedAnimation<Color>(color),
                           minHeight: 8,
                         ),
@@ -2713,7 +2721,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       child: Text(
                         '$count (${(pct * 100).toStringAsFixed(1)}%)',
                         textAlign: TextAlign.end,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.grey.shade800),
                       ),
                     ),
                   ],
@@ -2812,7 +2820,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: pct,
-                          backgroundColor: Colors.grey.shade100,
+                          backgroundColor: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                           valueColor: AlwaysStoppedAnimation<Color>(color),
                           minHeight: 8,
                         ),
@@ -2824,7 +2832,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       child: Text(
                         '$count (${(pct * 100).toStringAsFixed(1)}%)',
                         textAlign: TextAlign.end,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.grey.shade800),
                       ),
                     ),
                   ],
@@ -2867,7 +2875,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                       child: Text(
                         '$otherCount (${((otherCount / total) * 100).toStringAsFixed(1)}%)',
                         textAlign: TextAlign.end,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.grey.shade800),
                       ),
                     ),
                   ],
@@ -3071,19 +3079,19 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundLight,
+        color: _isDark ? Colors.white.withOpacity(0.08) : AppTheme.backgroundLight,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: iconColor ?? AppTheme.textSecondary),
+          Icon(icon, size: 14, color: iconColor ?? (_isDark ? Colors.white70 : AppTheme.textSecondary)),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              color: AppTheme.textPrimary,
+              color: _isDark ? Colors.white : AppTheme.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -3262,9 +3270,9 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF161426) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.35), width: 1.5),
+        border: Border.all(color: AppTheme.primaryPurple.withOpacity(_isDark ? 0.3 : 0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: AppTheme.primaryPurple.withOpacity(0.05),
@@ -3303,7 +3311,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.purple.shade900,
+                                color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                               ),
                             ),
                           ),
@@ -3311,18 +3319,18 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFF59E0B)),
+                                border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFFB45309)),
-                                  SizedBox(width: 4),
+                                  Icon(Icons.verified_user_rounded, size: 14, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Calibrated by Psychometrician',
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E)),
                                   ),
                                 ],
                               ),
@@ -3424,20 +3432,20 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           children: [
             Icon(Icons.bar_chart_rounded, size: 16, color: AppTheme.primaryPurple),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '1. RIASEC Interest Profile Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -3499,7 +3507,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         const SizedBox(height: 8),
         Text(
           displayText,
-          style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+          style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
         ),
       ],
     );
@@ -3515,16 +3523,16 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             children: [
               Icon(Icons.favorite_rounded, size: 16, color: Colors.pink.shade400),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '2. Self-Esteem Profile (RSE) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Self-Esteem assessment data is not yet recorded for this student.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: _isDark ? Colors.white60 : Colors.grey.shade600),
           ),
         ],
       );
@@ -3563,20 +3571,20 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           children: [
             Icon(Icons.favorite_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '2. Self-Esteem Profile (RSE) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -3607,7 +3615,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         const SizedBox(height: 8),
         Text(
           displayText,
-          style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+          style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
         ),
       ],
     );
@@ -3623,16 +3631,16 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             children: [
               Icon(Icons.explore_rounded, size: 16, color: AppTheme.primaryPurple),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '3. Career Decision Self-Efficacy (CDSES) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Career Decision Self-Efficacy assessment data is not yet recorded for this student.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: _isDark ? Colors.white60 : Colors.grey.shade600),
           ),
         ],
       );
@@ -3688,20 +3696,20 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
           children: [
             Icon(Icons.explore_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '3. Career Decision Self-Efficacy (CDSES) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (hasCustom)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -3725,25 +3733,25 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Highest: ${highest['code']} (${(highest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Lowest: ${lowest['code']} (${(lowest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
           ],
@@ -3751,7 +3759,7 @@ class _StudentRecordsScreenState extends State<StudentRecordsScreen> with Widget
         const SizedBox(height: 8),
         Text(
           displayText,
-          style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+          style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
         ),
       ],
     );

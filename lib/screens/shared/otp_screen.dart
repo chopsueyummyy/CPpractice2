@@ -22,14 +22,24 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _isLoading = false;
   String _errorMessage = '';
   late String _email;
+  late String _returnRoute;
 
   @override
   void initState() {
     super.initState();
     _email = widget.extraData?['email'] ?? '';
+    final portal = widget.extraData?['portalType'];
+    if (portal == 'admin') {
+      _returnRoute = '/admin/login';
+    } else if (portal == 'staff') {
+      _returnRoute = '/staff/login';
+    } else {
+      _returnRoute = '/login';
+    }
+
     if (_email.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go('/login');
+        context.go(_returnRoute);
       });
     }
   }
@@ -147,7 +157,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () => context.go('/login'),
+                  onPressed: () => context.go(_returnRoute),
                   child: Text('Cancel & Return to Login', style: TextStyle(color: AppTheme.textSecondary)),
                 )
               ],

@@ -49,7 +49,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       case 'in_progress':
         return 'Resume Assessment';
       case 'pending_review':
-        return 'Awaiting Counselor/Facilitator Review...';
+        return 'Awaiting Counselor/Facilitator Review';
       case 'approved':
         return 'Assessment Completed';
       case 'rejected':
@@ -72,7 +72,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
       case 'in_progress':
         return Icons.play_circle_fill;
       case 'pending_review':
-        return Icons.hourglass_empty;
+        return Icons.hourglass_top_rounded;
       case 'approved':
         return Icons.check_circle;
       case 'rejected':
@@ -102,6 +102,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
 
     return Scaffold(
       drawer: StudentSidebar(currentRoute: '/student/dashboard'),
@@ -195,37 +197,40 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                 width: 1.5,
                               ),
                             ),
-                             padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 48.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Main Title
-                                if (_assessmentStatus != null && _assessmentStatus != 'not_started')
-                                  Text(
-                                    _assessmentStatus == 'approved'
-                                        ? 'Assessment Complete!'
-                                        : _assessmentStatus == 'pending_review'
-                                            ? 'Assessment Under Review'
-                                            : 'Your assessment needs a retake',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 44,
-                                      fontWeight: FontWeight.w900,
-                                      color: isDark ? Colors.white : const Color(0xFF1B0748),
-                                      letterSpacing: -1.2,
-                                      height: 1.1,
-                                    ),
-                                  )
-                                else
-                                  RichText(
-                                    textAlign: TextAlign.center,
-                                    text: TextSpan(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isMobile ? 20.0 : 40.0,
+                                vertical: isMobile ? 32.0 : 48.0,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Main Title
+                                  if (_assessmentStatus != null && _assessmentStatus != 'not_started')
+                                    Text(
+                                      _assessmentStatus == 'approved'
+                                          ? 'Assessment Complete!'
+                                          : _assessmentStatus == 'pending_review'
+                                              ? 'Assessment Under Review'
+                                              : 'Your assessment needs a retake',
+                                      textAlign: TextAlign.center,
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 44,
+                                        fontSize: isMobile ? 32 : 44,
                                         fontWeight: FontWeight.w900,
+                                        color: isDark ? Colors.white : const Color(0xFF1B0748),
                                         letterSpacing: -1.2,
                                         height: 1.1,
                                       ),
+                                    )
+                                  else
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: isMobile ? 32 : 44,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -1.2,
+                                          height: 1.1,
+                                        ),
                                       children: [
                                         TextSpan(
                                           text: 'Start your Course\n',
@@ -334,15 +339,17 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                   )
                                 else
                                   Container(
-                                    constraints: const BoxConstraints(maxWidth: 320),
+                                    constraints: BoxConstraints(
+                                      maxWidth: _assessmentStatus == 'pending_review' ? 440 : 320,
+                                    ),
                                     height: 54,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(30),
                                       gradient: _buttonEnabled
-                                          ? LinearGradient(
+                                          ? const LinearGradient(
                                               colors: [
                                                 AppTheme.primaryPurple,
-                                                const Color(0xFF3B1BA5),
+                                                Color(0xFF3B1BA5),
                                               ],
                                               begin: Alignment.centerLeft,
                                               end: Alignment.centerRight,
@@ -350,6 +357,12 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                           : null,
                                       color: !_buttonEnabled
                                           ? (isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200)
+                                          : null,
+                                      border: !_buttonEnabled
+                                          ? Border.all(
+                                              color: isDark ? Colors.white.withOpacity(0.12) : Colors.grey.shade300,
+                                              width: 1,
+                                            )
                                           : null,
                                       boxShadow: _buttonEnabled
                                           ? [
@@ -375,28 +388,45 @@ class _StudentDashboardState extends State<StudentDashboard> {
                                               }
                                             : null,
                                         child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                                          padding: const EdgeInsets.symmetric(horizontal: 20),
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Icon(
-                                                Icons.play_arrow_rounded,
+                                                _buttonIcon,
                                                 size: 22,
-                                                color: _buttonEnabled ? Colors.white : Colors.grey,
+                                                color: _buttonEnabled
+                                                    ? Colors.white
+                                                    : (isDark ? Colors.white70 : const Color(0xFF6B5B95)),
                                               ),
-                                              Text(
-                                                _buttonLabel == 'Start Test' ? 'Start Assessment' : _buttonLabel,
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: _buttonEnabled ? Colors.white : Colors.grey,
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Text(
+                                                      _buttonLabel == 'Start Test' ? 'Start Assessment' : _buttonLabel,
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: _buttonEnabled
+                                                            ? Colors.white
+                                                            : (isDark ? Colors.white70 : const Color(0xFF6B5B95)),
+                                                        letterSpacing: 0.2,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                              Icon(
-                                                Icons.arrow_forward_rounded,
-                                                size: 20,
-                                                color: _buttonEnabled ? Colors.white : Colors.grey,
-                                              ),
+                                              if (_buttonEnabled)
+                                                const Icon(
+                                                  Icons.arrow_forward_rounded,
+                                                  size: 20,
+                                                  color: Colors.white,
+                                                )
+                                              else
+                                                const SizedBox(width: 22),
                                             ],
                                           ),
                                         ),

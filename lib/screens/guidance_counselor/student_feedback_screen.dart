@@ -17,6 +17,7 @@ class StudentFeedbackScreen extends StatefulWidget {
 }
 
 class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
+  bool _isDark = false;
   final _session = SessionManager();
   bool get isPsych => _session.isPsychometrician;
   String get prefix => isPsych ? '/psychometrician' : '/guidance-counselor';
@@ -562,6 +563,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedIdStr = _selectedStudent?['assessmentId']?.toString();
 
     final bool isValueInItems = _pendingList.any((st) => st['assessmentId']?.toString() == selectedIdStr);
@@ -621,7 +623,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             // ── 1. STUDENT SELECTION DROPDOWN BAR ───────────────────────────
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.transparent),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -643,9 +649,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                           // Quick Queue Switcher
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -837,11 +843,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1.5)),
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
+        border: Border(top: BorderSide(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200, width: 1.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(_isDark ? 0.3 : 0.06),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),
@@ -871,7 +877,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 children: [
                   Text(
                     stName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -955,12 +961,12 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -990,10 +996,10 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                   children: [
                     Text(
                       st['studentName']?.toString() ?? 'Student',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E293B),
+                        color: _isDark ? Colors.white : const Color(0xFF1E293B),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1017,13 +1023,13 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.blueGrey.shade50,
+                    color: _isDark ? Colors.white.withOpacity(0.08) : Colors.blueGrey.shade50,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.blueGrey.shade100),
+                    border: Border.all(color: _isDark ? Colors.white.withOpacity(0.12) : Colors.blueGrey.shade100),
                   ),
                   child: Text(
                     st['strand'].toString(),
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade700),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? Colors.white70 : Colors.blueGrey.shade700),
                   ),
                 ),
               if (st['durationSeconds'] != null && (int.tryParse(st['durationSeconds'].toString()) ?? 0) > 0)
@@ -1054,18 +1060,18 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey.shade600),
+                      Icon(Icons.calendar_today_outlined, size: 11, color: _isDark ? Colors.white60 : Colors.grey.shade600),
                       const SizedBox(width: 4),
                       Text(
                         st['submittedAt'].toString().split(' ')[0],
-                        style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                        style: TextStyle(fontSize: 11, color: _isDark ? Colors.white70 : Colors.grey.shade700),
                       ),
                     ],
                   ),
@@ -1085,9 +1091,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
+        color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFFFBEB),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF59E0B)),
+        border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1097,29 +1103,29 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF78350F).withOpacity(0.3) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.lock_rounded, size: 16, color: Color(0xFFB45309)),
+                child: Icon(Icons.lock_rounded, size: 16, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Psychometrician Briefing (Confidential)',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
-                        color: Color(0xFF92400E),
+                        color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                       ),
                     ),
                     Text(
                       'Staff-to-staff clinical briefing.',
                       style: TextStyle(
                         fontSize: 11,
-                        color: const Color(0xFFB45309).withOpacity(0.9),
+                        color: _isDark ? const Color(0xFFFDE68A).withOpacity(0.8) : const Color(0xFFB45309).withOpacity(0.9),
                       ),
                     ),
                   ],
@@ -1129,15 +1135,15 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: _isDark ? const Color(0xFF78350F).withOpacity(0.3) : const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     'Endorsed by ${st['psychometricianNote']['endorserName']}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFB45309),
+                      color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309),
                     ),
                   ),
                 ),
@@ -1148,15 +1154,15 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: _isDark ? const Color(0xFF1E170A) : Colors.white,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFFDE68A)),
+              border: Border.all(color: _isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A)),
             ),
             child: Text(
               (st['psychometricianNote'] is Map ? (st['psychometricianNote']['notes'] ?? '') : st['psychometricianNote'].toString()),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF78350F),
+                color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF78350F),
                 fontWeight: FontWeight.w500,
                 height: 1.4,
               ),
@@ -1174,9 +1180,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1207,9 +1213,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1254,7 +1260,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                           const SizedBox(width: 6),
                           Text(
                             AppTheme.riasecName(trait),
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
                           ),
                         ],
                       ),
@@ -1276,7 +1282,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: (val / 100).clamp(0.0, 1.0),
-                      backgroundColor: Colors.grey.shade100,
+                      backgroundColor: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                       valueColor: AlwaysStoppedAnimation<Color>(traitColor),
                       minHeight: 8,
                     ),
@@ -1299,9 +1305,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1482,9 +1488,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1498,7 +1504,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Colors.purple.shade900,
+                      color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                     ),
               ),
             ],
@@ -1525,6 +1531,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 elevation: 0,
+                color: _isDark ? const Color(0xFF161426) : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: rankColor.withOpacity(0.4), width: 1.5),
@@ -1609,9 +1616,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.purple.shade100),
+                                    border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.purple.shade100),
                                   ),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1629,7 +1636,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                                             fontStyle: FontStyle.italic,
                                             height: 1.35,
                                             fontWeight: FontWeight.w500,
-                                            color: Colors.grey.shade700,
+                                            color: _isDark ? Colors.white70 : Colors.grey.shade700,
                                           ),
                                         ),
                                       ),
@@ -1648,7 +1655,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                           children: [
                             Text(
                               '📌 Recommended Courses under this Cluster:',
-                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : Colors.grey.shade800),
                             ),
                             TextButton.icon(
                               icon: const Icon(Icons.add_circle_outline, size: 14, color: AppTheme.primaryPurple),
@@ -1682,9 +1689,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                               height: 48,
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppTheme.dividerColor.withOpacity(0.5)),
+                                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : AppTheme.dividerColor.withOpacity(0.5)),
                               ),
                               child: Row(
                                 children: [
@@ -1701,11 +1708,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                                               cleanName,
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600,
                                                 height: 1.25,
-                                                color: Color(0xFF1E293B),
+                                                color: _isDark ? Colors.white : const Color(0xFF1E293B),
                                               ),
                                             ),
                                           ),
@@ -1729,7 +1736,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primaryPurple.withOpacity(0.08),
+                                        color: _isDark ? Colors.white.withOpacity(0.08) : AppTheme.primaryPurple.withOpacity(0.08),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: const Row(
@@ -1847,9 +1854,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: _isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1902,9 +1909,15 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isPsych ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
+                  color: isPsych
+                      ? (_isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7))
+                      : (_isDark ? const Color(0xFF064E3B).withOpacity(0.4) : const Color(0xFFDCFCE7)),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: isPsych ? const Color(0xFFF59E0B) : const Color(0xFF16A34A)),
+                  border: Border.all(
+                    color: isPsych
+                        ? (_isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B))
+                        : (_isDark ? const Color(0xFF059669) : const Color(0xFF16A34A)),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1912,7 +1925,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                     Icon(
                       isPsych ? Icons.lock_outline : Icons.visibility_outlined,
                       size: 12,
-                      color: isPsych ? const Color(0xFFB45309) : const Color(0xFF15803D),
+                      color: isPsych
+                          ? (_isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309))
+                          : (_isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D)),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -1920,7 +1935,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isPsych ? const Color(0xFFB45309) : const Color(0xFF15803D),
+                        color: isPsych
+                            ? (_isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309))
+                            : (_isDark ? const Color(0xFF6EE7B7) : const Color(0xFF15803D)),
                       ),
                     ),
                   ],
@@ -2039,12 +2056,12 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? const Color(0xFF1E1B2E) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.35), width: 1.5),
+        border: Border.all(color: AppTheme.primaryPurple.withOpacity(_isDark ? 0.3 : 0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryPurple.withOpacity(0.05),
+            color: Colors.black.withOpacity(_isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -2080,7 +2097,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.purple.shade900,
+                                color: _isDark ? AppTheme.lilac : Colors.purple.shade900,
                               ),
                             ),
                           ),
@@ -2108,18 +2125,18 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFF59E0B)),
+                                border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFFB45309)),
-                                  SizedBox(width: 4),
+                                  Icon(Icons.verified_user_rounded, size: 14, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309)),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Calibrated by Psychometrician',
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF92400E)),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E)),
                                   ),
                                 ],
                               ),
@@ -2202,9 +2219,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
           children: [
             Icon(Icons.bar_chart_rounded, size: 16, color: AppTheme.primaryPurple),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '1. RIASEC Interest Profile Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (isPsych)
@@ -2232,11 +2249,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -2301,12 +2318,12 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             controller: _riasecInsightController,
             maxLines: null,
             minLines: 2,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF1E293B)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Enter calibrated RIASEC interest profile narrative...',
               filled: true,
-              fillColor: const Color(0xFFF8FAFC),
+              fillColor: _isDark ? const Color(0xFF161426) : const Color(0xFFF8FAFC),
               contentPadding: const EdgeInsets.all(10),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: AppTheme.primaryPurple, width: 1.5)),
@@ -2315,7 +2332,7 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
         else
           Text(
             displayText,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
           ),
       ],
     );
@@ -2331,16 +2348,16 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             children: [
               Icon(Icons.favorite_rounded, size: 16, color: Colors.pink.shade400),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '2. Self-Esteem Profile (RSE) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Self-Esteem assessment data is not yet recorded for this student.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: _isDark ? Colors.white60 : Colors.grey.shade600),
           ),
         ],
       );
@@ -2369,9 +2386,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
           children: [
             Icon(Icons.favorite_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '2. Self-Esteem Profile (RSE) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (isPsych)
@@ -2399,11 +2416,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -2437,21 +2454,21 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             controller: _rseInsightController,
             maxLines: null,
             minLines: 2,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF1E293B)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Enter calibrated Self-Esteem narrative...',
               filled: true,
-              fillColor: const Color(0xFFF8FAFC),
+              fillColor: _isDark ? const Color(0xFF161426) : const Color(0xFFF8FAFC),
               contentPadding: const EdgeInsets.all(10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: badgeColor, width: 1.5)),
             ),
           )
         else
           Text(
             displayText,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
           ),
       ],
     );
@@ -2467,16 +2484,16 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             children: [
               Icon(Icons.explore_rounded, size: 16, color: AppTheme.primaryPurple),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '3. Career Decision Self-Efficacy (CDSES) Insights',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'Career Decision Self-Efficacy assessment data is not yet recorded for this student.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12, color: _isDark ? Colors.white60 : Colors.grey.shade600),
           ),
         ],
       );
@@ -2522,9 +2539,9 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
           children: [
             Icon(Icons.explore_rounded, size: 16, color: badgeColor),
             const SizedBox(width: 6),
-            const Text(
+            Text(
               '3. Career Decision Self-Efficacy (CDSES) Insights',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             ),
             const Spacer(),
             if (isPsych)
@@ -2552,11 +2569,11 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: _isDark ? const Color(0xFF261D10) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFF59E0B)),
+                  border: Border.all(color: _isDark ? const Color(0xFF92400E) : const Color(0xFFF59E0B)),
                 ),
-                child: const Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF92400E))),
+                child: Text('Calibrated', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: _isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))),
               ),
           ],
         ),
@@ -2580,25 +2597,25 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Highest: ${highest['code']} (${(highest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: _isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
               ),
               child: Text(
                 'Lowest: ${lowest['code']} (${(lowest['score'] as double).toStringAsFixed(2)})',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
               ),
             ),
           ],
@@ -2609,21 +2626,21 @@ class _StudentFeedbackScreenState extends State<StudentFeedbackScreen> {
             controller: _cdsesInsightController,
             maxLines: null,
             minLines: 2,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF1E293B)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white : const Color(0xFF1E293B)),
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Enter calibrated CDSES narrative...',
               filled: true,
-              fillColor: const Color(0xFFF8FAFC),
+              fillColor: _isDark ? const Color(0xFF161426) : const Color(0xFFF8FAFC),
               contentPadding: const EdgeInsets.all(10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: _isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300)),
               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: badgeColor, width: 1.5)),
             ),
           )
         else
           Text(
             displayText,
-            style: const TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF334155)),
+            style: TextStyle(fontSize: 12, height: 1.45, color: _isDark ? Colors.white70 : const Color(0xFF334155)),
           ),
       ],
     );

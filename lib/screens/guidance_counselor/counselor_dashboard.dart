@@ -75,7 +75,7 @@ class _CounselorDashboardState extends State<CounselorDashboard> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               _session.logout();
-              context.go('/login');
+              context.go('/staff/login');
             },
           ),
         ],
